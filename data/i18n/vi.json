@@ -206,5 +206,7 @@
   "ui.help": "Trợ giúp",
   "ui.newGameButton": "Ván mới…",
   "poi.hint": "Xây công trình (kể cả đường) cách đây tối đa {r} ô để khám phá",
-  "poi.explored": "Đã khám phá"
+  "poi.explored": "Đã khám phá",
+  "minimap.label": "Bản đồ nhỏ",
+  "minimap.toggle": "Bản đồ nhỏ (M)"
 }

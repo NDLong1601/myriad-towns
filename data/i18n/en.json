@@ -206,5 +206,7 @@
   "ui.help": "Help",
   "ui.newGameButton": "New game…",
   "poi.hint": "Build anything (even a road) within {r} tiles to explore it",
-  "poi.explored": "Explored"
+  "poi.explored": "Explored",
+  "minimap.label": "Minimap",
+  "minimap.toggle": "Minimap (M)"
 }
