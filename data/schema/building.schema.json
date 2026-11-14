@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://myriad-towns.local/schema/building.schema.json",
+  "title": "Building definition (v0)",
+  "description": "Data-driven building rules. One file in data/buildings/ may hold one object or an array of them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "category", "footprint", "cost"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Stable id, snake_case. Never rename after release: saves refer to it."
+    },
+    "category": {
+      "enum": ["housing", "food", "production", "service", "culture", "infrastructure", "nature"]
+    },
+    "nameKey": {
+      "type": "string",
+      "description": "i18n key in data/i18n/*.json. Defaults to building.<id>.name."
+    },
+    "footprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["w", "d"],
+      "properties": {
+        "w": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "d": { "type": "integer", "minimum": 1, "maximum": 8 }
+      }
+    },
+    "biomes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Biomes where it can be placed. Omit for all."
+    },
+    "cost": { "$ref": "#/$defs/amounts", "description": "One-off resources to build." },
+    "upkeep": { "$ref": "#/$defs/amounts", "description": "Consumed per sim second." },
+    "produces": { "$ref": "#/$defs/amounts", "description": "Produced per sim second." },
+    "housing": { "type": "integer", "minimum": 0, "description": "Residents housed." },
+    "emits": {
+      "type": "array",
+      "description": "Local fields this building adds to tiles around it (e.g. pollution, education).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "amount", "radius"],
+        "properties": {
+          "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "amount": { "type": "number" },
+          "radius": { "type": "integer", "minimum": 0, "maximum": 16 },
+          "falloff": { "enum": ["none", "linear"], "default": "none" }
+        }
+      }
+    },
+    "requires": {
+      "type": "array",
+      "description": "All must hold to place it, or to keep it from declining.",
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "upgrades": {
+      "type": "array",
+      "description": "Checked in order; the first whose conditions all hold wins.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["to", "when"],
+        "properties": {
+          "to": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "when": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/requirement" } }
+        }
+      }
+    },
+    "decline": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Grace period before a building whose requirements fail is abandoned.",
+      "properties": {
+        "warnAtTicks": { "type": "integer", "minimum": 0 },
+        "graceTicks": { "type": "integer", "minimum": 0 },
+        "to": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+      }
+    },
+    "unlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "population": { "type": "integer", "minimum": 0 },
+        "buildings": { "$ref": "#/$defs/amounts", "description": "Need at least N of each built." }
+      }
+    },
+    "model": { "type": "string", "description": "Asset id under public/assets/models." },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  },
+  "$defs": {
+    "amounts": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "requirement": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "building", "radius"],
+          "properties": {
+            "type": { "const": "near" },
+            "building": { "type": "string" },
+            "radius": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "min": { "type": "integer", "minimum": 1, "default": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "building", "radius"],
+          "properties": {
+            "type": { "const": "notNear" },
+            "building": { "type": "string" },
+            "radius": { "type": "integer", "minimum": 1, "maximum": 16 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "field"],
+          "properties": {
+            "type": { "const": "field" },
+            "field": { "type": "string" },
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "terrain", "radius"],
+          "properties": {
+            "type": { "const": "terrain" },
+            "terrain": { "type": "string" },
+            "radius": { "type": "integer", "minimum": 0, "maximum": 16 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "maxDistance"],
+          "properties": {
+            "type": { "const": "road" },
+            "maxDistance": { "type": "integer", "minimum": 0, "maximum": 8 }
+          }
+        }
+      ]
+    }
+  }
+}

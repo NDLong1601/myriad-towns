@@ -1,0 +1,46 @@
+:root {
+  color-scheme: light dark;
+  --hud-bg: rgb(255 255 255 / 0.82);
+  --hud-fg: #1d2b2f;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hud-bg: rgb(20 28 31 / 0.82);
+    --hud-fg: #e6eef0;
+  }
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #8fc1d4;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+#app,
+#app canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#hud {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--hud-bg);
+  color: var(--hud-fg);
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: none;
+  max-width: calc(100vw - 48px);
+}
+#hud strong {
+  font-size: 15px;
+}

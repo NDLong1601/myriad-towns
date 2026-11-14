@@ -1,0 +1,73 @@
+[
+  {
+    "id": "hut",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 4 },
+    "housing": 4,
+    "upkeep": { "food": 0.2 },
+    "produces": { "labor": 1 },
+    "requires": [{ "type": "road", "maxDistance": 2 }],
+    "upgrades": [
+      {
+        "to": "cottage",
+        "when": [
+          { "type": "near", "building": "well", "radius": 4 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60 },
+    "model": "hut",
+    "tags": ["starter"]
+  },
+  {
+    "id": "cottage",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 6, "stone": 2 },
+    "housing": 8,
+    "upkeep": { "food": 0.4, "water": 0.2 },
+    "produces": { "labor": 2 },
+    "requires": [
+      { "type": "road", "maxDistance": 2 },
+      { "type": "near", "building": "well", "radius": 4 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "hut" },
+    "unlock": { "population": 40 },
+    "model": "cottage"
+  },
+  {
+    "id": "well",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 3 },
+    "produces": { "water": 1 },
+    "emits": [{ "field": "water_access", "amount": 1, "radius": 4 }],
+    "model": "well",
+    "tags": ["starter"]
+  },
+  {
+    "id": "berry_field",
+    "category": "food",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 2 },
+    "upkeep": { "labor": 1 },
+    "produces": { "food": 1.5 },
+    "requires": [{ "type": "terrain", "terrain": "grass", "radius": 0 }],
+    "model": "berry_field",
+    "tags": ["starter"]
+  },
+  {
+    "id": "woodcutter",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 2 },
+    "upkeep": { "labor": 1 },
+    "produces": { "wood": 1 },
+    "emits": [{ "field": "noise", "amount": 1, "radius": 2 }],
+    "requires": [{ "type": "terrain", "terrain": "forest", "radius": 3 }],
+    "model": "woodcutter",
+    "tags": ["starter"]
+  }
+]

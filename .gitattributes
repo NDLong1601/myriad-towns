@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.glb binary
+*.vox binary
+*.blend binary
+*.ogg binary
+*.mp3 binary
