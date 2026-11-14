@@ -7,7 +7,7 @@ Chơi thử: https://ndlong1601.github.io/myriad-towns/
 
 ![Một ngôi làng đang lớn: nhà lều nâng cấp thành nhà gỗ quanh giếng, ruộng dâu, bản đồ nhỏ góc phải](docs/images/hero.jpg)
 
-> Trạng thái: **M5 xong** (lưu ván và cài đặt). Tiếp theo: M6 (hoàn thiện đồ hoạ, âm thanh). Lộ trình ở cuối trang.
+> Trạng thái: **M6a xong** (ngày đêm, âm thanh, hiệu ứng xây). Tiếp theo: M6b (đồ hoạ công trình, đường tự nối, bảng màu cho người mù màu). Lộ trình ở cuối trang.
 
 ## Có gì trong game
 
@@ -53,11 +53,23 @@ làm; bỏ qua được bất cứ lúc nào.
 
 - **💾 Lưu** hoặc Ctrl+S; tự lưu mỗi 2 phút và khi rời tab. Đóng tab mở lại là chơi tiếp.
 - Nhiều bản lưu trong trình duyệt; **xuất/nhập** file `.mtsave` để chuyển máy hoặc gửi bạn bè.
-- **⚙ Cài đặt**: chất lượng đồ hoạ, tầm nhìn, ngôn ngữ (Tiếng Việt / English), tự lưu.
+- **⚙ Cài đặt**: chất lượng đồ hoạ, tầm nhìn, ngôn ngữ (Tiếng Việt / English), âm lượng, ngày đêm, tự lưu.
 
 | Lưu và tải                                  | Cài đặt                                   |
 | ------------------------------------------- | ----------------------------------------- |
 | ![Danh sách bản lưu](docs/images/saves.jpg) | ![Menu cài đặt](docs/images/settings.jpg) |
+
+### Ngày đêm, âm thanh và cảm giác xây
+
+- **Ngày đêm theo giờ trong game**: một ngày là 10 phút chơi ở tốc độ ×1, dừng game thì trời cũng dừng. Bình minh và hoàng hôn ngả cam, đêm xanh tối nhưng vẫn nhìn rõ công trình. Tắt trong ⚙ nếu muốn trời luôn sáng.
+- **Âm thanh tự tổng hợp** (không tải file nào): tiếng "cộc" khi xây, tiếng sỏi khi kéo đường, tiếng đổ khi phá, chuông khi nâng cấp, hợp âm khi xong chương hay lập thị trấn, tiếng "bíp bíp" khi không đặt được.
+- **Âm nền theo nơi camera nhìn**: chim hót ban ngày, dế kêu ban đêm, nước chảy gần sông hồ, tiếng ồn phố khi đông nhà, gió to hơn khi zoom xa.
+- Nút **🔊/🔇** ở cột trái tắt tiếng (nhớ cho lần sau); âm lượng chỉnh trong ⚙ và nghe thử ngay khi kéo.
+- Công trình mới **"nảy" lên** khi đặt và khi nâng cấp, thay vì hiện ra cứng đơ.
+
+![Cùng một làng lúc trưa, hoàng hôn và nửa đêm](docs/images/day-night.jpg)
+
+![Làng về đêm](docs/images/night.jpg)
 
 ### Chơi trên điện thoại
 
@@ -130,7 +142,8 @@ task spec trong [docs/tasks/](docs/tasks/), bắt đầu từ [\_TEMPLATE.md](do
 | M3  | Kinh tế, mô phỏng, nâng cấp/xuống cấp, bản đồ nhiệt, quy hoạch                 | ✔          |
 | M4  | Chế độ chơi, chương, gói công trình, biome, di tích, nhiều thị trấn, hướng dẫn | ✔          |
 | M5  | Lưu/tải, tự lưu, xuất/nhập file, cài đặt                                       | ✔          |
-| M6  | Hoàn thiện đồ hoạ, âm thanh, hiệu ứng                                          | Tiếp theo  |
+| M6a | Ngày đêm, âm thanh tự tổng hợp, hiệu ứng xây, cài đặt âm lượng                 | ✔          |
+| M6b | Đồ hoạ công trình, đường tự nối, trang trí, bảng màu cho người mù màu          | Tiếp theo  |
 | M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      |            |
 
 Chi tiết kỹ thuật: [docs/architecture.md](docs/architecture.md) và các ADR trong [docs/adr](docs/adr).

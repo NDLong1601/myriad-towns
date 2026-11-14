@@ -39,12 +39,15 @@ import { type SaveData, applySave } from '@/io/save';
 import { getSlot, listSlots, storageAvailable } from '@/io/store';
 import { SaveSession, showSaveMenu, urlForSlot } from '@/ui/saveMenu';
 import { showSettings } from '@/ui/settingsMenu';
-import { loadSettings } from '@/ui/settingsStore';
+import { loadSettings, saveSettings } from '@/ui/settingsStore';
 import { TownStore } from '@/sim/towns';
 import { TerritoryRenderer } from '@/render/territoryRenderer';
 import { mountTownsPanel } from '@/ui/townsPanel';
 import { mountTutorial } from '@/ui/tutorial';
 import { t } from '@/ui/i18n';
+import { AudioEngine } from '@/audio/audioEngine';
+import { ambientMix } from '@/audio/ambientMix';
+import { timeOfDay } from '@/render/dayNight';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
 import { LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
@@ -109,6 +112,9 @@ interface DebugApi {
   /** Re-evaluates which towns sleep, as if the camera were at (x, z). */
   updateTiers(): void;
   tutorialStep(): string | null;
+  /** Time of day 0..1 (null when day/night is off); setting it fixes the clock (for screenshots). */
+  timeOfDay(fixed?: number | null): number | null;
+  audio(): { started: boolean; muted: boolean; volume: number; popping: number };
   /** Deterministic state hash (saves round-trip to the same value). */
   hash(): number;
   save(): Promise<boolean>;
@@ -215,6 +221,8 @@ const surfaceY = (x: number, z: number): number => {
   return s.flags & TileFlag.Water ? WATER_Y : s.level * LEVEL_HEIGHT;
 };
 const buildings = new BuildingRenderer(city, view.origin, surfaceY);
+// ?anim=0 turns the placement "pop" off (tests, screenshots).
+buildings.animate = params.get('anim') !== '0';
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
 const planView = new PlanRenderer(plans, city.catalog, view.origin, surfaceY);
@@ -239,6 +247,33 @@ sim.on((e) => {
 city.on((e) => {
   if (e.type === 'trees') view.refreshTiles(e.tiles);
 });
+
+// Sound: synthesised, starts on the first click or key press (?audio=0 keeps it off).
+const audio = new AudioEngine({ volume: settings.volume, muted: settings.muted });
+if (params.get('audio') !== '0') audio.attach(window);
+/** True while the simulation runs: its replacements are not the player's clicks. */
+let simRunning = false;
+city.on((e) => {
+  if (simRunning) return;
+  if (e.type === 'added') audio.play(e.building.def.id === 'road' ? 'road' : 'place');
+  else if (e.type === 'removed' && !city.get(e.building.uid)) audio.play('demolish');
+});
+history.onRejected(() => audio.play('error'));
+sim.on((e) => {
+  if (e.type === 'upgraded') audio.play('upgrade');
+  else if (e.type === 'declined') audio.play('decline');
+});
+goals?.on((e) => {
+  if (e.type === 'chapterDone') audio.play('chapter');
+});
+towns.on((e) => {
+  if (e.type === 'founded' && e.town.id > 1) audio.play('chapter');
+});
+pois.on(() => audio.play('upgrade'));
+
+// Day and night follow game time (?daynight=0 turns it off, ?time=0..1 fixes the hour).
+const dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
+let fixedTime: number | null = params.has('time') ? num('time', 0.5) : null;
 
 mountResourceBar(city, document.body, sim);
 const menu = mountBuildMenu(city, history, document.body);
@@ -337,13 +372,31 @@ bar.appendChild(newGameBtn);
 button(`💾 ${t('save.button')}`, `${t('save.title')} (Ctrl+S)`, () =>
   showSaveMenu(document.body, session),
 );
+const muteLabel = (): string => (audio.muted ? '🔇' : '🔊');
+button(muteLabel(), t('audio.muteShort'), () => {
+  audio.muted = !audio.muted;
+  muteBtn.textContent = muteLabel();
+  muteBtn.setAttribute('aria-pressed', String(audio.muted));
+  saveSettings({ ...loadSettings(), muted: audio.muted });
+});
+const muteBtn = bar.lastElementChild as HTMLButtonElement;
+muteBtn.classList.add('mt-mute');
+muteBtn.setAttribute('aria-pressed', String(audio.muted));
 button('⚙', t('settings.title'), () =>
-  showSettings(document.body, () => {
-    // Reload into this game's slot; if saving is impossible, reload as it is.
-    void session
-      .save(true)
-      .then((ok) => window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href));
-  }),
+  showSettings(
+    document.body,
+    () => {
+      // Reload into this game's slot; if saving is impossible, reload as it is.
+      void session
+        .save(true)
+        .then((ok) =>
+          window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href),
+        );
+    },
+    (v) => {
+      audio.volume = v;
+    },
+  ),
 );
 left.appendChild(bar);
 window.addEventListener('keydown', (e) => {
@@ -380,6 +433,34 @@ function updateTiers(): void {
 }
 let tierClock = 0;
 
+/** What the camera hears: water, trees and buildings around its target, and the hour. */
+function sampleSurroundings(): void {
+  const c = view.controller.state;
+  let water = 0;
+  let trees = 0;
+  let n = 0;
+  for (let dz = -24; dz <= 24; dz += 4) {
+    for (let dx = -24; dx <= 24; dx += 4) {
+      const f = view.tileFlagsAt(c.x + dx, c.z + dz);
+      if (f === undefined) continue;
+      n++;
+      if (f & TileFlag.Water) water++;
+      if (f & TileFlag.Tree) trees++;
+    }
+  }
+  const near = city.near({ x: Math.floor(c.x), z: Math.floor(c.z), w: 1, d: 1 }, 24).length;
+  audio.setAmbient(
+    ambientMix({
+      night: view.nightness,
+      water: n ? water / n : 0,
+      trees: n ? trees / n : 0,
+      buildings: near,
+      distance: c.distance,
+    }),
+  );
+}
+let ambientClock = 0;
+
 let simHud = 0;
 view.onFrame((dt) => {
   tierClock += dt;
@@ -389,7 +470,12 @@ view.onFrame((dt) => {
   }
   const n = clock.advance(dt);
   if (n > 0) {
-    sim.run(n, () => performance.now());
+    simRunning = true;
+    try {
+      sim.run(n, () => performance.now());
+    } finally {
+      simRunning = false;
+    }
     simHud += n;
     if (simHud >= 2) {
       simHud = 0;
@@ -399,6 +485,16 @@ view.onFrame((dt) => {
   const s = view.controller.state;
   heatmap.update(s.x, s.z);
   poiView.update(s.x, s.z);
+  buildings.update(dt);
+  if (dayNightOn || fixedTime !== null) view.setTimeOfDay(fixedTime ?? timeOfDay(sim.tick));
+  if (audio.started) {
+    audio.update(dt);
+    ambientClock += dt;
+    if (ambientClock >= 0.5) {
+      ambientClock = 0;
+      sampleSurroundings();
+    }
+  }
 });
 
 const api: DebugApi = {
@@ -434,7 +530,12 @@ const api: DebugApi = {
   stock: () => ({ ...city.stock }),
   grant: (amounts) => city._addStock(amounts, 1),
   tick: (n = 1) => {
-    sim.run(n);
+    simRunning = true;
+    try {
+      sim.run(n);
+    } finally {
+      simRunning = false;
+    }
     return sim.tick;
   },
   speed: (s) => {
@@ -472,6 +573,19 @@ const api: DebugApi = {
     })),
   updateTiers,
   tutorialStep: () => tutorial?.step() ?? null,
+  timeOfDay: (fixed) => {
+    if (fixed !== undefined) {
+      fixedTime = fixed;
+      if (fixed === null && !dayNightOn) view.setTimeOfDay(null);
+    }
+    return view.timeOfDay;
+  },
+  audio: () => ({
+    started: audio.started,
+    muted: audio.muted,
+    volume: audio.volume,
+    popping: buildings.popping,
+  }),
   hash: () => sim.hash(),
   save: () => session.save(),
   explored: () => pois.exploredCount,

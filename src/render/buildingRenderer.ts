@@ -9,6 +9,19 @@ const ABANDONED = new THREE.Color(0.45, 0.42, 0.4);
 /** Buildings with a pending decline get a warm warning tint. */
 export const WARNING_TINT = new THREE.Color(1.25, 0.85, 0.55);
 
+/** Length of the "pop" when a building is placed or upgraded, seconds. */
+const POP_SECONDS = 0.35;
+/** More adds than this in one frame (loading, bulk tools) skip the animation. */
+const POP_MAX_PER_FRAME = 48;
+
+/** Overshoots past 1 and settles back: the "pop" curve. */
+export function easeOutBack(t: number): number {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  const u = Math.min(1, Math.max(0, t)) - 1;
+  return 1 + c3 * u * u * u + c1 * u * u;
+}
+
 interface Batch {
   mesh: THREE.InstancedMesh;
   uids: number[];
@@ -26,6 +39,11 @@ export class BuildingRenderer {
   private readonly m = new THREE.Matrix4();
   private readonly c = new THREE.Color();
   private tints = new Map<number, THREE.Color>();
+  /** uid -> seconds since its pop started. */
+  private pops = new Map<number, number>();
+  private addsThisFrame = 0;
+  /** Off for tests and screenshots (?anim=0). */
+  animate = true;
 
   constructor(
     private readonly city: City,
@@ -90,13 +108,17 @@ export class BuildingRenderer {
     batch.uids.push(b.uid);
     batch.mesh.count = batch.uids.length;
     this.where.set(b.uid, { batch, index });
+    if (this.animate && ++this.addsThisFrame <= POP_MAX_PER_FRAME) this.pops.set(b.uid, 0);
     this.writeMatrix(batch, index, b);
     this.writeColor(batch, index, b.uid);
   }
 
   private remove(uid: number): void {
     // A replace (upgrade/decline) re-adds the same uid right away; keep its tint then.
-    if (!this.city.get(uid)) this.tints.delete(uid);
+    if (!this.city.get(uid)) {
+      this.tints.delete(uid);
+      this.pops.delete(uid);
+    }
     const w = this.where.get(uid);
     if (!w) return;
     const { batch, index } = w;
@@ -131,9 +153,38 @@ export class BuildingRenderer {
     this.group.add(next);
   }
 
+  /** Advances the pop animations; call once per rendered frame. */
+  update(dt: number): void {
+    this.addsThisFrame = 0;
+    if (this.pops.size === 0) return;
+    for (const [uid, t] of this.pops) {
+      const next = t + dt;
+      if (next >= POP_SECONDS) this.pops.delete(uid);
+      else this.pops.set(uid, next);
+      const w = this.where.get(uid);
+      const b = this.city.get(uid);
+      if (w && b) this.writeMatrix(w.batch, w.index, b);
+    }
+  }
+
+  /** Buildings still popping (debug/tests). */
+  get popping(): number {
+    return this.pops.size;
+  }
+
   private writeMatrix(batch: Batch, index: number, b: PlacedBuilding): void {
     const p = this.origin.toLocal(b.x, b.z);
-    this.m.makeTranslation(p.x, this.heightAt(b.x, b.z), p.z);
+    const y = this.heightAt(b.x, b.z);
+    const t = this.pops.get(b.uid);
+    if (t === undefined) {
+      this.m.makeTranslation(p.x, y, p.z);
+    } else {
+      // Scale about the footprint centre: T(p + c - s*c) * S(s).
+      const s = Math.max(0.05, easeOutBack(t / POP_SECONDS));
+      const cx = b.def.footprint.w / 2;
+      const cz = b.def.footprint.d / 2;
+      this.m.makeScale(s, s, s).setPosition(p.x + cx - s * cx, y, p.z + cz - s * cz);
+    }
     batch.mesh.setMatrixAt(index, this.m);
     batch.mesh.instanceMatrix.needsUpdate = true;
   }

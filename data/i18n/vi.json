@@ -270,6 +270,10 @@
   "settings.lang": "Ngôn ngữ",
   "settings.autosave": "Tự lưu mỗi 2 phút và khi rời trang",
   "settings.reloadHint": "Ván đang chơi được lưu rồi tải lại để áp dụng.",
+  "settings.volume": "Âm lượng",
+  "settings.dayNight": "Chu kỳ ngày đêm",
+  "audio.mute": "Tắt tiếng",
+  "audio.muteShort": "Tắt/bật tiếng",
   "settings.apply": "Lưu và áp dụng",
   "ui.close": "Đóng"
 }
