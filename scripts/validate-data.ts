@@ -126,6 +126,43 @@ for (const b of all) {
   }
 }
 
+// Packs and chapters (M4): every referenced building/resource exists, ids unique.
+interface Goal {
+  type: string;
+  building?: string;
+  resource?: string;
+  min: number;
+}
+const packs =
+  (readJson(join(dataDir, 'packs.json')) as { packs: { id: string; buildings: string[] }[] })
+    ?.packs ?? [];
+const chapters =
+  (
+    readJson(join(dataDir, 'chapters.json')) as {
+      chapters: { id: string; goals: Goal[]; reward?: Record<string, number> }[];
+    }
+  )?.chapters ?? [];
+const packOf = new Map<string, string>();
+for (const p of packs) {
+  for (const id of p.buildings) {
+    if (!buildings.has(id)) errors.push(`pack "${p.id}": unknown building "${id}"`);
+    if (packOf.has(id)) errors.push(`building "${id}" is in two packs`);
+    packOf.set(id, p.id);
+  }
+}
+const goalTypes = new Set(['population', 'count', 'stock', 'production', 'explore']);
+for (const c of chapters) {
+  for (const g of c.goals) {
+    if (!goalTypes.has(g.type)) errors.push(`chapter "${c.id}": unknown goal type "${g.type}"`);
+    if (g.building && !buildings.has(g.building))
+      errors.push(`chapter "${c.id}": unknown building "${g.building}"`);
+    if (g.resource && !resourceIds.has(g.resource))
+      errors.push(`chapter "${c.id}": unknown resource "${g.resource}"`);
+  }
+  for (const r of Object.keys(c.reward ?? {}))
+    if (!resourceIds.has(r)) errors.push(`chapter "${c.id}": unknown reward resource "${r}"`);
+}
+
 const i18nDir = join(dataDir, 'i18n');
 for (const file of readdirSync(i18nDir).filter((f) => f.endsWith('.json'))) {
   const strings = readJson(join(i18nDir, file)) as Record<string, string> | undefined;
@@ -136,6 +173,8 @@ for (const file of readdirSync(i18nDir).filter((f) => f.endsWith('.json'))) {
     ...[...resourceIds].map((r) => `resource.${r}`),
     ...[...fieldIds].map((f) => `field.${f}`),
     ...[...terrainTags].map((t) => `terrain.${t}`),
+    ...packs.map((p) => `pack.${p.id}`),
+    ...chapters.map((c) => `chapter.${c.id}`),
   ];
   for (const key of keys) {
     if (!strings[key]) errors.push(`data/i18n/${file}: missing "${key}"`);

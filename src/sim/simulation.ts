@@ -94,6 +94,8 @@ export class Simulation {
   private dirty = true;
   private listeners: ((e: SimEvent) => void)[] = [];
   flows: Flows = emptyFlows();
+  /** Sandbox option: buildings never warn or decline. */
+  noDecline = false;
   /** Duration of the last tick in ms (filled in by the caller that times it). */
   lastTickMs = 0;
 
@@ -287,7 +289,7 @@ export class Simulation {
 
       const failing = checkSustain(city, uid).filter((c) => !c.ok);
       const hungry = s.shortages.filter((p) => p.kind === 'hungry');
-      if (failing.length || hungry.length) {
+      if ((failing.length || hungry.length) && !this.noDecline) {
         s.unmetTicks += RULE_STRIDE;
         const { warn, grace } = declineTimes(b.def);
         if (s.warnedAt < 0 && s.unmetTicks >= grace - warn) {

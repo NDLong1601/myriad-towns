@@ -1,0 +1,9 @@
+{
+  "packs": [
+    { "id": "trade", "buildings": ["market", "tavern", "lighthouse"] },
+    { "id": "crafts", "buildings": ["sawmill", "brickworks"] },
+    { "id": "learning", "buildings": ["school", "workshop", "scholar_camp"] },
+    { "id": "faith", "buildings": ["chapel", "clinic", "herb_garden"] },
+    { "id": "industry", "buildings": ["iron_mine", "smelter"] }
+  ]
+}

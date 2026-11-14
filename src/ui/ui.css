@@ -335,3 +335,207 @@
     bottom: 312px;
   }
 }
+
+/* ---- M4: left column (HUD + goals), new game, pack choice ---- */
+.mt-left {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(340px, calc(100vw - 24px));
+  z-index: 4;
+}
+.mt-left #hud {
+  position: static;
+  max-width: 100%;
+}
+.mt-goals {
+  background: var(--hud-bg);
+  color: var(--hud-fg);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+}
+.mt-goals h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+.mt-goals ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mt-goals li {
+  padding: 1px 0;
+  font-variant-numeric: tabular-nums;
+}
+.mt-goals li.ok {
+  color: #27ae60;
+}
+.mt-goals small {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+.mt-goals label {
+  display: block;
+  padding: 2px 0;
+  cursor: pointer;
+}
+.mt-newgame-btn {
+  font: inherit;
+  font-size: 12px;
+  color: var(--hud-fg);
+  background: var(--hud-bg);
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.mt-newgame,
+.mt-choice {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.35);
+  z-index: 50;
+  padding: 16px;
+}
+.mt-choice[hidden] {
+  display: none;
+}
+.mt-newgame-card,
+.mt-choice-card {
+  background: var(--panel-bg, #fff);
+  color: var(--hud-fg);
+  border-radius: 14px;
+  padding: 18px 20px;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
+  font-size: 14px;
+}
+.mt-newgame-card h2,
+.mt-choice-card h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.mt-newgame fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+  display: grid;
+  gap: 8px;
+}
+.mt-modes {
+  grid-template-columns: 1fr 1fr;
+}
+.mt-modes label {
+  display: grid;
+  gap: 2px;
+  border: 1px solid rgb(127 127 127 / 0.3);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+.mt-modes label:has(input:checked) {
+  border-color: #2f80ed;
+  background: rgb(47 128 237 / 0.1);
+}
+.mt-modes label {
+  position: relative;
+}
+/* Visually hidden but still focusable, so the arrow keys pick a mode. */
+.mt-modes input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.mt-modes label:has(input:focus-visible) {
+  outline: 2px solid #2f80ed;
+  outline-offset: 2px;
+}
+.mt-modes small {
+  opacity: 0.75;
+}
+.mt-sb[disabled] {
+  opacity: 0.45;
+}
+.mt-seed {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.mt-seed input {
+  font: inherit;
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgb(127 127 127 / 0.4);
+  background: transparent;
+  color: inherit;
+}
+.mt-newgame button,
+.mt-choice button {
+  font: inherit;
+  color: inherit;
+  background: rgb(127 127 127 / 0.12);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.mt-newgame .mt-primary {
+  width: 100%;
+  background: #2f80ed;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px;
+}
+.mt-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mt-choice-row button {
+  text-align: left;
+  padding: 12px;
+  border: 1px solid rgb(127 127 127 / 0.3);
+}
+.mt-choice-row button:hover {
+  border-color: #2f80ed;
+  background: rgb(47 128 237 / 0.1);
+}
+.mt-choice-row ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+@media (max-width: 600px) {
+  /* Below the resource chips, which take the top row on phones. */
+  .mt-left {
+    top: 56px;
+  }
+}
+@media (max-width: 480px) {
+  .mt-modes,
+  .mt-choice-row {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .mt-newgame-card,
+  .mt-choice-card {
+    --panel-bg: #1c2629;
+  }
+}

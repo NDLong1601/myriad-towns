@@ -43,13 +43,17 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   };
   const renderItems = (): void => {
     items.innerHTML = city.catalog.defs
-      .filter((d) => d.category === category)
+      .filter((d) => d.category === category && city.progress.isRevealed(d))
       .map((d) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const poor = city.canAfford(d.cost) ? '' : ' poor';
-        if (!city.progress.isUnlocked(d)) {
+        const lock = city.progress.lockReason(d);
+        if (lock) {
           // Locked buildings stay visible (greyed) with what unlocks them.
-          const need = t('ui.unlockAt', { n: d.unlock?.population ?? 0 });
+          const need =
+            lock.key === 'req.pack'
+              ? t('ui.packLocked', { pack: t(`pack.${lock.params.pack}`) })
+              : t('ui.unlockAt', { n: lock.params.pop });
           return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}"><span>🔒 ${buildingName(d.id)}</span><small>${need}</small></button>`;
         }
         return `<button class="mt-item${active}${poor}" data-def="${d.id}"><span>${buildingName(d.id)}</span><small>${formatAmounts(d.cost) || '—'}</small></button>`;

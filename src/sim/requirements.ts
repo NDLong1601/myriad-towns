@@ -125,13 +125,8 @@ export function checkPlacement(city: City, def: BuildingDef, x: number, z: numbe
     }
   }
   if (occupied) site.push({ ok: false, key: 'req.occupied', params: {} });
-  if (!city.progress.isUnlocked(def)) {
-    site.push({
-      ok: false,
-      key: 'req.locked',
-      params: { pop: def.unlock?.population ?? 0, have: city.progress.peakPopulation },
-    });
-  }
+  const lock = city.progress.lockReason(def);
+  if (lock) site.push({ ok: false, key: lock.key, params: lock.params });
   for (const tag of city.catalog.placeOn(def)) {
     let ok: boolean;
     if (tag === 'flat') ok = flat;

@@ -1,6 +1,9 @@
 import type { City } from '@/sim/city';
 import type { SimEvent, Simulation } from '@/sim/simulation';
-import { buildingName, t } from './i18n';
+import type { Goals } from '@/sim/goals';
+import type { PoiStore } from '@/sim/poi';
+import { PACKS } from '@/sim/progress';
+import { buildingName, formatAmounts, t } from './i18n';
 
 const MAX_TOASTS = 4;
 const LIFETIME_MS = 6000;
@@ -14,6 +17,7 @@ export function mountNotifications(
   city: City,
   parent: HTMLElement,
   focus: (x: number, z: number, uid: number) => void,
+  extra: { goals?: Goals | undefined; pois?: PoiStore | undefined } = {},
 ): void {
   const el = document.createElement('div');
   el.className = 'mt-toasts';
@@ -45,6 +49,46 @@ export function mountNotifications(
     scheduled = false;
     for (const { e, n } of pending.values()) show(e, n);
     pending.clear();
+  }
+
+  // Chapter, pack and exploration news (Goals mode / POIs).
+  extra.goals?.on((e) => {
+    if (e.type === 'chapterDone') {
+      plain(
+        t('note.chapter', {
+          name: t(`chapter.${e.chapter.id}`),
+          what: formatAmounts(e.chapter.reward) || '—',
+        }),
+        'good',
+      );
+    } else if (e.type === 'packChosen') {
+      const p = PACKS.find((x) => x.id === e.pack);
+      plain(
+        t('note.pack', {
+          name: t(`pack.${e.pack}`),
+          buildings: (p?.buildings ?? []).map(buildingName).join(', '),
+        }),
+        'good',
+      );
+    }
+  });
+  extra.pois?.on((e) =>
+    plain(
+      t('note.poi', { name: t(`poi.${e.poi.kind}`), what: formatAmounts(e.poi.reward) }),
+      'good',
+      () => focus(e.poi.x + 0.5, e.poi.z + 0.5, -1),
+    ),
+  );
+
+  function plain(text: string, cls: string, onClick?: () => void): void {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = `mt-toast ${cls}`;
+    item.textContent = text;
+    if (onClick) item.addEventListener('click', onClick);
+    el.prepend(item);
+    while (el.children.length > MAX_TOASTS) el.lastElementChild?.remove();
+    setTimeout(() => item.remove(), LIFETIME_MS);
   }
 
   function show(e: SimEvent, n: number): void {

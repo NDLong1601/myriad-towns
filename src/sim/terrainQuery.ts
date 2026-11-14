@@ -52,6 +52,12 @@ export function hasTag(q: TerrainQuery, x: number, z: number, tag: string): bool
       );
     case 'beach':
       return s.biome === Biome.Beach;
+    case 'steppe':
+      return !water && s.biome === Biome.Steppe;
+    case 'cold':
+      return !water && s.biome === Biome.Cold;
+    case 'temperate':
+      return !water && s.biome === Biome.Temperate;
     case 'mountain':
       return s.biome === Biome.Mountain;
     case 'ruins':

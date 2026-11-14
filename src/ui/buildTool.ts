@@ -12,6 +12,7 @@ import { buildingName, formatAmounts, t } from './i18n';
 import type { InfoPanel, PanelContent, PanelLine } from './infoPanel';
 import type { Problem, Simulation } from '@/sim/simulation';
 import type { PlanStore } from '@/sim/plan';
+import { EXPLORE_RADIUS, type Poi } from '@/sim/poi';
 
 const CLICK_SLOP_PX = 6;
 const MAX_ROAD = 64;
@@ -36,6 +37,8 @@ export class BuildTool {
     private readonly menu: BuildMenu,
     private readonly sim?: Simulation,
     private readonly plans?: PlanStore,
+    /** Ruins under the cursor, for the hover card. */
+    private readonly poiAt?: (x: number, z: number) => { poi: Poi; explored: boolean } | undefined,
   ) {
     const canvas = view.renderer.domElement;
     const signal = this.ac.signal;
@@ -198,7 +201,27 @@ export class BuildTool {
             ? { ...empty, footprint: rectTiles(rectOf(hovered.def, hovered.x, hovered.z), true) }
             : empty,
         );
-        this.panel.hide();
+        const poi = !hovered && this.hover ? this.poiAt?.(this.hover.x, this.hover.z) : undefined;
+        if (poi) {
+          this.panel.show(
+            {
+              title: t(`poi.${poi.poi.kind}`),
+              sections: [
+                {
+                  lines: [
+                    poi.explored
+                      ? { ok: true, text: t('poi.explored') }
+                      : { text: t('poi.hint', { r: EXPLORE_RADIUS }) },
+                    { text: t('ui.reward', { what: formatAmounts(poi.poi.reward) }) },
+                  ],
+                },
+              ],
+            },
+            this.screen,
+          );
+        } else {
+          this.panel.hide();
+        }
         return;
       }
       const rect = rectOf(b.def, b.x, b.z);
