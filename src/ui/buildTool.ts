@@ -1,0 +1,415 @@
+import type { BuildingDef, Requirement } from '@/sim/catalog';
+import { type City, rectOf } from '@/sim/city';
+import { BatchCommand, DemolishCommand, type History, PlaceCommand } from '@/sim/commands';
+import { forTilesInRadius, type Rect } from '@/sim/geometry';
+import { type CheckResult, checkPlacement, checkSustain, checkUpgrades } from '@/sim/requirements';
+import { pickTile } from '@/render/picking';
+import type { PlacementPreview, PreviewTiles } from '@/render/placementPreview';
+import type { WorldView } from '@/render/worldView';
+import type { BuildMenu, Tool } from './buildMenu';
+import { describeCheck } from './describe';
+import { buildingName, formatAmounts, t } from './i18n';
+import type { InfoPanel, PanelContent, PanelLine } from './infoPanel';
+
+const CLICK_SLOP_PX = 6;
+const MAX_ROAD = 64;
+
+/**
+ * Connects pointer input to the city: hover preview with the requirement checklist,
+ * click to place, drag to lay roads, demolish, inspect, and undo/redo shortcuts.
+ */
+export class BuildTool {
+  private hover: { x: number; z: number } | null = null;
+  private screen = { x: 0, y: 0 };
+  private down: { x: number; y: number; tile: { x: number; z: number } | null } | null = null;
+  private inspected: number | null = null;
+  private readonly ac = new AbortController();
+
+  constructor(
+    private readonly view: WorldView,
+    private readonly city: City,
+    private readonly history: History,
+    private readonly preview: PlacementPreview,
+    private readonly panel: InfoPanel,
+    private readonly menu: BuildMenu,
+  ) {
+    const canvas = view.renderer.domElement;
+    const signal = this.ac.signal;
+    canvas.addEventListener('pointermove', (e) => this.onMove(e), { signal });
+    canvas.addEventListener('pointerdown', (e) => this.onDown(e), { signal });
+    canvas.addEventListener('pointerup', (e) => this.onUp(e), { signal });
+    canvas.addEventListener(
+      'pointerleave',
+      () => {
+        this.hover = null;
+        this.refresh();
+      },
+      { signal },
+    );
+    window.addEventListener('keydown', (e) => this.onKey(e), { signal });
+    menu.onToolChange((tool) => {
+      this.inspected = null;
+      // Roads are drawn by dragging, so left-drag stops panning while the road tool is on.
+      view.controller.panWithLeftButton = !(tool.kind === 'build' && tool.defId === 'road');
+      this.refresh();
+    });
+    city.on(() => this.refresh());
+    history.onChange(() => this.refresh());
+  }
+
+  private get tool(): Tool {
+    return this.menu.tool;
+  }
+
+  private pick(e: PointerEvent): { x: number; z: number } | null {
+    const r = this.view.renderer.domElement.getBoundingClientRect();
+    const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+    const ny = -((e.clientY - r.top) / r.height) * 2 + 1;
+    return pickTile(this.view.camera, this.view.origin, nx, ny, (x, z) =>
+      this.view.groundYAt(x + 0.5, z + 0.5),
+    );
+  }
+
+  private onMove(e: PointerEvent): void {
+    this.screen = { x: e.clientX, y: e.clientY };
+    const tile = this.pick(e);
+    if (tile?.x === this.hover?.x && tile?.z === this.hover?.z) {
+      this.positionOnly();
+      return;
+    }
+    this.hover = tile;
+    this.refresh();
+  }
+
+  private onDown(e: PointerEvent): void {
+    if (e.button !== 0) return;
+    this.down = { x: e.clientX, y: e.clientY, tile: this.pick(e) };
+  }
+
+  private onUp(e: PointerEvent): void {
+    if (e.button !== 0 || !this.down) return;
+    const moved = Math.hypot(e.clientX - this.down.x, e.clientY - this.down.y) > CLICK_SLOP_PX;
+    const start = this.down.tile;
+    this.down = null;
+    const tile = this.pick(e);
+    const tool = this.tool;
+    if (tool.kind === 'build' && tool.defId === 'road') {
+      if (start && tile) this.layRoad(start, tile);
+    } else if (!moved && tile) {
+      this.click(tile);
+    }
+    this.refresh();
+  }
+
+  private click(tile: { x: number; z: number }): void {
+    const tool = this.tool;
+    if (tool.kind === 'build') {
+      const def = this.city.catalog.get(tool.defId);
+      const c = this.corner(def, tile);
+      this.history.run(new PlaceCommand(def.id, c.x, c.z));
+    } else if (tool.kind === 'demolish') {
+      const b = this.city.at(tile.x, tile.z);
+      if (b) this.history.run(new DemolishCommand(b.uid));
+    } else {
+      const b = this.city.at(tile.x, tile.z);
+      this.inspected = b && b.uid !== this.inspected ? b.uid : null;
+    }
+  }
+
+  private layRoad(a: { x: number; z: number }, b: { x: number; z: number }): void {
+    const parts = roadPath(a, b).map((p) => new PlaceCommand('road', p.x, p.z));
+    this.history.run(new BatchCommand('road', parts));
+  }
+
+  private onKey(e: KeyboardEvent): void {
+    if (e.target instanceof HTMLInputElement) return;
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && e.code === 'KeyZ') {
+      e.preventDefault();
+      if (e.shiftKey) this.history.redo();
+      else this.history.undo();
+    } else if (mod && e.code === 'KeyY') {
+      e.preventDefault();
+      this.history.redo();
+    } else if (e.code === 'Escape') {
+      this.inspected = null;
+      this.menu.setTool({ kind: 'none' });
+    } else if (e.code === 'KeyX' && !mod) {
+      this.menu.setTool(this.tool.kind === 'demolish' ? { kind: 'none' } : { kind: 'demolish' });
+    }
+  }
+
+  /** Footprint corner so the cursor sits on the building's centre tile. */
+  private corner(def: BuildingDef, tile: { x: number; z: number }): { x: number; z: number } {
+    return {
+      x: tile.x - Math.floor((def.footprint.w - 1) / 2),
+      z: tile.z - Math.floor((def.footprint.d - 1) / 2),
+    };
+  }
+
+  private positionOnly(): void {
+    if (this.tool.kind !== 'none' || this.inspected === null) this.refresh();
+  }
+
+  /** Recompute preview overlays and the checklist panel. */
+  refresh(): void {
+    const tool = this.tool;
+    const empty: PreviewTiles = { footprint: [], affects: [], checks: [], markers: [] };
+
+    if (tool.kind === 'none') {
+      this.preview.setGhost(null);
+      const uid = this.inspected;
+      const b = uid !== null ? this.city.get(uid) : undefined;
+      if (!b) {
+        this.inspected = null;
+        const hovered = this.hover ? this.city.at(this.hover.x, this.hover.z) : undefined;
+        this.preview.setTiles(
+          hovered
+            ? { ...empty, footprint: rectTiles(rectOf(hovered.def, hovered.x, hovered.z), true) }
+            : empty,
+        );
+        this.panel.hide();
+        return;
+      }
+      const rect = rectOf(b.def, b.x, b.z);
+      const sustain = checkSustain(this.city, b.uid);
+      const upgrades = checkUpgrades(this.city, b.uid);
+      const all = [...sustain, ...upgrades.flatMap((u) => u.checks)];
+      this.preview.setTiles({
+        footprint: rectTiles(
+          rect,
+          sustain.every((c) => c.ok),
+        ),
+        affects: emitTiles(b.def, rect),
+        checks: checkTiles(all, rect),
+        markers: markersFor(this.city, all),
+      });
+      this.panel.show(
+        {
+          title: buildingName(b.def.id),
+          sections: [
+            { title: t('ui.produces'), lines: info(b.def) },
+            { lines: sustain.map(line) },
+            ...upgrades.map((u) => ({
+              title: t('ui.upgradeTo', { name: buildingName(u.to) }),
+              lines: u.checks.map(line),
+            })),
+          ],
+          action: {
+            label: t('ui.demolish').replace(/ \(.*\)/, ''),
+            run: () => {
+              this.history.run(new DemolishCommand(b.uid));
+              this.inspected = null;
+            },
+          },
+        },
+        'pinned',
+      );
+      return;
+    }
+
+    if (!this.hover) {
+      this.preview.clear();
+      this.panel.hide();
+      return;
+    }
+
+    if (tool.kind === 'demolish') {
+      this.preview.setGhost(null);
+      const b = this.city.at(this.hover.x, this.hover.z);
+      if (!b) {
+        this.preview.setTiles(empty);
+        this.panel.hide();
+        return;
+      }
+      this.preview.setTiles({ ...empty, footprint: rectTiles(rectOf(b.def, b.x, b.z), false) });
+      this.panel.show(
+        {
+          title: `${t('ui.demolish').replace(/ \(.*\)/, '')}: ${buildingName(b.def.id)}`,
+          sections: [
+            {
+              lines: [
+                { text: t('ui.refund', { cost: formatAmounts(this.city.refundOf(b.def)) || '—' }) },
+              ],
+            },
+          ],
+        },
+        this.screen,
+      );
+      return;
+    }
+
+    const def = this.city.catalog.get(tool.defId);
+    if (def.id === 'road' && this.down?.tile) {
+      // Dragging a road: preview the whole path.
+      const path = roadPath(this.down.tile, this.hover);
+      const fp = path.map((p) => ({ ...p, ok: checkPlacement(this.city, def, p.x, p.z).ok }));
+      const okCount = fp.filter((p) => p.ok).length;
+      this.preview.setGhost(null);
+      this.preview.setTiles({ ...empty, footprint: fp });
+      this.panel.show(
+        {
+          title: `${buildingName('road')} × ${okCount}`,
+          sections: [
+            { lines: [{ text: `${t('ui.cost')}: ${formatAmounts(scale(def.cost, okCount))}` }] },
+          ],
+        },
+        this.screen,
+      );
+      return;
+    }
+
+    const c = this.corner(def, this.hover);
+    const check = checkPlacement(this.city, def, c.x, c.z);
+    const rect = rectOf(def, c.x, c.z);
+    this.preview.setGhost(def, c.x, c.z, check.ok);
+    this.preview.setTiles({
+      footprint: rectTiles(rect, check.ok),
+      affects: emitTiles(def, rect),
+      checks: checkTiles(check.requires, rect),
+      markers: markersFor(this.city, check.requires),
+    });
+    const content: PanelContent = {
+      title: buildingName(def.id),
+      sections: [
+        {
+          lines: [
+            { ok: check.cost.ok, text: `${t('ui.cost')}: ${formatAmounts(def.cost) || '—'}` },
+            ...check.site.filter((s) => !s.ok || s.key !== 'req.footprint').map(line),
+            ...check.site.filter((s) => s.ok && s.key === 'req.footprint').map(line),
+            ...check.requires.map(line),
+            ...(check.treesToCut ? [{ text: t('ui.treesCleared') }] : []),
+          ],
+        },
+        { title: t('ui.produces'), lines: info(def) },
+        ...(def.upgrades ?? []).slice(0, 1).map((u) => ({
+          title: t('ui.upgradeTo', { name: buildingName(u.to) }),
+          lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
+        })),
+      ],
+      verdict: { ok: check.ok, text: check.ok ? t('ui.canPlace') : t('ui.cannotPlace') },
+    };
+    this.panel.show(content, this.screen);
+  }
+
+  dispose(): void {
+    this.ac.abort();
+  }
+}
+
+function line(c: CheckResult): PanelLine {
+  return { ok: c.ok, text: describeCheck(c) };
+}
+
+/** Static facts about a building: housing, production, upkeep, what it spreads. */
+function info(def: BuildingDef): PanelLine[] {
+  const out: PanelLine[] = [];
+  if (def.housing) out.push({ text: t('ui.housing', { n: def.housing }) });
+  if (def.produces) out.push({ text: `+ ${formatAmounts(def.produces)} ${t('ui.perSecond')}` });
+  if (def.upkeep) out.push({ text: `− ${formatAmounts(def.upkeep)} ${t('ui.perSecond')}` });
+  for (const e of def.emits ?? []) {
+    out.push({
+      text: `${t('ui.emits')}: ${t(`field.${e.field}`)} ${e.amount > 0 ? '+' : ''}${e.amount} (r=${e.radius})`,
+    });
+  }
+  return out;
+}
+
+/** A requirement shown as text without evaluating it (for "upgrades when" hints). */
+function placeholder(r: Requirement): CheckResult {
+  switch (r.type) {
+    case 'near':
+      return {
+        ok: false,
+        key: 'req.near',
+        params: { building: r.building, r: r.radius, need: r.min ?? 1, have: '…' },
+      };
+    case 'notNear':
+      return {
+        ok: false,
+        key: 'req.notNear',
+        params: { building: r.building, r: r.radius, have: '…' },
+      };
+    case 'field':
+      return r.min !== undefined
+        ? { ok: false, key: 'req.fieldMin', params: { field: r.field, min: r.min, have: '…' } }
+        : {
+            ok: false,
+            key: 'req.fieldMax',
+            params: { field: r.field, max: r.max ?? 0, have: '…' },
+          };
+    case 'terrain':
+      return {
+        ok: false,
+        key: 'req.terrain',
+        params: { terrain: r.terrain, r: r.radius, need: r.min ?? 1, have: '…' },
+      };
+    case 'road':
+      return { ok: false, key: 'req.road', params: { d: r.maxDistance } };
+  }
+}
+
+function rectTiles(rect: Rect, ok: boolean): { x: number; z: number; ok: boolean }[] {
+  const out: { x: number; z: number; ok: boolean }[] = [];
+  for (let z = rect.z; z < rect.z + rect.d; z++)
+    for (let x = rect.x; x < rect.x + rect.w; x++) out.push({ x, z, ok });
+  return out;
+}
+
+function ringTiles(rect: Rect, r: number): { x: number; z: number }[] {
+  const out: { x: number; z: number }[] = [];
+  forTilesInRadius(rect, r, (x, z, d) => {
+    if (d > 0) out.push({ x, z });
+  });
+  return out;
+}
+
+function emitTiles(def: BuildingDef, rect: Rect): { x: number; z: number }[] {
+  const r = Math.max(0, ...(def.emits ?? []).map((e) => e.radius));
+  return r > 0 ? ringTiles(rect, r) : [];
+}
+
+function checkTiles(checks: readonly CheckResult[], rect: Rect): { x: number; z: number }[] {
+  const r = Math.max(0, ...checks.map((c) => c.radius ?? 0));
+  return r > 0 ? ringTiles(rect, r) : [];
+}
+
+function markersFor(city: City, checks: readonly CheckResult[]): PreviewTiles['markers'] {
+  const out: PreviewTiles['markers'] = [];
+  for (const c of checks) {
+    for (const uid of c.matches ?? []) {
+      const b = city.get(uid);
+      if (!b) continue;
+      out.push({ x: b.x, z: b.z, good: c.key !== 'req.notNear' });
+    }
+  }
+  return out;
+}
+
+/** L-shaped path: along x first, then z. */
+export function roadPath(
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+): { x: number; z: number }[] {
+  const out: { x: number; z: number }[] = [];
+  const sx = Math.sign(b.x - a.x);
+  const sz = Math.sign(b.z - a.z);
+  let x = a.x;
+  let z = a.z;
+  out.push({ x, z });
+  while (x !== b.x && out.length < MAX_ROAD) {
+    x += sx;
+    out.push({ x, z });
+  }
+  while (z !== b.z && out.length < MAX_ROAD) {
+    z += sz;
+    out.push({ x, z });
+  }
+  return out;
+}
+
+function scale(a: Readonly<Record<string, number>>, n: number): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(a)) out[k] = v * n;
+  return out;
+}

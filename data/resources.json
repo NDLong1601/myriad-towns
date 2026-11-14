@@ -1,0 +1,15 @@
+{
+  "stock": ["food", "wood", "stone", "ore", "metal", "goods", "energy", "knowledge"],
+  "labor": ["labor", "skilled", "expert"],
+  "start": {
+    "food": 80,
+    "wood": 200,
+    "stone": 120,
+    "ore": 0,
+    "metal": 0,
+    "goods": 0,
+    "energy": 0,
+    "knowledge": 0
+  },
+  "demolishRefund": 0.75
+}

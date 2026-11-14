@@ -1,9 +1,24 @@
 import './style.css';
+import './ui/ui.css';
 import { tileToChunk } from '@/core/coords';
 import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
 import { WorldView } from '@/render/worldView';
+import { BuildingRenderer } from '@/render/buildingRenderer';
+import { PlacementPreview } from '@/render/placementPreview';
+import { loadCatalog } from '@/sim/catalog';
+import { City } from '@/sim/city';
+import { DemolishCommand, History, PlaceCommand } from '@/sim/commands';
+import { checkPlacement } from '@/sim/requirements';
+import { GeneratedTerrain } from '@/sim/terrainQuery';
+import { mountBuildMenu } from '@/ui/buildMenu';
+import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
+import { InfoPanel } from '@/ui/infoPanel';
+import { mountResourceBar } from '@/ui/resourceBar';
+import { CHUNK_SIZE, localIndex } from '@/core/coords';
+import { TileFlag } from '@/world/biomes';
+import { LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
 import { BIOME_NAMES, type Biome } from '@/world/biomes';
 import { InlineGenerator, WorkerPoolGenerator } from '@/world/genPool';
 import { sampleTile } from '@/world/terrain';
@@ -26,6 +41,16 @@ interface DebugApi {
     triangles: number;
   };
   ready(radius?: number): boolean;
+  place(defId: string, x: number, z: number): boolean;
+  canPlace(defId: string, x: number, z: number): boolean;
+  demolishAt(x: number, z: number): boolean;
+  undo(): boolean;
+  redo(): boolean;
+  buildingCount(): number;
+  buildingAt(x: number, z: number): string | null;
+  stock(): Record<string, number>;
+  /** Testing only: add resources. */
+  grant(amounts: Record<string, number>): void;
 }
 
 declare global {
@@ -52,13 +77,48 @@ const small =
   window.matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 600;
 const viewRadius = Math.max(2, Math.min(10, Math.round(num('r', small ? 4 : 6))));
 
+const terrain = new GeneratedTerrain(seed);
+const city = new City(loadCatalog(), terrain);
+const history = new History(city);
+
 const generator = typeof Worker !== 'undefined' ? new WorkerPoolGenerator() : new InlineGenerator();
 const view = new WorldView(app, {
   seed,
   viewRadius,
   generator,
   start: { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
+  // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
+  patchChunk: (chunk) => {
+    let changed = false;
+    for (const key of terrain.clearedTrees) {
+      const [x, z] = key.split(',').map(Number) as [number, number];
+      const lx = x - chunk.cx * CHUNK_SIZE;
+      const lz = z - chunk.cz * CHUNK_SIZE;
+      if (lx < 0 || lz < 0 || lx >= CHUNK_SIZE || lz >= CHUNK_SIZE) continue;
+      const i = localIndex(lx, lz);
+      const before = chunk.flags[i] as number;
+      chunk.flags[i] = before & ~TileFlag.Tree;
+      if (chunk.flags[i] !== before) changed = true;
+    }
+    return changed;
+  },
 });
+
+// Buildings stand on the generated surface, so they never depend on a chunk being loaded.
+const surfaceY = (x: number, z: number): number => {
+  const s = terrain.tile(x, z);
+  return s.flags & TileFlag.Water ? WATER_Y : s.level * LEVEL_HEIGHT;
+};
+const buildings = new BuildingRenderer(city, view.origin, surfaceY);
+const preview = new PlacementPreview(view.origin, surfaceY);
+view.scene.add(buildings.group, preview.group);
+city.on((e) => {
+  if (e.type === 'trees') view.refreshTiles(e.tiles);
+});
+
+mountResourceBar(city, document.body);
+const menu = mountBuildMenu(city, history, document.body);
+new BuildTool(view, city, history, preview, new InfoPanel(document.body), menu);
 
 const api: DebugApi = {
   seed,
@@ -77,6 +137,18 @@ const api: DebugApi = {
     };
   },
   ready: (radius) => view.chunks.isReady(radius),
+  place: (defId, x, z) => history.run(new PlaceCommand(defId, x, z)),
+  canPlace: (defId, x, z) => checkPlacement(city, city.catalog.get(defId), x, z).ok,
+  demolishAt: (x, z) => {
+    const b = city.at(x, z);
+    return b ? history.run(new DemolishCommand(b.uid)) : false;
+  },
+  undo: () => history.undo(),
+  redo: () => history.redo(),
+  buildingCount: () => city.count,
+  buildingAt: (x, z) => city.at(x, z)?.def.id ?? null,
+  stock: () => ({ ...city.stock }),
+  grant: (amounts) => city._addStock(amounts, 1),
 };
 window.__MYRIAD__ = api;
 mountDebugOverlay(view.renderer, document.body);
@@ -107,7 +179,7 @@ view.onFrame((dt) => {
     `<strong>Myriad Towns</strong> · seed "${escapeHtml(seedText)}" · gen v${GEN_VERSION}<br>` +
     `Ô (${tx}, ${tz}) · chunk (${cx}, ${cz}) · ${BIOME_NAMES[tile.biome as Biome]} · cao ${tile.level}<br>` +
     `${fps} fps · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call<br>` +
-    `<span class="hint">Kéo chuột trái: di chuyển · chuột phải: xoay · cuộn: zoom · Q/E: xoay 90° · WASD</span>`;
+    `<span class="hint">Kéo chuột trái: di chuyển · chuột phải: xoay · cuộn: zoom · Q/E: xoay 90°<br>Chọn công trình ở thanh dưới · Esc: huỷ · X: phá · Ctrl+Z: hoàn tác</span>`;
 });
 
 function escapeHtml(s: string): string {

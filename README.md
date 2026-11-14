@@ -3,7 +3,7 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M1** (thế giới vô hạn). Đã đi khắp thế giới được; chưa xây công trình (M2).
+> Trạng thái: **M2** (đặt công trình). Xây được làng với 26 loại công trình, có xem trước điều kiện và hoàn tác. Kinh tế chạy theo thời gian là M3.
 
 ## Điều khiển
 

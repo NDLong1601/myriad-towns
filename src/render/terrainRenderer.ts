@@ -48,6 +48,10 @@ export class TerrainRenderer {
     if (m) m.visible = visible;
   }
 
+  isVisible(key: ChunkKey): boolean {
+    return this.meshes.get(key)?.visible ?? false;
+  }
+
   remove(key: ChunkKey): void {
     const m = this.meshes.get(key);
     if (!m) return;

@@ -1,0 +1,14 @@
+{
+  "fields": [
+    "water_access",
+    "commerce",
+    "education",
+    "health",
+    "leisure",
+    "greenery",
+    "faith",
+    "pollution",
+    "noise",
+    "density"
+  ]
+}
