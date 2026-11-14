@@ -28,6 +28,7 @@ export function showSettings(
       <input type="range" name="volume" min="0" max="100" step="5" value="${Math.round(s.volume * 100)}"></label>
     <label class="mt-check"><input type="checkbox" name="cvd" ${s.palette === 'cvd' ? 'checked' : ''}> ${t('settings.cvd')}</label>
     <label class="mt-check"><input type="checkbox" name="dayNight" ${s.dayNight ? 'checked' : ''}> ${t('settings.dayNight')}</label>
+    <label class="mt-check"><input type="checkbox" name="traffic" ${s.traffic ? 'checked' : ''}> ${t('settings.traffic')}</label>
     <label class="mt-check"><input type="checkbox" name="autosave" ${s.autosave ? 'checked' : ''}> ${t('settings.autosave')}</label>
     <small>${t('settings.reloadHint')}</small>
     <div class="mt-save-row">
@@ -71,6 +72,7 @@ export function showSettings(
       volume: Number(vol.value) / 100,
       muted: s.muted,
       dayNight: fd.get('dayNight') !== null,
+      traffic: fd.get('traffic') !== null,
       palette: fd.get('cvd') !== null ? 'cvd' : 'default',
     };
     if (q === 'low' || q === 'medium' || q === 'high') next.quality = q;

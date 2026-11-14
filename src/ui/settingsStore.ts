@@ -9,6 +9,8 @@ export interface Settings {
   volume: number;
   muted: boolean;
   dayNight: boolean;
+  /** Pedestrians and vehicles on the roads. */
+  traffic: boolean;
   palette: 'default' | 'cvd';
 }
 
@@ -18,6 +20,7 @@ const DEFAULTS: Settings = {
   volume: 0.7,
   muted: false,
   dayNight: true,
+  traffic: true,
   palette: 'default',
 };
 
