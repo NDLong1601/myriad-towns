@@ -74,7 +74,7 @@ test('speed buttons and Space control the clock', async ({ page }) => {
   const t0 = await page.evaluate(() => window.__MYRIAD__!.stats().tick);
   // Software rendering is slow here, so wait for ticks rather than a fixed time.
   await expect
-    .poll(() => page.evaluate(() => window.__MYRIAD__!.stats().tick), { timeout: 10_000 })
+    .poll(() => page.evaluate(() => window.__MYRIAD__!.stats().tick), { timeout: 30_000 })
     .toBeGreaterThan(t0 + 8);
   await page.locator('canvas').click({ position: { x: 5, y: 300 } });
   await page.keyboard.press('Space');

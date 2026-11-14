@@ -288,5 +288,9 @@
   "audio.muteShort": "Tắt/bật tiếng",
   "settings.cvd": "Bảng màu cho người mù màu (xanh dương / cam)",
   "settings.apply": "Lưu và áp dụng",
+  "ui.nextLevel": "Cấp tiếp theo",
+  "ui.topLevel": "Đã là cấp cao nhất",
+  "ui.requirements": "Điều kiện",
+  "ui.details": "Chi tiết công trình",
   "ui.close": "Đóng"
 }

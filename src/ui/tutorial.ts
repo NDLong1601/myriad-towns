@@ -20,7 +20,8 @@ export function mountTutorial(
   onClose: () => void,
 ): { el: HTMLElement; step: () => string | null } {
   const start = { ...camera() };
-  const infoOpen = (): boolean => !!document.querySelector('.mt-panel:not([hidden])');
+  const infoOpen = (): boolean =>
+    !!document.querySelector('.mt-panel:not([hidden]), .mt-detail:not([hidden])');
   const steps: Step[] = [
     {
       key: 'camera',

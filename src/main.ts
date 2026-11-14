@@ -18,6 +18,7 @@ import { mountEncyclopedia } from '@/ui/encyclopedia';
 import { mountMinimap } from '@/ui/minimap';
 import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
+import { DetailPanel } from '@/ui/detailPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
 import { HeatmapOverlay } from '@/render/heatmap';
 import { PlanRenderer } from '@/render/planRenderer';
@@ -293,6 +294,7 @@ new BuildTool(
     const poi = poiView.at(x, z);
     return poi ? { poi, explored: pois.isExplored(poi.key) } : undefined;
   },
+  new DetailPanel(document.body),
 );
 const renderSimBar = mountSimBar(sim, clock, document.body);
 const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {

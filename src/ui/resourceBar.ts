@@ -2,6 +2,7 @@ import { STOCK_RESOURCES } from '@/sim/catalog';
 import type { City } from '@/sim/city';
 import { netFlows, type Simulation } from '@/sim/simulation';
 import { fmt, t } from './i18n';
+import { icon } from './icons';
 
 /**
  * Stockpile chips in the top-right corner, each with its net change per second.
@@ -24,7 +25,7 @@ export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulati
           Math.abs(n) < 0.05
             ? ''
             : `<i class="${n > 0 ? 'up' : 'down'}">${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}${t('ui.perSecond')}</i>`;
-        return `<span data-res="${r}">${t(`resource.${r}`)}<b>${fmt(Math.floor(city.stock[r] ?? 0))}</b>${rate}</span>`;
+        return `<span data-res="${r}" title="${t(`resource.${r}`)}">${icon(r)}<b>${fmt(Math.floor(city.stock[r] ?? 0))}</b>${rate}</span>`;
       })
       .join('');
   };

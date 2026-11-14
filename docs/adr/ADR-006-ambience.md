@@ -57,3 +57,14 @@ The debug API has `timeOfDay(fixed?)` and `audio()`.
 - **Bridges** are `placeOn: [water]` and need a road within 1 tile, so they always continue a road.
 - **Stone everywhere:** `gravel_pit` (no terrain need), `trading_post` (food in, stone and wood out), quarry
   needs 1 stone tile instead of 2, and the starting stock is larger.
+
+## M6c: icons, thumbnails, detail panel
+
+- **Icons are inline SVG** (`src/ui/icons.ts`), one per resource, with the name as tooltip and label.
+  A unit test fails if a resource in `data/resources.json` has no icon.
+- **Thumbnails are rendered from the real building models** (`src/render/thumbnails.ts`): one small
+  offscreen WebGL renderer, isometric orthographic camera, PNG data URL cached per `def#variant`.
+  Without WebGL it returns '' and the UI shows text only.
+- **Detail panel** (`src/ui/detailPanel.ts`) is docked on the right. `detailHtml()` is pure and tested.
+  It shows the chosen (menu) or selected (inspect) building with cost, stats, requirements and the
+  next upgrade step. The cursor card keeps only the live site checklist and verdict.
