@@ -132,6 +132,21 @@ export function mountMinimap(
   root.appendChild(canvas);
   parent.appendChild(el);
 
+  // Phones have no M key: a small button shows the map while it is hidden.
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'mt-minimap-btn';
+  btn.textContent = '🗺';
+  btn.title = t('minimap.toggle');
+  btn.setAttribute('aria-label', t('minimap.toggle'));
+  btn.hidden = isVisible;
+  btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    show();
+  });
+  parent.appendChild(btn);
+
   const ctx = canvas.getContext('2d');
 
   // Reuse one single ImageData across frames (zero per-frame allocations)
@@ -151,6 +166,11 @@ export function mountMinimap(
   let sampleCenterZ = camera.state.z;
   let lastYaw = camera.state.yaw;
   let needsBuildingRedraw = true;
+  // Centre of the terrain image on the offscreen canvas, and where the camera was at the last draw.
+  let committedX = sampleCenterX;
+  let committedZ = sampleCenterZ;
+  let drawnX = camera.state.x;
+  let drawnZ = camera.state.z;
 
   const stats = {
     lastSliceMs: 0,
@@ -198,8 +218,13 @@ export function mountMinimap(
 
     ctx.clearRect(0, 0, size, size);
 
-    // 1. Draw sampled terrain layer
-    ctx.drawImage(offscreen, 0, 0);
+    // 1. Draw sampled terrain layer, shifted by how far the camera is from where it was sampled,
+    // so terrain and buildings stay aligned between refreshes.
+    ctx.drawImage(
+      offscreen,
+      (committedX - camera.state.x) / TILES_PER_PIXEL,
+      (committedZ - camera.state.z) / TILES_PER_PIXEL,
+    );
 
     // 2. Draw placed buildings from city.all()
     // Roads: light brown (#c4a47c)
@@ -316,6 +341,8 @@ export function mountMinimap(
       // When all rows are sampled, commit to offscreen canvas
       if (currentSliceRow >= size && imageData) {
         offCtx.putImageData(imageData, 0, 0);
+        committedX = sampleCenterX;
+        committedZ = sampleCenterZ;
         stats.fullRefreshCount++;
         needsBuildingRedraw = true;
       }
@@ -323,9 +350,13 @@ export function mountMinimap(
 
     // Redraw canvas if camera moved, rotated, or buildings were updated
     const yawChanged = Math.abs(camYaw - lastYaw) > 0.01;
-    if (needsBuildingRedraw || yawChanged || movedDist > 0.5) {
+    // Compare with the last draw, not the sample centre, so a still camera costs nothing.
+    const drawMoved = Math.hypot(camX - drawnX, camZ - drawnZ) > 0.5;
+    if (needsBuildingRedraw || yawChanged || drawMoved) {
       redrawCanvas();
       lastYaw = camYaw;
+      drawnX = camX;
+      drawnZ = camZ;
       needsBuildingRedraw = false;
     }
   };
@@ -366,7 +397,14 @@ export function mountMinimap(
 
   // Toggle visibility with M key (ignored when typing in an input or textarea)
   const onKeyDown = (e: KeyboardEvent): void => {
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    const tgt = e.target as HTMLElement | null;
+    if (
+      tgt instanceof HTMLInputElement ||
+      tgt instanceof HTMLTextAreaElement ||
+      tgt instanceof HTMLSelectElement ||
+      tgt?.isContentEditable
+    )
+      return;
     if (e.code === 'KeyM' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       e.preventDefault();
       toggle();
@@ -382,6 +420,7 @@ export function mountMinimap(
   const show = (): void => {
     isVisible = true;
     el.classList.remove('hidden');
+    btn.hidden = true;
     needsBuildingRedraw = true;
     update();
   };
@@ -389,6 +428,7 @@ export function mountMinimap(
   const hide = (): void => {
     isVisible = false;
     el.classList.add('hidden');
+    btn.hidden = false;
   };
 
   // Register with view.onFrame if view is provided
@@ -402,6 +442,7 @@ export function mountMinimap(
     window.removeEventListener('keydown', onKeyDown);
     unsubscribeCity();
     el.remove();
+    btn.remove();
   };
 
   return {

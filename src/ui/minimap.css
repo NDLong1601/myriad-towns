@@ -38,3 +38,27 @@
     height: 120px;
   }
 }
+
+/* Shown while the map is hidden (phones start hidden and have no M key). */
+.mt-minimap-btn {
+  position: fixed;
+  right: 12px;
+  bottom: 124px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--hud-bg, rgb(255 255 255 / 0.82));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 25;
+}
+.mt-minimap-btn[hidden] {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .mt-minimap-btn {
+    bottom: 180px;
+  }
+}
