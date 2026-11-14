@@ -68,3 +68,15 @@ The debug API has `timeOfDay(fixed?)` and `audio()`.
 - **Detail panel** (`src/ui/detailPanel.ts`) is docked on the right. `detailHtml()` is pure and tested.
   It shows the chosen (menu) or selected (inspect) building with cost, stats, requirements and the
   next upgrade step. The cursor card keeps only the live site checklist and verdict.
+
+## M6e: people and vehicles
+
+- **Visual only.** `TrafficRenderer` never touches the simulation or saves. Agents live on road tiles
+  (tracked through city events, swap-remove index), walk tile to tile, keep right, turn at dead ends and
+  cross bridges (+0.14 lift). They exist only within `reach` of the camera, so cost does not grow with the map.
+- **One draw call per kind** (pedestrian, handcart, horsecart, car, bus): instanced low-poly models from
+  `vehicleModels.ts`; the cap is 60 agents on coarse/small devices, 160 otherwise.
+- **`trafficPlan` is pure and unit tested**: pedestrians ~ pop/5, vehicles ~ pop/25; the vehicle mix follows
+  the era (carts by population, cars and buses also need a paved share of roads).
+- **Paused games still populate the streets** (agents just freeze), which also keeps screenshots and tests
+  deterministic in time. `?traffic=0` and the settings toggle switch it off.

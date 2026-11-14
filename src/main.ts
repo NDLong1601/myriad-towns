@@ -5,6 +5,8 @@ import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
 import { WorldView } from '@/render/worldView';
 import { BuildingRenderer } from '@/render/buildingRenderer';
+import { TrafficRenderer } from '@/render/trafficRenderer';
+import { trafficPlan } from '@/render/trafficPlan';
 import { PlacementPreview } from '@/render/placementPreview';
 import { isRoadDef, loadCatalog } from '@/sim/catalog';
 import { City } from '@/sim/city';
@@ -116,6 +118,8 @@ interface DebugApi {
   tutorialStep(): string | null;
   /** Time of day 0..1 (null when day/night is off); setting it fixes the clock (for screenshots). */
   timeOfDay(fixed?: number | null): number | null;
+  /** Pedestrians and vehicles currently walking or driving. */
+  traffic(): { pedestrians: number; vehicles: number; wantPedestrians: number };
   audio(): { started: boolean; muted: boolean; volume: number; popping: number };
   /** Deterministic state hash (saves round-trip to the same value). */
   hash(): number;
@@ -226,6 +230,9 @@ const surfaceY = (x: number, z: number): number => {
 const buildings = new BuildingRenderer(city, view.origin, surfaceY);
 // ?anim=0 turns the placement "pop" off (tests, screenshots).
 buildings.animate = params.get('anim') !== '0';
+// People and vehicles on the roads (?traffic=0 or the settings toggle turns them off).
+const traffic = new TrafficRenderer(city, view.origin, surfaceY, small ? 60 : 160);
+traffic.enabled = params.has('traffic') ? params.get('traffic') !== '0' : settings.traffic;
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
 const planView = new PlanRenderer(plans, city.catalog, view.origin, surfaceY);
@@ -233,6 +240,7 @@ const poiView = new PoiRenderer(pois, view.origin, surfaceY, viewRadius);
 const territory = new TerritoryRenderer(towns, view.origin, surfaceY);
 view.scene.add(
   buildings.group,
+  traffic.group,
   preview.group,
   heatmap.group,
   planView.group,
@@ -464,6 +472,25 @@ function sampleSurroundings(): void {
   );
 }
 let ambientClock = 0;
+let trafficClock = 1;
+/** Population of the town nearest to the camera: that is who is out on the streets. */
+function localPopulation(x: number, z: number): number {
+  let best = 0;
+  let bestD = Infinity;
+  for (const tw of towns.all()) {
+    const d = Math.hypot(tw.x - x, tw.z - z);
+    if (d < bestD) {
+      bestD = d;
+      best = tw.population;
+    }
+  }
+  return towns.all().length > 0 ? best : sim.population;
+}
+function refreshTrafficPlan(x: number, z: number): void {
+  const roads = city.countTag('road');
+  const paved = roads > 0 ? (city.countOf('stone_road') + city.countOf('brick_road')) / roads : 0;
+  traffic.setPlan(trafficPlan(localPopulation(x, z), paved, small ? 60 : 160));
+}
 
 let simHud = 0;
 view.onFrame((dt) => {
@@ -490,6 +517,12 @@ view.onFrame((dt) => {
   heatmap.update(s.x, s.z);
   poiView.update(s.x, s.z);
   buildings.update(dt);
+  trafficClock += dt;
+  if (trafficClock >= 1) {
+    trafficClock = 0;
+    refreshTrafficPlan(s.x, s.z);
+  }
+  traffic.update(dt, s, Math.min(60, Math.max(24, s.distance * 0.9 + 16)), clock.speed === 0);
   if (dayNightOn || fixedTime !== null) view.setTimeOfDay(fixedTime ?? timeOfDay(sim.tick));
   buildings.setNight(view.nightness);
   if (audio.started) {
@@ -585,6 +618,7 @@ const api: DebugApi = {
     }
     return view.timeOfDay;
   },
+  traffic: () => ({ ...traffic.counts, wantPedestrians: traffic.planned.pedestrians }),
   audio: () => ({
     started: audio.started,
     muted: audio.muted,

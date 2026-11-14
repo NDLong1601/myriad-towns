@@ -81,6 +81,16 @@ làm; bỏ qua được bất cứ lúc nào.
 
 ![Công trình công nghiệp mới trong menu Sản xuất](docs/images/industry-menu.jpg)
 
+### Thành phố sống động: người đi lại và phương tiện
+
+- **Dân số tăng thì đường phố đông lên**: cứ khoảng 5 dân có 1 người đi bộ, tối đa vài chục người quanh khu bạn đang xem. Họ đi bên lề đường, rẽ ở ngã tư, quay đầu ở cuối đường và đi qua cả cầu.
+- **Phương tiện đổi theo thời đại**: xe kéo tay từ khoảng 40 dân, xe ngựa từ 120 dân, ô tô từ 300 dân và xe buýt từ 700 dân. Ô tô cần có đường lát đá hoặc gạch (ít nhất 5% số đường), xe buýt cần ít nhất 15%; đường đất chỉ có xe kéo và xe ngựa.
+- **Chỉ là hiệu ứng nhìn**: không ảnh hưởng mô phỏng, chỉ xuất hiện gần camera nên bản đồ lớn không chậm đi; mỗi loại là một lệnh vẽ. Tắt bằng mục "Người đi lại và phương tiện" trong Cài đặt hoặc thêm `?traffic=0` vào địa chỉ.
+
+![Người đi bộ, xe kéo tay và xe ngựa trên đường của một làng 416 dân](docs/images/traffic.jpg)
+
+![Cận cảnh](docs/images/traffic-close.jpg)
+
 ### Giao diện: icon tài nguyên, ảnh công trình, panel chi tiết
 
 - **Icon cho mọi loại tài nguyên** (lương thực, gỗ, đá, quặng, kim loại, hàng hoá, điện, tri thức, hiến chương, lao động). Icon vẽ bằng SVG ngay trong game, thanh tài nguyên và giá xây đều dùng icon; rê chuột vào icon để xem tên.
@@ -185,6 +195,9 @@ task spec trong [docs/tasks/](docs/tasks/), bắt đầu từ [\_TEMPLATE.md](do
 | M5  | Lưu/tải, tự lưu, xuất/nhập file, cài đặt                                       | ✔          |
 | M6a | Ngày đêm, âm thanh tự tổng hợp, hiệu ứng xây, cài đặt âm lượng                 | ✔          |
 | M6b | Đường tự nối, đèn đêm, nhà có vườn, bảng màu cho người mù màu                  | ✔          |
+| M6c | Icon tài nguyên, ảnh công trình trong menu, panel chi tiết bên phải            | ✔          |
+| M6d | Cầu, đường tự nâng cấp, công nghiệp mới, dễ chơi hơn ở biome thiếu đá          | ✔          |
+| M6e | Người đi lại và phương tiện theo thời đại                                      | ✔          |
 | M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      | Tiếp theo  |
 
 Chi tiết kỹ thuật: [docs/architecture.md](docs/architecture.md) và các ADR trong [docs/adr](docs/adr).

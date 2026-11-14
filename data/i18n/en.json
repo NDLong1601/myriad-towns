@@ -284,6 +284,7 @@
   "settings.reloadHint": "The game is saved and reloaded to apply.",
   "settings.volume": "Volume",
   "settings.dayNight": "Day and night cycle",
+  "settings.traffic": "People and vehicles",
   "audio.mute": "Mute",
   "audio.muteShort": "Mute or unmute",
   "settings.cvd": "Colourblind palette (blue / orange)",

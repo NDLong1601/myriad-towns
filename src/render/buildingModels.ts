@@ -37,7 +37,7 @@ function arms(mask: number): number {
   return (mask & 1) + ((mask >> 1) & 1) + ((mask >> 2) & 1) + ((mask >> 3) & 1);
 }
 
-function part(
+export function part(
   geo: THREE.BufferGeometry,
   color: string,
   x: number,
@@ -58,7 +58,7 @@ function part(
 }
 
 /** Box resting on y=0, centred on (x, z). */
-function box(
+export function box(
   w: number,
   h: number,
   d: number,
@@ -289,7 +289,7 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   return merged;
 }
 
-function shade(hex: string, f: number): string {
+export function shade(hex: string, f: number): string {
   const c = new THREE.Color(hex);
   c.multiplyScalar(f);
   return `#${c.getHexString()}`;
