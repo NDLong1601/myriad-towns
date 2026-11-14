@@ -1,3 +1,4 @@
+import { isRoadDef } from './catalog';
 import { type City, rectOf } from './city';
 import { BatchCommand, type History, PlaceCommand } from './commands';
 import { checkPlacement } from './requirements';
@@ -109,9 +110,9 @@ export class PlanStore {
    * Plans that cannot be built yet stay. Returns how many were built.
    */
   build(history: History): number {
-    const order = this.all().sort(
-      (a, b) => Number(b.defId === 'road') - Number(a.defId === 'road') || a.id - b.id,
-    );
+    const isRoad = (id: string): number =>
+      Number(this.city.catalog.has(id) && isRoadDef(this.city.catalog.get(id)));
+    const order = this.all().sort((a, b) => isRoad(b.defId) - isRoad(a.defId) || a.id - b.id);
     const cmds = order.map((p) => ({ p, cmd: new PlaceCommand(p.defId, p.x, p.z) }));
     const batch = new BatchCommand(
       'build plan',

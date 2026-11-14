@@ -153,7 +153,8 @@ export class Goals {
       case 'population':
         return this.sim.population;
       case 'count':
-        return this.city.countOf(g.building);
+        // "road" counts every kind of road, so paving a street does not undo the goal.
+        return g.building === 'road' ? this.city.countTag('road') : this.city.countOf(g.building);
       case 'stock':
         return Math.floor(this.city.stock[g.resource] ?? 0);
       case 'production':

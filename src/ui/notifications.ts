@@ -1,3 +1,4 @@
+import { isRoadDef } from '@/sim/catalog';
 import type { City } from '@/sim/city';
 import type { SimEvent, Simulation } from '@/sim/simulation';
 import type { Goals } from '@/sim/goals';
@@ -40,6 +41,8 @@ export function mountNotifications(
 
   sim.on((e) => {
     if (e.type === 'resolved' || e.type === 'recovered') return;
+    // Streets paving themselves is background change, not news.
+    if (e.type === 'upgraded' && isRoadDef(city.catalog.get(e.from))) return;
     if (e.type === 'unlocked') {
       show(e, 1); // each unlock is its own news
       return;

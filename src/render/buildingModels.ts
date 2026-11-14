@@ -144,24 +144,64 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const cz = d / 2;
   const parts: THREE.BufferGeometry[] = [];
   switch (v.shape) {
-    case 'road': {
-      const half = 0.36; // the carriageway is 0.72 wide, leaving a verge on each side
-      parts.push(box(half * 2, h, half * 2, color, cx, cz));
-      const arm = (len: number, ax: number, az: number, w2: number, d2: number): void => {
-        parts.push(box(w2, h, d2, color, cx + ax * len, cz + az * len));
+    case 'road':
+    case 'bridge': {
+      const bridge = v.shape === 'bridge';
+      // Bridges ride a little above the water on piles, with rails on the open sides.
+      const lift = bridge ? 0.14 : 0;
+      const half = bridge ? 0.4 : 0.36; // the carriageway; roads leave a verge on each side
+      const reach = 0.5 - half;
+      const l = (0.5 + half) / 2; // arm centre offset: from the centre block to the tile edge
+      parts.push(box(half * 2, h, half * 2, color, cx, cz, lift));
+      const arm = (ax: number, az: number, w2: number, d2: number): void => {
+        parts.push(box(w2, h, d2, color, cx + ax * l, cz + az * l, lift));
       };
-      const l = (0.5 + half) / 2; // arm centre offset: spans from the centre block to the tile edge
-      if (variant & ROAD_E) arm(l, 1, 0, 0.5 - half, half * 2);
-      if (variant & ROAD_W) arm(l, -1, 0, 0.5 - half, half * 2);
-      if (variant & ROAD_S) arm(l, 0, 1, half * 2, 0.5 - half);
-      if (variant & ROAD_N) arm(l, 0, -1, half * 2, 0.5 - half);
+      if (variant & ROAD_E) arm(1, 0, reach, half * 2);
+      if (variant & ROAD_W) arm(-1, 0, reach, half * 2);
+      if (variant & ROAD_S) arm(0, 1, half * 2, reach);
+      if (variant & ROAD_N) arm(0, -1, half * 2, reach);
       const lane = shade(color, 1.25);
       const eastWest = (variant & (ROAD_E | ROAD_W)) === (ROAD_E | ROAD_W) && arms(variant) === 2;
       const northSouth = (variant & (ROAD_S | ROAD_N)) === (ROAD_S | ROAD_N) && arms(variant) === 2;
-      if (eastWest) parts.push(box(0.32, 0.01, 0.06, lane, cx, cz, h));
-      if (northSouth) parts.push(box(0.06, 0.01, 0.32, lane, cx, cz, h));
-      // A street lamp at junctions and dead ends.
-      if (arms(variant) >= 3 || arms(variant) === 1) {
+      if (!bridge && eastWest) parts.push(box(0.32, 0.01, 0.06, lane, cx, cz, h));
+      if (!bridge && northSouth) parts.push(box(0.06, 0.01, 0.32, lane, cx, cz, h));
+      if (bridge) {
+        const rail = shade(color, 0.6);
+        const top = lift + h;
+        for (const p of [
+          [-1, -1],
+          [1, -1],
+          [-1, 1],
+          [1, 1],
+        ] as const) {
+          parts.push(box(0.08, top + 0.3, 0.08, rail, cx + p[0] * half, cz + p[1] * half, -0.3));
+          parts.push(box(0.1, 0.18, 0.1, rail, cx + p[0] * half, cz + p[1] * half, top));
+        }
+        // Rails along the edges that do not continue as a deck.
+        const bar = (x: number, z: number, w2: number, d2: number): void => {
+          parts.push(box(w2, 0.05, d2, rail, x, z, top + 0.12));
+        };
+        if (!(variant & ROAD_N)) bar(cx, cz - half, half * 2, 0.05);
+        if (!(variant & ROAD_S)) bar(cx, cz + half, half * 2, 0.05);
+        if (!(variant & ROAD_W)) bar(cx - half, cz, 0.05, half * 2);
+        if (!(variant & ROAD_E)) bar(cx + half, cz, 0.05, half * 2);
+        for (const [flag, ax, az] of [
+          [ROAD_E, 1, 0],
+          [ROAD_W, -1, 0],
+          [ROAD_S, 0, 1],
+          [ROAD_N, 0, -1],
+        ] as const) {
+          if (!(variant & flag)) continue;
+          const along = ax !== 0;
+          for (const side of [-1, 1]) {
+            const x = cx + ax * l + (along ? 0 : side * half);
+            const z = cz + az * l + (along ? side * half : 0);
+            bar(x, z, along ? reach : 0.05, along ? 0.05 : reach);
+          }
+        }
+      }
+      // A street lamp at junctions and dead ends (not on bridges).
+      if (!bridge && (arms(variant) >= 3 || arms(variant) === 1)) {
         parts.push(box(0.05, 0.5, 0.05, '#4a4a4a', cx + 0.3, cz + 0.3, h));
         parts.push(box(0.12, 0.1, 0.12, LIT, cx + 0.3, cz + 0.3, h + 0.5, 1));
       }

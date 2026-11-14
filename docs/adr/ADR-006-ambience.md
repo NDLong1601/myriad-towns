@@ -45,6 +45,19 @@ The debug API has `timeOfDay(fixed?)` and `audio()`.
   switches CSS colours and `previewColors()` switches the 3D placement colours. Toasts always carry a
   symbol (✔ ▲ ✖) so meaning never rests on hue alone.
 
+## M6d: roads as a family, bridges, industry
+
+- **"Road" is a tag, not an id.** `isRoadDef` (tag `road`) decides what counts for road requirements, goals
+  (`City.countTag('road')`), the minimap, plans and the drag tool. Dirt road, stone road, brick road, wooden
+  and stone bridges all carry it, and the renderer auto-tiles them together (`shape: road | bridge`).
+- **Road upgrades use a field, not neighbour queries.** Cottages, townhouses and villas emit an `urban` field
+  (radius 2); a road upgrades to stone at `urban >= 1` and to brick at `urban >= 4`. A field lookup is O(1),
+  while three `near` queries per road made the 5,000-building tick 5x slower. Roads now join the rule
+  engine; measured tick for 8,246 buildings went from 1.7 ms to about 2.5 ms.
+- **Bridges** are `placeOn: [water]` and need a road within 1 tile, so they always continue a road.
+- **Stone everywhere:** `gravel_pit` (no terrain need), `trading_post` (food in, stone and wood out), quarry
+  needs 1 stone tile instead of 2, and the starting stock is larger.
+
 ## M6c: icons, thumbnails, detail panel
 
 - **Icons are inline SVG** (`src/ui/icons.ts`), one per resource, with the name as tooltip and label.

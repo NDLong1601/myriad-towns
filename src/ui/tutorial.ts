@@ -34,7 +34,7 @@ export function mountTutorial(
         );
       },
     },
-    { key: 'road', done: () => city.countOf('road') >= 5 },
+    { key: 'road', done: () => city.countTag('road') >= 5 },
     { key: 'hut', done: () => city.countOf('hut') + city.countOf('cottage') >= 1 },
     { key: 'food', done: () => city.countOf('berry_field') >= 1 },
     { key: 'well', done: () => city.countOf('well') >= 1 },

@@ -30,6 +30,7 @@ export interface BuildingVisual {
     | 'tower'
     | 'dock'
     | 'road'
+    | 'bridge'
     | 'park'
     | 'well'
     | 'mine'
@@ -112,4 +113,9 @@ export function loadCatalog(): Catalog {
     if (v) defs.push(...(Array.isArray(v) ? v : [v]));
   }
   return new Catalog(defs);
+}
+
+/** Roads, paved roads and bridges: anything tagged "road" carries traffic and satisfies road rules. */
+export function isRoadDef(def: BuildingDef): boolean {
+  return def.tags?.includes('road') === true;
 }

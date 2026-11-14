@@ -4,6 +4,7 @@ import { sampleTile } from '@/world/terrain';
 import type { CameraController } from '@/render/cameraController';
 import type { WorldView } from '@/render/worldView';
 import type { City } from '@/sim/city';
+import { isRoadDef } from '@/sim/catalog';
 import { t } from './i18n';
 
 export interface Point2D {
@@ -246,7 +247,7 @@ export function mountMinimap(
       );
       const d2 = (p.px - cx) * (p.px - cx) + (p.py - cy) * (p.py - cy);
       if (d2 <= (radius - 2) * (radius - 2)) {
-        if (b.def.id === 'road') roads.push(p);
+        if (isRoadDef(b.def)) roads.push(p);
         else structures.push(p);
       }
     }

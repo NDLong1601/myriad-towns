@@ -1,4 +1,4 @@
-import type { BuildingDef, Requirement } from '@/sim/catalog';
+import { type BuildingDef, type Requirement, isRoadDef } from '@/sim/catalog';
 import { type City, rectOf } from '@/sim/city';
 import { BatchCommand, DemolishCommand, type History, PlaceCommand } from '@/sim/commands';
 import { forTilesInRadius, type Rect } from '@/sim/geometry';
@@ -60,7 +60,7 @@ export class BuildTool {
     menu.onToolChange((tool) => {
       this.inspected = null;
       // Roads are drawn by dragging, so left-drag stops panning while the road tool is on.
-      view.controller.panWithLeftButton = !(tool.kind === 'build' && tool.defId === 'road');
+      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isRoadTool(tool.defId));
       this.refresh();
     });
     city.on(() => this.refresh());
@@ -104,8 +104,8 @@ export class BuildTool {
     this.down = null;
     const tile = this.pick(e);
     const tool = this.tool;
-    if (tool.kind === 'build' && tool.defId === 'road') {
-      if (start && tile) this.layRoad(start, tile);
+    if (tool.kind === 'build' && this.isRoadTool(tool.defId)) {
+      if (start && tile) this.layRoad(tool.defId, start, tile);
     } else if (!moved && tile) {
       this.click(tile);
     }
@@ -146,12 +146,17 @@ export class BuildTool {
     }
   }
 
-  private layRoad(a: { x: number; z: number }, b: { x: number; z: number }): void {
+  /** Roads, paved roads and bridges are drawn by dragging. */
+  private isRoadTool(defId: string): boolean {
+    return isRoadDef(this.city.catalog.get(defId));
+  }
+
+  private layRoad(defId: string, a: { x: number; z: number }, b: { x: number; z: number }): void {
     if (this.planning && this.plans) {
-      for (const p of roadPath(a, b)) this.plans.add('road', p.x, p.z);
+      for (const p of roadPath(a, b)) this.plans.add(defId, p.x, p.z);
       return;
     }
-    const parts = roadPath(a, b).map((p) => new PlaceCommand('road', p.x, p.z));
+    const parts = roadPath(a, b).map((p) => new PlaceCommand(defId, p.x, p.z));
     this.history.run(new BatchCommand('road', parts));
   }
 
@@ -316,7 +321,7 @@ export class BuildTool {
     }
 
     const def = this.city.catalog.get(tool.defId);
-    if (def.id === 'road' && this.down?.tile) {
+    if (isRoadDef(def) && this.down?.tile) {
       // Dragging a road: preview the whole path.
       const path = roadPath(this.down.tile, this.hover);
       const fp = path.map((p) => ({ ...p, ok: checkPlacement(this.city, def, p.x, p.z).ok }));
@@ -325,7 +330,7 @@ export class BuildTool {
       this.preview.setTiles({ ...empty, footprint: fp });
       this.panel.show(
         {
-          title: `${buildingName('road')} × ${okCount}`,
+          title: `${buildingName(def.id)} × ${okCount}`,
           sections: [
             { lines: [{ text: `${t('ui.cost')}: ${formatAmounts(scale(def.cost, okCount))}` }] },
           ],

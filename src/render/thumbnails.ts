@@ -42,10 +42,16 @@ function setup(): boolean {
 
 /**
  * A small picture of a building as a PNG data URL, rendered once and cached. Returns '' when
- * WebGL is not available. Roads are shown as a crossing so the lamp and lane marks are visible.
+ * WebGL is not available. Roads are shown as a crossing so the lamp and lane marks are visible; bridges as a straight span.
  */
 export function thumbnail(def: BuildingDef, variant?: number): string {
-  const v = variant ?? (def.visual.shape === 'road' ? ROAD_E | ROAD_W | ROAD_S | ROAD_N : 0);
+  const v =
+    variant ??
+    (def.visual.shape === 'road'
+      ? ROAD_E | ROAD_W | ROAD_S | ROAD_N
+      : def.visual.shape === 'bridge'
+        ? ROAD_E | ROAD_W
+        : 0);
   const key = `${def.id}#${v}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;

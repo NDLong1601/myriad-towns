@@ -2,9 +2,9 @@
   "stock": ["food", "wood", "stone", "ore", "metal", "goods", "energy", "knowledge", "charter"],
   "labor": ["labor", "skilled", "expert"],
   "start": {
-    "food": 80,
-    "wood": 200,
-    "stone": 120,
+    "food": 150,
+    "wood": 300,
+    "stone": 200,
     "ore": 0,
     "metal": 0,
     "goods": 0,

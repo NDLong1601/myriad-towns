@@ -6,7 +6,7 @@ import { GEN_VERSION } from '@/core/version';
 import { WorldView } from '@/render/worldView';
 import { BuildingRenderer } from '@/render/buildingRenderer';
 import { PlacementPreview } from '@/render/placementPreview';
-import { loadCatalog } from '@/sim/catalog';
+import { isRoadDef, loadCatalog } from '@/sim/catalog';
 import { City } from '@/sim/city';
 import { DemolishCommand, History, PlaceCommand } from '@/sim/commands';
 import { checkPlacement } from '@/sim/requirements';
@@ -258,12 +258,12 @@ if (params.get('audio') !== '0') audio.attach(window);
 let simRunning = false;
 city.on((e) => {
   if (simRunning) return;
-  if (e.type === 'added') audio.play(e.building.def.id === 'road' ? 'road' : 'place');
+  if (e.type === 'added') audio.play(isRoadDef(e.building.def) ? 'road' : 'place');
   else if (e.type === 'removed' && !city.get(e.building.uid)) audio.play('demolish');
 });
 history.onRejected(() => audio.play('error'));
 sim.on((e) => {
-  if (e.type === 'upgraded') audio.play('upgrade');
+  if (e.type === 'upgraded' && !isRoadDef(city.catalog.get(e.from))) audio.play('upgrade');
   else if (e.type === 'declined') audio.play('decline');
 });
 goals?.on((e) => {

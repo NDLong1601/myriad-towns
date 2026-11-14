@@ -14,7 +14,29 @@
       "color": "#7a6a55",
       "height": 0.07
     },
-    "tags": ["road"]
+    "tags": ["road"],
+    "upgrades": [
+      {
+        "to": "brick_road",
+        "when": [
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          }
+        ]
+      },
+      {
+        "to": "stone_road",
+        "when": [
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "hut",
@@ -104,6 +126,11 @@
         "field": "density",
         "amount": 2,
         "radius": 2
+      },
+      {
+        "field": "urban",
+        "amount": 1,
+        "radius": 2
       }
     ],
     "requires": [
@@ -185,6 +212,11 @@
         "field": "density",
         "amount": 3,
         "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 4,
+        "radius": 2
       }
     ],
     "requires": [
@@ -253,6 +285,11 @@
       {
         "field": "greenery",
         "amount": 1,
+        "radius": 2
+      },
+      {
+        "field": "urban",
+        "amount": 4,
         "radius": 2
       }
     ],
@@ -608,7 +645,7 @@
         "type": "terrain",
         "terrain": "stone",
         "radius": 2,
-        "min": 2
+        "min": 1
       }
     ],
     "tags": ["starter"]
