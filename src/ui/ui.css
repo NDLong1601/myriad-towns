@@ -317,10 +317,17 @@
   }
 }
 
+:root {
+  --mt-map-controls-bottom: 124px;
+  --mt-map-toggle-size: 44px;
+}
+
 .mt-heat {
   position: fixed;
-  right: 60px;
-  bottom: 124px;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(var(--mt-map-controls-bottom) + var(--mt-map-toggle-size) + 8px);
+  max-width: min(220px, 48vw);
+  z-index: 25;
   background: var(--hud-bg);
   color: var(--hud-fg);
   border-radius: 10px;
@@ -328,6 +335,7 @@
   font-size: 12px;
 }
 .mt-heat select {
+  max-width: 100%;
   border-radius: 6px;
   padding: 2px 4px;
 }
@@ -344,9 +352,8 @@
   background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725);
 }
 
-.mt-minimap-dock,
-.mt-planbar {
-  --mt-map-controls-bottom: 124px;
+.mt-heat-legend[hidden] {
+  display: none;
 }
 
 .mt-planbar {
@@ -372,19 +379,12 @@
 }
 
 @media (max-width: 600px) {
-  .mt-minimap-dock,
-  .mt-planbar {
+  :root {
     --mt-map-controls-bottom: 208px;
   }
   .mt-simbar {
     top: auto;
     bottom: 150px;
-  }
-  .mt-heat {
-    bottom: 222px;
-  }
-  .mt-heat-btn {
-    bottom: 222px;
   }
   .mt-toasts {
     bottom: 312px;
@@ -892,10 +892,12 @@
 /* Corner toggles for the heat map and the minimap. */
 .mt-heat-btn {
   position: fixed;
-  right: 12px;
-  bottom: 124px;
-  width: 40px;
-  height: 40px;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: var(--mt-map-controls-bottom);
+  display: grid;
+  place-items: center;
+  width: var(--mt-map-toggle-size);
+  height: var(--mt-map-toggle-size);
   border-radius: 50%;
   border: none;
   background: var(--hud-bg);

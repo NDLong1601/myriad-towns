@@ -25,6 +25,26 @@ test('resources form a column; minimap and heat map have corner toggles that per
   expect((await map.boundingBox())!.x).toBeLessThan(100);
   const heat = page.locator('.mt-heat');
   await expect(heat).toBeVisible();
+  const mapButton = page.locator('.mt-minimap-btn');
+  const heatButton = page.locator('.mt-heat-btn');
+
+  for (const viewport of [
+    { width: 1280, height: 760 },
+    { width: 375, height: 667 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const left = (await mapButton.boundingBox())!;
+    const right = (await heatButton.boundingBox())!;
+    const minimap = (await map.boundingBox())!;
+    const panel = (await heat.boundingBox())!;
+    expect(right.y).toBeCloseTo(left.y, 0);
+    expect(right.width).toBe(left.width);
+    expect(minimap.y + minimap.height).toBeLessThan(left.y);
+    expect(panel.y + panel.height).toBeLessThan(right.y);
+    expect(minimap.x + minimap.width).toBeLessThan(panel.x);
+    expect(panel.x + panel.width).toBeCloseTo(right.x + right.width, 0);
+  }
+  await page.setViewportSize({ width: 1280, height: 760 });
 
   // Toggles.
   await page.locator('.mt-minimap-btn').click();
@@ -38,6 +58,28 @@ test('resources form a column; minimap and heat map have corner toggles that per
   await page.locator('.mt-minimap-btn').click();
   await expect(page.locator('.mt-minimap')).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('all nine stockpile icons load with transparent backgrounds', async ({ page }) => {
+  await page.goto('./?seed=e2e-icons&r=2&speed=0&autosave=0&tut=0');
+  const ids = ['food', 'wood', 'stone', 'ore', 'metal', 'goods', 'energy', 'knowledge', 'charter'];
+  await page.evaluate((resources) => {
+    window.__MYRIAD__!.grant(Object.fromEntries(resources.map((r) => [r, 1])));
+  }, ids);
+  for (const id of ids) {
+    const icon = page.locator(`.mt-resources [data-res="${id}"] img`);
+    await expect(icon).toBeVisible();
+    const image = await icon.evaluate(async (el: HTMLImageElement) => {
+      await el.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = el.naturalWidth;
+      canvas.height = el.naturalHeight;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(el, 0, 0);
+      return { width: el.naturalWidth, alpha: ctx.getImageData(0, 0, 1, 1).data[3] };
+    });
+    expect(image).toEqual({ width: 64, alpha: 0 });
+  }
 });
 
 test('flat land by default: buildings and roads share one ground height', async ({ page }) => {

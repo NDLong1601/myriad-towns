@@ -9,15 +9,16 @@ describe('resource icons', () => {
     for (const r of [...resources.stock, ...resources.labor]) expect(hasIcon(r), r).toBe(true);
   });
 
-  it('an icon is an svg with its resource name as the label', () => {
-    expect(icon('wood')).toMatch(/^<svg[^>]*aria-label="[^"]+"/);
+  it('labels stockpile images and workforce glyphs with their resource names', () => {
+    expect(icon('wood')).toMatch(/^<img[^>]*icons\/resources\/wood\.webp" alt="[^"]+"/);
+    expect(icon('labor')).toMatch(/^<svg[^>]*aria-label="[^"]+"/);
   });
 
   it('amounts show every resource with its number', () => {
     const html = amountsHtml({ wood: 6, stone: 8 }, '+');
     expect(html).toContain('+6');
     expect(html).toContain('+8');
-    expect(html.match(/<svg/g)).toHaveLength(2);
+    expect(html.match(/<img/g)).toHaveLength(2);
   });
 });
 

@@ -1,7 +1,7 @@
 .mt-minimap-dock {
   position: fixed;
   left: max(12px, env(safe-area-inset-left));
-  bottom: var(--mt-map-controls-bottom, 124px);
+  bottom: var(--mt-map-controls-bottom);
   display: grid;
   justify-items: start;
   gap: 8px;
@@ -10,7 +10,7 @@
 }
 
 .mt-minimap {
-  width: clamp(104px, 23vh, 160px);
+  width: clamp(88px, 23dvh, 160px);
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
@@ -29,15 +29,15 @@
 
 @media (max-width: 600px) {
   .mt-minimap {
-    width: 120px;
+    width: clamp(88px, 20dvh, 120px);
   }
 }
 
 .mt-minimap-btn {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: var(--mt-map-toggle-size);
+  height: var(--mt-map-toggle-size);
   border-radius: 50%;
   border: none;
   background: var(--hud-bg, rgb(255 255 255 / 0.82));

@@ -6,7 +6,7 @@
 
 ## Goal
 
-Give every chapter a viable production route, expand the build catalog, and show how the HUD could grow.
+Give every chapter a viable production route, expand the build catalog, and improve map controls within the existing HUD.
 
 ## Context to read first
 
@@ -19,9 +19,9 @@ Give every chapter a viable production route, expand the build catalog, and show
 - `scripts/validate-data.ts`
 - `src/sim/{requirements,goals}.ts`
 - `src/render/{buildingModels,buildingRenderer,facilityTraffic}.ts`, `src/main.ts`
-- `src/ui/{buildMenu,encyclopedia,goalsPanel,i18n,minimap,resourceBar}.ts`, `src/ui/{minimap,ui}.css`
-- `tests/unit/{economy,progression,simulation,facilityTraffic}.test.ts`, `tests/e2e/{economy,minimap}.spec.ts`
-- This spec. Approval previews are delivered separately from the game.
+- `src/ui/{buildMenu,encyclopedia,goalsPanel,heatmapControls,i18n,icons,minimap,resourceBar}.ts`, `src/ui/{minimap,ui}.css`
+- `tests/unit/ui/detail.test.ts`, `tests/unit/{economy,progression,simulation,facilityTraffic}.test.ts`, `tests/e2e/{economy,layout,minimap,polish}.spec.ts`
+- `public/icons/resources/*.webp`, `CREDITS.md` and this spec.
 
 ## Contracts used
 
@@ -33,7 +33,7 @@ Building data tags, stock and workforce rates, city placement checks, fields, ci
 2. Allow direct construction of dirt roads and wooden bridges. Upgrade surfaces in place when neighboring infrastructure qualifies.
 3. Add varied footprints, neighborhood services, tourism, planting and transport facilities. Show trains on connected rail, boats on water and aircraft at airfields.
 4. Adjust production and consumption rates, and validate the resources required by chapter objectives.
-5. Anchor the minimap and controls within the viewport. Provide two HUD designs and a resource icon sheet for review.
+5. Align the minimap and heat map with their corner controls using the existing HUD layout and palette. Integrate the approved nine resource icons with transparent backgrounds.
 
 ## Non-functional requirements
 
@@ -49,7 +49,7 @@ Building data tags, stock and workforce rates, city placement checks, fields, ci
 
 ## Out of scope
 
-- HUD replacement and resource icon integration before design review.
+- Replacement of the HUD layout or palette.
 - Inter-town cargo accounting and route scheduling for the new transport modes.
 
 ## Result
@@ -58,5 +58,5 @@ Building data tags, stock and workforce rates, city placement checks, fields, ci
 - Dirt streets pave to stone with local water and urban coverage, then to brick when commerce and urban coverage increase. Wooden bridges can upgrade to stone. Old save IDs still resolve.
 - Added distinct track, runway and flower-garden geometry. Railway, fishing and aviation facilities spawn local animated vehicles. Tests cover connected track, water routes, origin shifts and pause controls.
 - Adjusted farming, fishing, bakery, gravel and trading-post rates. Data validation now checks chapter producer availability, stock and one-time cost references, and replacement footprint sizes.
-- Aligned the minimap toggle and planning bar. Provided two interactive HUD concepts and a nine-icon resource concept sheet for owner review.
-- Verified with `npm run check`, `npm run format:check`, and `npm run test:e2e -- --workers=1` (36 browser tests).
+- Following design review, kept the existing HUD and palette. Aligned the minimap and heat-map toggles and placed their panels above them. Integrated nine approved transparent WebP stockpile icons.
+- Verified with `npm run check`, `npm run format:check`, and `npm run test:e2e -- --workers=1` (including responsive map controls and transparent stockpile images).
