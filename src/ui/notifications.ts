@@ -24,7 +24,7 @@ export function mountNotifications(
     pois?: PoiStore | undefined;
     towns?: TownStore | undefined;
   } = {},
-): void {
+): (text: string, cls?: string) => void {
   const el = document.createElement('div');
   el.className = 'mt-toasts';
   el.setAttribute('aria-live', 'polite');
@@ -145,4 +145,7 @@ export function mountNotifications(
     while (el.children.length > MAX_TOASTS) el.lastElementChild?.remove();
     setTimeout(() => item.remove(), LIFETIME_MS);
   }
+
+  // Free-form messages (saves, errors).
+  return (text, cls = 'good') => plain(text, cls);
 }

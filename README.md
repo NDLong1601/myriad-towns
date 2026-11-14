@@ -3,7 +3,7 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M4** (tiến trình). Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox**. Công trình theo biome, di tích thưởng khi khám phá. **Nhiều thị trấn**: Toà thị chính lập thị trấn mới (cần Hiến chương), lãnh thổ lớn dần theo dân số, thị trấn ở xa camera chỉ chạy tóm tắt cho nhẹ. Có hướng dẫn cho người mới.
+> Trạng thái: **M5** (lưu và cài đặt). Lưu nhiều ván trong trình duyệt, tự lưu, xuất/nhập file `.mtsave`, tải lại trang là chơi tiếp; menu Cài đặt (đồ hoạ, tầm nhìn, ngôn ngữ). Trước đó (M4): Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox**. Công trình theo biome, di tích thưởng khi khám phá. **Nhiều thị trấn**: Toà thị chính lập thị trấn mới (cần Hiến chương), lãnh thổ lớn dần theo dân số, thị trấn ở xa camera chỉ chạy tóm tắt cho nhẹ. Có hướng dẫn cho người mới.
 
 ## Điều khiển
 
@@ -21,6 +21,7 @@ những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) 
 | X / Esc / Ctrl+Z / Ctrl+Y             | Phá / huỷ / hoàn tác / làm lại       |
 | Bấm vào công trình                    | Xem trạng thái và "Vì sao?"          |
 | M                                     | Bật/tắt bản đồ nhỏ                   |
+| Ctrl+S                                | Lưu ván                              |
 
 ## Chạy trên máy (Windows / macOS / Linux)
 

@@ -65,11 +65,15 @@ export function readSetup(params: URLSearchParams): GameSetup {
 }
 
 /** The new-game dialog. Starting reloads the page with the chosen seed and mode in the URL. */
-export function showNewGame(parent: HTMLElement, current: { seed: string }): void {
+export function showNewGame(
+  parent: HTMLElement,
+  current: { seed: string; continueSlot?: { name: string; url: string } | undefined },
+): void {
   const el = document.createElement('div');
   el.className = 'mt-newgame';
   el.innerHTML = `<form class="mt-newgame-card" role="dialog" aria-modal="true" aria-labelledby="mt-ng-title">
     <h2 id="mt-ng-title">Myriad Towns · ${t('ui.newGame')}</h2>
+    ${current.continueSlot ? `<a class="mt-continue" href="${current.continueSlot.url}">▶ ${t('save.continue', { name: current.continueSlot.name.replace(/[<>&"]/g, '') })}</a>` : ''}
     <fieldset class="mt-modes">
       <label><input type="radio" name="mode" value="goals" checked><b>${t('mode.goals')}</b><small>${t('mode.goalsHint')}</small></label>
       <label><input type="radio" name="mode" value="sandbox"><b>${t('mode.sandbox')}</b><small>${t('mode.sandboxHint')}</small></label>
@@ -104,7 +108,7 @@ export function showNewGame(parent: HTMLElement, current: { seed: string }): voi
     const mode = String(fd.get('mode'));
     q.set('seed', String(fd.get('seed') || 'myriad'));
     q.set('mode', mode);
-    for (const k of ['unlock', 'free', 'nodecline', 'sandbox', 'tut']) q.delete(k);
+    for (const k of ['unlock', 'free', 'nodecline', 'sandbox', 'tut', 'load']) q.delete(k);
     if (fd.get('tut')) q.set('tut', '1');
     if (mode === 'sandbox') {
       for (const k of ['unlock', 'free', 'nodecline']) q.set(k, fd.get(k) ? '1' : '0');

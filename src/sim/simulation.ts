@@ -173,6 +173,26 @@ export class Simulation {
     return out;
   }
 
+  /** Per-building state for saves: [uid, flags (1 staffed, 2 supplied), unmetTicks, warnedAt]. */
+  exportStates(): number[][] {
+    this.refreshOrder();
+    return this.byUid.map((uid) => {
+      const s = this.state.get(uid) as BuildingState;
+      return [uid, (s.staffed ? 1 : 0) | (s.supplied ? 2 : 0), s.unmetTicks, s.warnedAt];
+    });
+  }
+
+  /** Restores one building's state (after the building itself was re-added). */
+  importState(uid: number, flags: number, unmetTicks: number, warnedAt: number): void {
+    this.state.set(uid, {
+      staffed: (flags & 1) !== 0,
+      supplied: (flags & 2) !== 0,
+      shortages: [],
+      unmetTicks,
+      warnedAt,
+    });
+  }
+
   /** Towns currently simulated as a summary. */
   dormantTowns(): number[] {
     return [...this.dormant.keys()];

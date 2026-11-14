@@ -88,6 +88,16 @@ export class PoiStore {
     return this.explored.size;
   }
 
+  /** Explored keys, for saves. */
+  exploredKeys(): string[] {
+    return [...this.explored].sort();
+  }
+
+  /** Restores explored ruins without paying their rewards again (load a save before buildings). */
+  restoreExplored(keys: readonly string[]): void {
+    this.explored = new Set(keys);
+  }
+
   isExplored(key: string): boolean {
     return this.explored.has(key);
   }

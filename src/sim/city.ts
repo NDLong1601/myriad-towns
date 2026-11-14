@@ -143,6 +143,15 @@ export class City {
     return best <= maxDistance ? best : Infinity;
   }
 
+  /** Next uid to hand out (saved, so uids never repeat after a load). */
+  get nextUidValue(): number {
+    return this.nextUid;
+  }
+
+  _setNextUid(n: number): void {
+    this.nextUid = Math.max(this.nextUid, n);
+  }
+
   canAfford(cost: Amounts): boolean {
     if (this.freeBuild) return true;
     return Object.entries(cost).every(([r, n]) => (this.stock[r] ?? 0) >= n);

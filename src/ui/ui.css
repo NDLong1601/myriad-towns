@@ -574,3 +574,107 @@
     --panel-bg: #1c2629;
   }
 }
+
+/* ---- M5: save / load, settings ---- */
+.mt-left-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mt-save-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.mt-save-row input {
+  font: inherit;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgb(127 127 127 / 0.4);
+  background: transparent;
+  color: inherit;
+}
+.mt-newgame .mt-save-row .mt-primary {
+  width: auto;
+}
+.mt-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(50vh, 360px);
+  overflow-y: auto;
+}
+.mt-slots li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border-top: 1px solid rgb(127 127 127 / 0.2);
+}
+.mt-slots li.current b {
+  color: #2f80ed;
+}
+.mt-slots li.bad {
+  color: #c0392b;
+}
+.mt-slots small {
+  display: block;
+  opacity: 0.7;
+}
+.mt-slots em {
+  font-style: normal;
+  opacity: 0.7;
+}
+.mt-slots span {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.mt-saves button,
+.mt-settings button,
+.mt-file {
+  font: inherit;
+  font-size: 13px;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: rgb(127 127 127 / 0.18);
+  color: inherit;
+  cursor: pointer;
+}
+.mt-settings label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+.mt-settings label.mt-check {
+  justify-content: flex-start;
+}
+.mt-settings select,
+.mt-settings input[type='range'] {
+  font: inherit;
+  min-width: 140px;
+}
+.mt-continue {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: rgb(47 128 237 / 0.12);
+  color: #2f80ed;
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (max-width: 480px) {
+  .mt-slots li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

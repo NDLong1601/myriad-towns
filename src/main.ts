@@ -33,7 +33,13 @@ import { PoiRenderer } from '@/render/poiRenderer';
 import { Goals } from '@/sim/goals';
 import { PoiStore } from '@/sim/poi';
 import { applySandbox, mountGoalsPanel, mountSandboxPanel } from '@/ui/goalsPanel';
-import { markTutorialDone, readSetup, showNewGame } from '@/ui/newGame';
+import { type GameSetup, markTutorialDone, readSetup, showNewGame } from '@/ui/newGame';
+import { decodeSave } from '@/io/codec';
+import { type SaveData, applySave } from '@/io/save';
+import { getSlot, listSlots, storageAvailable } from '@/io/store';
+import { SaveSession, showSaveMenu, urlForSlot } from '@/ui/saveMenu';
+import { showSettings } from '@/ui/settingsMenu';
+import { loadSettings } from '@/ui/settingsStore';
 import { TownStore } from '@/sim/towns';
 import { TerritoryRenderer } from '@/render/territoryRenderer';
 import { mountTownsPanel } from '@/ui/townsPanel';
@@ -103,6 +109,9 @@ interface DebugApi {
   /** Re-evaluates which towns sleep, as if the camera were at (x, z). */
   updateTiers(): void;
   tutorialStep(): string | null;
+  /** Deterministic state hash (saves round-trip to the same value). */
+  hash(): number;
+  save(): Promise<boolean>;
   explored(): number;
   poisNear(x: number, z: number): { x: number; z: number; kind: string; explored: boolean }[];
 }
@@ -121,7 +130,22 @@ const hud = document.getElementById('hud');
 if (!app || !hud) throw new Error('index.html is missing #app or #hud');
 
 const params = new URLSearchParams(window.location.search);
-const seedText = params.get('seed') ?? 'myriad';
+const settings = loadSettings();
+// ?load=<slot> continues a saved game: its seed and mode come from the save.
+const loadId = params.get('load');
+let loaded: SaveData | undefined;
+let loadError = false;
+if (loadId && storageAvailable()) {
+  try {
+    const rec = await getSlot(loadId);
+    if (rec) loaded = await decodeSave(rec.bytes);
+    else loadError = true;
+  } catch (e) {
+    console.warn('could not load save', e);
+    loadError = true;
+  }
+}
+const seedText = loaded?.meta.seed ?? params.get('seed') ?? 'myriad';
 const seed = seedFromString(seedText);
 const num = (name: string, fallback: number): number => {
   const v = Number(params.get(name));
@@ -129,11 +153,16 @@ const num = (name: string, fallback: number): number => {
 };
 const small =
   window.matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) < 600;
-const viewRadius = Math.max(2, Math.min(10, Math.round(num('r', small ? 4 : 6))));
+const viewRadius = Math.max(
+  2,
+  Math.min(10, Math.round(num('r', settings.radius ?? (small ? 4 : 6)))),
+);
 
 const terrain = new GeneratedTerrain(seed);
 const city = new City(loadCatalog(), terrain);
-const setup = readSetup(params);
+const setup: GameSetup = loaded
+  ? { mode: loaded.meta.mode, sandbox: loaded.meta.sandbox, undecided: false, tutorial: false }
+  : readSetup(params);
 const history = new History(city);
 const sim = new Simulation(city);
 const pois = new PoiStore(city, seed);
@@ -146,7 +175,7 @@ const goals = setup.mode === 'goals' ? new Goals(city, sim, pois) : undefined;
 if (goals) goals.townCount = () => towns.all().length;
 if (setup.mode === 'sandbox') {
   applySandbox(setup.sandbox, city, sim);
-  city._addStock({ charter: 3 }, 1);
+  if (!loaded) city._addStock({ charter: 3 }, 1);
 }
 const clock = new SimClock();
 const startSpeed = num('speed', 1);
@@ -158,8 +187,11 @@ const view = new WorldView(app, {
   seed,
   viewRadius,
   generator,
-  quality: qualitySettings(parsePreset(params.get('quality')) ?? 'medium', window.devicePixelRatio),
-  start: { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
+  quality: qualitySettings(
+    parsePreset(params.get('quality')) ?? settings.quality ?? 'medium',
+    window.devicePixelRatio,
+  ),
+  start: loaded?.camera ?? { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
   // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
   patchChunk: (chunk) => {
     let changed = false;
@@ -196,6 +228,9 @@ view.scene.add(
   poiView.group,
   territory.group,
 );
+// Restore a saved game now that every system and renderer is listening.
+let missingDefs: string[] = [];
+if (loaded) missingDefs = applySave({ city, sim, towns, pois, goals }, loaded).missing;
 // Warn visibly on the building itself, not only in a toast.
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
@@ -223,7 +258,7 @@ new BuildTool(
   },
 );
 const renderSimBar = mountSimBar(sim, clock, document.body);
-mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
+const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
   towns,
@@ -258,10 +293,73 @@ const newGameBtn = document.createElement('button');
 newGameBtn.type = 'button';
 newGameBtn.className = 'mt-newgame-btn';
 newGameBtn.textContent = t('ui.newGameButton');
-newGameBtn.addEventListener('click', () => showNewGame(document.body, { seed: seedText }));
+newGameBtn.addEventListener('click', () => {
+  // Keep the current game before starting another.
+  void session.save(true);
+  showNewGame(document.body, { seed: seedText });
+});
 newGameBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-left.appendChild(newGameBtn);
-if (setup.undecided) showNewGame(document.body, { seed: seedText });
+
+// Saves: this game's slot (the loaded one, or a new one on first save).
+const session = new SaveSession(
+  { city, sim, towns, pois, goals },
+  loaded?.meta ?? {
+    name: seedText,
+    mode: setup.mode,
+    seed: seedText,
+    sandbox: { ...setup.sandbox },
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  },
+  () => ({ ...view.controller.state }),
+  say,
+  loaded ? (loadId ?? undefined) : undefined,
+);
+if (settings.autosave && params.get('autosave') !== '0') session.startAutosave(120);
+if (loadError) say(t('save.loadFailed'), 'bad');
+if (loaded) say(t('save.loaded', { name: loaded.meta.name }));
+if (missingDefs.length) say(t('save.missing', { ids: missingDefs.join(', ') }), 'bad');
+if (loaded && loaded.genVersion !== GEN_VERSION) say(t('save.genVersion'), 'bad');
+
+const bar = document.createElement('div');
+bar.className = 'mt-left-buttons';
+bar.addEventListener('pointerdown', (e) => e.stopPropagation());
+const button = (label: string, title: string, onClick: () => void): void => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'mt-newgame-btn';
+  b.textContent = label;
+  b.title = title;
+  b.addEventListener('click', onClick);
+  bar.appendChild(b);
+};
+bar.appendChild(newGameBtn);
+button(`💾 ${t('save.button')}`, `${t('save.title')} (Ctrl+S)`, () =>
+  showSaveMenu(document.body, session),
+);
+button('⚙', t('settings.title'), () =>
+  showSettings(document.body, () => {
+    // Reload into this game's slot; if saving is impossible, reload as it is.
+    void session
+      .save(true)
+      .then((ok) => window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href));
+  }),
+);
+left.appendChild(bar);
+window.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
+    e.preventDefault();
+    void session.save();
+  }
+});
+if (setup.undecided) {
+  // Offer to continue the most recent game, if this browser has one.
+  const latest = storageAvailable() ? await listSlots().catch(() => []) : [];
+  showNewGame(document.body, {
+    seed: seedText,
+    continueSlot: latest[0] ? { name: latest[0].name, url: urlForSlot(latest[0].id) } : undefined,
+  });
+}
 let hudOpen = params.get('debug') === '1';
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyH' && !(e.target instanceof HTMLInputElement)) hudOpen = !hudOpen;
@@ -374,6 +472,8 @@ const api: DebugApi = {
     })),
   updateTiers,
   tutorialStep: () => tutorial?.step() ?? null,
+  hash: () => sim.hash(),
+  save: () => session.save(),
   explored: () => pois.exploredCount,
   poisNear: (x, z) => {
     const c = tileToChunk(Math.floor(x), Math.floor(z));

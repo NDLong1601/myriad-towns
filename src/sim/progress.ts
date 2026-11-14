@@ -14,6 +14,13 @@ export function packOf(defId: string): string | undefined {
   return PACK_OF.get(defId);
 }
 
+export interface ProgressSnapshot {
+  peak: number;
+  chosen: string[];
+  latched: string[];
+  announced: string[];
+}
+
 export type LockReason =
   | { key: 'req.locked'; params: { pop: number; have: number } }
   | { key: 'req.pack'; params: { pack: string } };
@@ -95,6 +102,22 @@ export class Progress {
       }
     }
     return fresh;
+  }
+
+  snapshot(): ProgressSnapshot {
+    return {
+      peak: this.peakPopulation,
+      chosen: [...this.chosen],
+      latched: [...this.latched],
+      announced: [...this.announced],
+    };
+  }
+
+  restore(s: ProgressSnapshot): void {
+    this.peakPopulation = s.peak;
+    this.chosen = new Set(s.chosen);
+    this.latched = new Set(s.latched);
+    this.announced = new Set(s.announced);
   }
 
   /** Latched ids, for saves (M5). */

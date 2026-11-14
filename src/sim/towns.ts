@@ -44,6 +44,8 @@ export class TownStore {
   /** Bumped whenever membership may change (founding or removal). */
   version = 0;
   private towns: Town[] = [];
+  /** While a save loads, buildings come back without founding towns. */
+  private restoring = false;
   private nextId = 1;
   private listeners: ((e: TownEvent) => void)[] = [];
 
@@ -136,7 +138,30 @@ export class TownStore {
     return out <= 0 ? null : { ok: false, key: 'req.territory', params: { d: Math.ceil(out) } };
   }
 
+  snapshot(): { towns: { id: number; x: number; z: number; hallUid: number }[]; nextId: number } {
+    return {
+      towns: this.towns.map((t) => ({ id: t.id, x: t.x, z: t.z, hallUid: t.hallUid })),
+      nextId: this.nextId,
+    };
+  }
+
+  /** Call before re-adding the saved buildings; `done()` afterwards recounts populations. */
+  restore(s: ReturnType<TownStore['snapshot']>): { done: () => void } {
+    this.towns = s.towns.map((t) => ({ ...t, population: 0 }));
+    this.nextId = s.nextId;
+    this.version++;
+    this.restoring = true;
+    return {
+      done: () => {
+        this.restoring = false;
+        this.updatePopulation();
+        this.emit({ type: 'changed' });
+      },
+    };
+  }
+
   private onAdded(b: PlacedBuilding): void {
+    if (this.restoring) return;
     // A replace (upgrade) re-adds the same uid: not a new town.
     if (this.towns.some((t) => t.hallUid === b.uid)) return;
     if (this.towns.length && b.def.id !== TOWN_HALL) return;
@@ -148,6 +173,7 @@ export class TownStore {
   }
 
   private onRemoved(b: PlacedBuilding): void {
+    if (this.restoring) return;
     if (this.city.get(b.uid)) return; // replaced in place, still there
     const i = this.towns.findIndex((t) => t.hallUid === b.uid);
     if (i < 0) return;

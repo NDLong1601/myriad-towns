@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "seed": "old-village",
+  "mode": "goals",
+  "name": "Làng cũ",
+  "tick": 1200,
+  "stock": { "food": 50, "wood": 120, "stone": 30 },
+  "buildings": [
+    { "uid": 1, "id": "road", "x": 0, "z": 0 },
+    { "uid": 2, "id": "road", "x": 1, "z": 0 },
+    { "uid": 3, "id": "road", "x": 2, "z": 0 },
+    { "uid": 4, "id": "hut", "x": 0, "z": 1 },
+    { "uid": 5, "id": "hut", "x": 1, "z": 1 },
+    { "uid": 7, "id": "berry_field", "x": 3, "z": 1 },
+    { "uid": 9, "id": "well", "x": 2, "z": 1 }
+  ],
+  "createdAt": 1762000000000
+}
