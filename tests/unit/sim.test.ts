@@ -32,6 +32,7 @@ function setup() {
   const city = new City(loadCatalog(), terrain);
   city.stock.wood = 1e6;
   city.stock.stone = 1e6;
+  city.progress.sandbox = true;
   const history = new History(city);
   return { terrain, city, history };
 }

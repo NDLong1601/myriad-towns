@@ -3,18 +3,23 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M2** (đặt công trình). Xây được làng với 26 loại công trình, có xem trước điều kiện và hoàn tác. Kinh tế chạy theo thời gian là M3.
+> Trạng thái: **M3** (kinh tế và mô phỏng). Làng chạy theo thời gian: sản xuất, tiêu thụ, lao động, nâng cấp và xuống cấp có cảnh báo, mở khoá theo dân số, chế độ quy hoạch, bản đồ nhiệt.
 
 ## Điều khiển
 
-| Thao tác                              | Việc                           |
-| ------------------------------------- | ------------------------------ |
-| Kéo chuột trái / WASD / phím mũi tên  | Di chuyển (giữ Shift để nhanh) |
-| Kéo chuột phải                        | Xoay và nghiêng                |
-| Q / E                                 | Xoay 90°                       |
-| R / F                                 | Nghiêng lên / xuống            |
-| Cuộn chuột                            | Zoom                           |
-| Cảm ứng: 1 ngón kéo, 2 ngón chụm/xoay | Di chuyển, zoom, xoay          |
+| Thao tác                              | Việc                                 |
+| ------------------------------------- | ------------------------------------ |
+| Kéo chuột trái / WASD / phím mũi tên  | Di chuyển (giữ Shift để nhanh)       |
+| Kéo chuột phải                        | Xoay và nghiêng                      |
+| Q / E                                 | Xoay 90°                             |
+| R / F                                 | Nghiêng lên / xuống                  |
+| Cuộn chuột                            | Zoom                                 |
+| Cảm ứng: 1 ngón kéo, 2 ngón chụm/xoay | Di chuyển, zoom, xoay                |
+| Space                                 | Tạm dừng / chạy tiếp                 |
+| 1–9, 0                                | Bật/tắt bản đồ nhiệt một trường      |
+| P                                     | Chế độ quy hoạch (bản nháp miễn phí) |
+| X / Esc / Ctrl+Z / Ctrl+Y             | Phá / huỷ / hoàn tác / làm lại       |
+| Bấm vào công trình                    | Xem trạng thái và "Vì sao?"          |
 
 ## Chạy trên máy (Windows / macOS / Linux)
 
@@ -28,6 +33,7 @@ npm run dev          # mở http://localhost:5173
 Tham số URL:
 
 - `?seed=hanoi` đổi thế giới (cùng seed luôn ra cùng thế giới)
+- `?speed=0|1|2|4` tốc độ lúc mở game, `?sandbox=1` mở khoá mọi công trình
 - `&x=1000000&z=-500` bắt đầu tại ô bất kỳ
 - `&r=4` bán kính hiển thị (chunk), giảm nếu máy yếu
 

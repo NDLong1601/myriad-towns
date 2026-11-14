@@ -59,5 +59,5 @@ UI (`src/ui/buildTool.ts`) turns pointer input into commands and shows the same 
 
 ## Milestones
 
-M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ·
+M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ✔ ·
 M4 progression and biomes · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.
