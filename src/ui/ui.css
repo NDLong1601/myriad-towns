@@ -708,3 +708,8 @@
 :root[data-palette='cvd'] .mt-slots li.bad {
   color: #d55e00;
 }
+
+/* Menu items keep their width so long costs do not overlap the next item. */
+.mt-menu .mt-item {
+  flex-shrink: 0;
+}

@@ -69,6 +69,18 @@ làm; bỏ qua được bất cứ lúc nào.
 
 ![Cùng một làng lúc trưa, hoàng hôn và nửa đêm](docs/images/day-night.jpg)
 
+### Hạ tầng, đường nâng cấp và công nghiệp
+
+- **Cầu gỗ và cầu đá** bắc qua sông hồ: đặt trên nước, phải nối với đường (cách tối đa 1 ô). Kéo chuột để làm một đoạn cầu liền.
+- **Đường nâng cấp theo khu dân cư**: đường đất ở gần nhà gỗ tự lát đá, khu đông đúc (nhà phố, biệt thự) tự lát gạch. Mức "Đô thị hoá" là một bản đồ nhiệt mới (chọn trong ô Bản đồ nhiệt). Đường đá và đường lát gạch cũng xây tay được, đều tính là đường cho mọi điều kiện.
+- **Tháp nước**: nước sạch phủ rộng hơn giếng.
+- **6 công trình công nghiệp mới**: Hố sỏi, Trạm giao thương, Cối xay gió, Nhà máy điện, Xưởng đúc và Nhà máy. Chuỗi: quặng → lò nung → xưởng đúc (kim loại), điện từ cối xay gió hoặc nhà máy điện, rồi Nhà máy làm ra nhiều hàng hoá.
+- **Dễ chơi hơn ở biome thiếu đá**: Hố sỏi xây ở bất cứ đâu và ra đá chậm; Trạm giao thương đổi lương thực lấy đá và gỗ; mỏ đá chỉ cần 1 ô đá thay vì 2; tài nguyên khởi đầu tăng (lương thực 150, gỗ 300, đá 200).
+
+![Cầu gỗ qua hồ, đường đá và đường lát gạch](docs/images/bridge.jpg)
+
+![Công trình công nghiệp mới trong menu Sản xuất](docs/images/industry-menu.jpg)
+
 ### Đường tự nối, đèn đêm và trang trí
 
 - **Đường tự nối:** đường nhìn thấy láng giềng và tự đổi hình: đoạn thẳng có vạch giữa, góc, ngã ba, ngã tư, đường cụt. Phá một ô thì các ô quanh nó đổi lại ngay.

@@ -6,6 +6,7 @@ import {
   type Catalog,
   DEMOLISH_REFUND,
   START_STOCK,
+  isRoadDef,
 } from './catalog';
 import { FieldStore } from './fields';
 import { Progress } from './progress';
@@ -66,6 +67,15 @@ export class City {
   }
 
   /** Number of placed buildings of one type. */
+  /** Buildings whose definition carries a tag (roads, bridges and paved roads share "road"). */
+  countTag(tag: string): number {
+    let n = 0;
+    for (const [id, count] of this.perDef) {
+      if (count > 0 && this.catalog.has(id) && this.catalog.get(id).tags?.includes(tag)) n += count;
+    }
+    return n;
+  }
+
   countOf(defId: string): number {
     return this.perDef.get(defId) ?? 0;
   }
@@ -133,7 +143,7 @@ export class City {
         const edge = z === z0 || z === z1;
         for (let x = x0; x <= x1; x += edge ? 1 : x1 - x0) {
           const b = this.at(x, z);
-          if (b && b.def.id === 'road') {
+          if (b && isRoadDef(b.def)) {
             const d = rectDistance(rect, { x, z, w: 1, d: 1 });
             if (d < best) best = d;
           }

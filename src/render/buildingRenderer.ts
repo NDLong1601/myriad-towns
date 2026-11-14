@@ -1,7 +1,13 @@
 import * as THREE from 'three';
+import type { BuildingDef } from '@/sim/catalog';
 import type { City, PlacedBuilding } from '@/sim/city';
 import { ROAD_E, ROAD_N, ROAD_S, ROAD_W, buildingGeometry } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
+
+/** Roads and bridges connect to each other and are drawn by variant. */
+function isRoadShape(def: BuildingDef): boolean {
+  return def.visual.shape === 'road' || def.visual.shape === 'bridge';
+}
 
 const WHITE = new THREE.Color(1, 1, 1);
 /** Abandoned buildings are drawn dark and desaturated. */
@@ -133,9 +139,11 @@ export class BuildingRenderer {
 
   /** Roads connect to roads on their four sides. */
   private roadMask(b: PlacedBuilding): number {
-    if (b.def.visual.shape !== 'road') return 0;
-    const isRoad = (x: number, z: number): boolean =>
-      this.city.at(x, z)?.def.visual.shape === 'road';
+    if (!isRoadShape(b.def)) return 0;
+    const isRoad = (x: number, z: number): boolean => {
+      const n = this.city.at(x, z);
+      return n !== undefined && isRoadShape(n.def);
+    };
     return (
       (isRoad(b.x + 1, b.z) ? ROAD_E : 0) |
       (isRoad(b.x - 1, b.z) ? ROAD_W : 0) |
@@ -146,7 +154,7 @@ export class BuildingRenderer {
 
   /** After a road appears or disappears, its road neighbours may change shape. */
   private retileAround(b: PlacedBuilding): void {
-    if (b.def.visual.shape !== 'road') return;
+    if (!isRoadShape(b.def)) return;
     for (const [dx, dz] of [
       [1, 0],
       [-1, 0],
@@ -154,7 +162,7 @@ export class BuildingRenderer {
       [0, -1],
     ] as const) {
       const n = this.city.at(b.x + dx, b.z + dz);
-      if (!n || n.def.visual.shape !== 'road') continue;
+      if (!n || !isRoadShape(n.def)) continue;
       const w = this.where.get(n.uid);
       const mask = this.roadMask(n);
       if (!w || w.batch.variant === mask) continue;
