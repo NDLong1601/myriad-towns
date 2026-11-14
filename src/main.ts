@@ -45,6 +45,7 @@ import { TerritoryRenderer } from '@/render/territoryRenderer';
 import { mountTownsPanel } from '@/ui/townsPanel';
 import { mountTutorial } from '@/ui/tutorial';
 import { t } from '@/ui/i18n';
+import { initPalette } from '@/ui/palette';
 import { AudioEngine } from '@/audio/audioEngine';
 import { ambientMix } from '@/audio/ambientMix';
 import { timeOfDay } from '@/render/dayNight';
@@ -137,6 +138,7 @@ if (!app || !hud) throw new Error('index.html is missing #app or #hud');
 
 const params = new URLSearchParams(window.location.search);
 const settings = loadSettings();
+initPalette(params.get('palette'));
 // ?load=<slot> continues a saved game: its seed and mode come from the save.
 const loadId = params.get('load');
 let loaded: SaveData | undefined;
@@ -487,6 +489,7 @@ view.onFrame((dt) => {
   poiView.update(s.x, s.z);
   buildings.update(dt);
   if (dayNightOn || fixedTime !== null) view.setTimeOfDay(fixedTime ?? timeOfDay(sim.tick));
+  buildings.setNight(view.nightness);
   if (audio.started) {
     audio.update(dt);
     ambientClock += dt;

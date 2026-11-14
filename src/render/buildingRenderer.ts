@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { City, PlacedBuilding } from '@/sim/city';
-import { buildingGeometry } from './buildingModels';
+import { ROAD_E, ROAD_N, ROAD_S, ROAD_W, buildingGeometry } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
 
 const WHITE = new THREE.Color(1, 1, 1);
@@ -25,7 +25,13 @@ export function easeOutBack(t: number): number {
 interface Batch {
   mesh: THREE.InstancedMesh;
   uids: number[];
+  defId: string;
+  /** Road connection mask (0 for everything else). */
+  variant: number;
 }
+
+/** Colour of lit windows and lamps at night. */
+const LIT_COLOR = new THREE.Color(1.0, 0.55, 0.18);
 
 /**
  * Draws all placed buildings: one InstancedMesh per building type (one draw call each),
@@ -34,6 +40,7 @@ interface Batch {
 export class BuildingRenderer {
   readonly group = new THREE.Group();
   private readonly material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  private readonly nightUniform = { value: 0 };
   private batches = new Map<string, Batch>();
   private where = new Map<number, { batch: Batch; index: number }>();
   private readonly m = new THREE.Matrix4();
@@ -52,13 +59,59 @@ export class BuildingRenderer {
     private readonly heightAt: (x: number, z: number) => number,
   ) {
     this.group.name = 'buildings';
+    this.patchMaterial();
     city.on((e) => {
-      if (e.type === 'added') this.add(e.building);
-      else if (e.type === 'removed') this.remove(e.building.uid);
-      else if (e.type === 'status') this.setTint(e.building.uid, e.active ? null : ABANDONED);
+      if (e.type === 'added') {
+        this.add(e.building);
+        this.retileAround(e.building);
+      } else if (e.type === 'removed') {
+        this.remove(e.building.uid);
+        this.retileAround(e.building);
+      } else if (e.type === 'status') this.setTint(e.building.uid, e.active ? null : ABANDONED);
     });
     for (const b of city.all()) this.add(b);
     origin.onShift(() => this.refreshAll());
+  }
+
+  /**
+   * Windows and lamps are plain vertices with a `glow` attribute; by night the shader adds
+   * a warm emissive term to them. Abandoned buildings (dark instance colour) stay unlit.
+   */
+  private patchMaterial(): void {
+    const night = this.nightUniform;
+    this.material.onBeforeCompile = (shader) => {
+      shader.uniforms.uNight = night;
+      shader.uniforms.uLit = { value: LIT_COLOR };
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nattribute float glow;\nvarying float vGlow;',
+        )
+        .replace(
+          '#include <begin_vertex>',
+          `#include <begin_vertex>
+#ifdef USE_INSTANCING_COLOR
+  vGlow = glow * step(2.0, instanceColor.r + instanceColor.g + instanceColor.b);
+#else
+  vGlow = glow;
+#endif`,
+        );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nuniform float uNight;\nuniform vec3 uLit;\nvarying float vGlow;',
+        )
+        .replace(
+          '#include <emissivemap_fragment>',
+          '#include <emissivemap_fragment>\n  totalEmissiveRadiance += uLit * vGlow * uNight * 1.3;',
+        );
+    };
+    this.material.customProgramCacheKey = () => 'buildings-night';
+  }
+
+  /** 0 by day … 1 at night: how brightly windows and lamps glow. */
+  setNight(n: number): void {
+    this.nightUniform.value = Math.min(1, Math.max(0, n));
   }
 
   /** Multiplies a building's colours (null = normal). Survives upgrades (same uid). */
@@ -69,23 +122,61 @@ export class BuildingRenderer {
     if (w) this.writeColor(w.batch, w.index, uid);
   }
 
+  /** Road connection mask a building is drawn with (0 for non-roads or unknown uids). */
+  variantOf(uid: number): number {
+    return this.where.get(uid)?.batch.variant ?? 0;
+  }
+
   get drawnCount(): number {
     return this.where.size;
   }
 
-  private batchFor(defId: string): Batch {
-    let b = this.batches.get(defId);
+  /** Roads connect to roads on their four sides. */
+  private roadMask(b: PlacedBuilding): number {
+    if (b.def.visual.shape !== 'road') return 0;
+    const isRoad = (x: number, z: number): boolean =>
+      this.city.at(x, z)?.def.visual.shape === 'road';
+    return (
+      (isRoad(b.x + 1, b.z) ? ROAD_E : 0) |
+      (isRoad(b.x - 1, b.z) ? ROAD_W : 0) |
+      (isRoad(b.x, b.z + 1) ? ROAD_S : 0) |
+      (isRoad(b.x, b.z - 1) ? ROAD_N : 0)
+    );
+  }
+
+  /** After a road appears or disappears, its road neighbours may change shape. */
+  private retileAround(b: PlacedBuilding): void {
+    if (b.def.visual.shape !== 'road') return;
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const n = this.city.at(b.x + dx, b.z + dz);
+      if (!n || n.def.visual.shape !== 'road') continue;
+      const w = this.where.get(n.uid);
+      const mask = this.roadMask(n);
+      if (!w || w.batch.variant === mask) continue;
+      this.detach(n.uid);
+      this.attach(n, mask, false);
+    }
+  }
+
+  private batchFor(defId: string, variant: number): Batch {
+    const key = `${defId}#${variant}`;
+    let b = this.batches.get(key);
     if (!b) {
-      b = { mesh: this.makeMesh(defId, 64), uids: [] };
-      this.batches.set(defId, b);
+      b = { mesh: this.makeMesh(defId, variant, 64), uids: [], defId, variant };
+      this.batches.set(key, b);
       this.group.add(b.mesh);
     }
     return b;
   }
 
-  private makeMesh(defId: string, capacity: number): THREE.InstancedMesh {
+  private makeMesh(defId: string, variant: number, capacity: number): THREE.InstancedMesh {
     const mesh = new THREE.InstancedMesh(
-      buildingGeometry(this.city.catalog.get(defId)),
+      buildingGeometry(this.city.catalog.get(defId), variant),
       this.material,
       capacity,
     );
@@ -97,18 +188,22 @@ export class BuildingRenderer {
     mesh.castShadow = defId !== 'road';
     mesh.receiveShadow = true;
     mesh.frustumCulled = false; // instances span the whole map; bounding volumes are not updated
-    mesh.name = `buildings:${defId}`;
+    mesh.name = `buildings:${defId}:${variant}`;
     return mesh;
   }
 
   private add(b: PlacedBuilding): void {
-    const batch = this.batchFor(b.def.id);
-    if (batch.uids.length >= batch.mesh.instanceMatrix.count) this.grow(b.def.id, batch);
+    this.attach(b, this.roadMask(b), true);
+  }
+
+  private attach(b: PlacedBuilding, variant: number, pop: boolean): void {
+    const batch = this.batchFor(b.def.id, variant);
+    if (batch.uids.length >= batch.mesh.instanceMatrix.count) this.grow(batch);
     const index = batch.uids.length;
     batch.uids.push(b.uid);
     batch.mesh.count = batch.uids.length;
     this.where.set(b.uid, { batch, index });
-    if (this.animate && ++this.addsThisFrame <= POP_MAX_PER_FRAME) this.pops.set(b.uid, 0);
+    if (pop && this.animate && ++this.addsThisFrame <= POP_MAX_PER_FRAME) this.pops.set(b.uid, 0);
     this.writeMatrix(batch, index, b);
     this.writeColor(batch, index, b.uid);
   }
@@ -119,6 +214,10 @@ export class BuildingRenderer {
       this.tints.delete(uid);
       this.pops.delete(uid);
     }
+    this.detach(uid);
+  }
+
+  private detach(uid: number): void {
     const w = this.where.get(uid);
     if (!w) return;
     const { batch, index } = w;
@@ -140,9 +239,9 @@ export class BuildingRenderer {
     this.where.delete(uid);
   }
 
-  private grow(defId: string, batch: Batch): void {
+  private grow(batch: Batch): void {
     const old = batch.mesh;
-    const next = this.makeMesh(defId, old.instanceMatrix.count * 2);
+    const next = this.makeMesh(batch.defId, batch.variant, old.instanceMatrix.count * 2);
     next.instanceMatrix.array.set(old.instanceMatrix.array);
     if (old.instanceColor && next.instanceColor)
       next.instanceColor.array.set(old.instanceColor.array);

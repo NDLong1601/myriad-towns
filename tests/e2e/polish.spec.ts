@@ -68,3 +68,15 @@ test('audio starts on the first click; mute is remembered', async ({ page }) => 
   await expect(page.locator('.mt-mute')).toHaveText('🔇');
   expect(errors).toEqual([]);
 });
+
+test('colourblind palette applies from the URL and toasts carry symbols', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('./?mode=sandbox&seed=e2e-cvd&speed=0&autosave=0&palette=cvd');
+  await ready(page);
+  expect(await page.evaluate(() => document.documentElement.dataset.palette)).toBe('cvd');
+  // Toasts say what happened with a symbol, not only a colour: saving gives a "good" one.
+  await page.keyboard.press('Control+s');
+  await expect(page.locator('.mt-toast.good').first()).toContainText('✔', { timeout: 30_000 });
+  expect(errors).toEqual([]);
+});

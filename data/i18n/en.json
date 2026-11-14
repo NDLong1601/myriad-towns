@@ -274,6 +274,7 @@
   "settings.dayNight": "Day and night cycle",
   "audio.mute": "Mute",
   "audio.muteShort": "Mute or unmute",
+  "settings.cvd": "Colourblind palette (blue / orange)",
   "settings.apply": "Save and apply",
   "ui.close": "Close"
 }

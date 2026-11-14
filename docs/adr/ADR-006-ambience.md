@@ -31,3 +31,16 @@ M6 is about how the game feels. It must not cost download size, frame time or de
 
 `?daynight=0` (fixed classic daylight), `?time=0..1` (fixed hour), `?audio=0`, `?anim=0`.
 The debug API has `timeOfDay(fixed?)` and `audio()`.
+
+## M6b: road auto-tiling, night lights, palette
+
+- **Roads auto-tile by batching per variant.** A road's variant is the mask of its four road
+  neighbours (16 geometries, built once). `BuildingRenderer` keeps one InstancedMesh per
+  `def#variant`; when a road appears or disappears its road neighbours move to the batch for their
+  new mask. Draw calls grow by at most 16 for roads, not per tile.
+- **Night lights without a second material.** Window and lamp vertices carry a `glow` attribute;
+  the shared Lambert material is patched (`onBeforeCompile`) to add a warm emissive term scaled by a
+  `uNight` uniform. Abandoned buildings (dark instance colour) do not glow. No extra lights.
+- **Colourblind palette** is a setting (`palette: 'cvd'`, `?palette=cvd`): `data-palette` on the root
+  switches CSS colours and `previewColors()` switches the 3D placement colours. Toasts always carry a
+  symbol (✔ ▲ ✖) so meaning never rests on hue alone.

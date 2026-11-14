@@ -9,10 +9,17 @@ export interface Settings {
   volume: number;
   muted: boolean;
   dayNight: boolean;
+  palette: 'default' | 'cvd';
 }
 
 const KEY = 'mt.settings';
-const DEFAULTS: Settings = { autosave: true, volume: 0.7, muted: false, dayNight: true };
+const DEFAULTS: Settings = {
+  autosave: true,
+  volume: 0.7,
+  muted: false,
+  dayNight: true,
+  palette: 'default',
+};
 
 export function loadSettings(): Settings {
   try {
