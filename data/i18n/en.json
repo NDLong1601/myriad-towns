@@ -147,5 +147,7 @@
   "note.abandoned": "{name} was abandoned",
   "note.upgraded": "{name} upgraded to {to}",
   "note.unlocked": "Unlocked: {names}",
-  "encyclopedia.emit": "{field} +{amount} (r={r})"
+  "encyclopedia.emit": "{field} +{amount} (r={r})",
+  "minimap.label": "Minimap",
+  "minimap.toggle": "Minimap (M)"
 }

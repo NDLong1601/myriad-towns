@@ -147,5 +147,7 @@
   "note.abandoned": "{name} đã bị bỏ hoang",
   "note.upgraded": "{name} đã nâng cấp thành {to}",
   "note.unlocked": "Mở khoá: {names}",
-  "encyclopedia.emit": "{field} +{amount} (r={r})"
+  "encyclopedia.emit": "{field} +{amount} (r={r})",
+  "minimap.label": "Bản đồ nhỏ",
+  "minimap.toggle": "Bản đồ nhỏ (M)"
 }

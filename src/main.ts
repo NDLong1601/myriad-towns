@@ -15,6 +15,7 @@ import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
 import { mountEncyclopedia } from '@/ui/encyclopedia';
+import { mountMinimap } from '@/ui/minimap';
 import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
@@ -165,6 +166,7 @@ const renderSimBar = mountSimBar(sim, clock, document.body);
 mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z));
 mountHeatmapControls(heatmap, document.body);
 mountPlanBar(plans, history, document.body);
+mountMinimap(document.body, seed, view.controller, city, view);
 
 let simHud = 0;
 view.onFrame((dt) => {
