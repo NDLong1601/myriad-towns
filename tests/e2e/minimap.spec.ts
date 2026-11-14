@@ -31,18 +31,16 @@ test.describe('minimap', () => {
 
     await page.mouse.click(clickX, clickY);
 
+    // Software WebGL under parallel load can take a while to process the click.
     await expect
-      .poll(async () => {
-        const cam = await page.evaluate(() => window.__MYRIAD__!.camera());
-        return {
-          dx: cam.x - initialCam.x,
-          dz: cam.z - initialCam.z,
-        };
-      })
-      .toEqual({
-        dx: expect.any(Number),
-        dz: expect.any(Number),
-      });
+      .poll(
+        async () => {
+          const cam = await page.evaluate(() => window.__MYRIAD__!.camera());
+          return Math.hypot(cam.x - initialCam.x, cam.z - initialCam.z);
+        },
+        { timeout: 20_000 },
+      )
+      .toBeGreaterThan(10);
 
     const newCam = await page.evaluate(() => window.__MYRIAD__!.camera());
     // Click was to the East (+x) and North (-z)

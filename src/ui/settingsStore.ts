@@ -5,10 +5,14 @@ export interface Settings {
   radius?: number;
   lang?: 'vi' | 'en';
   autosave: boolean;
+  /** Master volume, 0..1. */
+  volume: number;
+  muted: boolean;
+  dayNight: boolean;
 }
 
 const KEY = 'mt.settings';
-const DEFAULTS: Settings = { autosave: true };
+const DEFAULTS: Settings = { autosave: true, volume: 0.7, muted: false, dayNight: true };
 
 export function loadSettings(): Settings {
   try {

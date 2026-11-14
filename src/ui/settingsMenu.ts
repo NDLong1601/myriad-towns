@@ -5,7 +5,12 @@ import { type Settings, loadSettings, saveSettings } from './settingsStore';
  * Settings dialog. Quality, view radius and language apply on reload, so "Apply" saves the
  * game first (the caller's `apply`) and then reloads.
  */
-export function showSettings(parent: HTMLElement, apply: () => void): void {
+export function showSettings(
+  parent: HTMLElement,
+  apply: () => void,
+  /** Live preview of the volume slider (applies without a reload). */
+  previewVolume?: (v: number) => void,
+): void {
   const s = loadSettings();
   const el = document.createElement('div');
   el.className = 'mt-newgame mt-settings';
@@ -19,6 +24,9 @@ export function showSettings(parent: HTMLElement, apply: () => void): void {
       <input type="range" name="radius" min="2" max="10" step="1" value="${s.radius ?? 5}"></label>
     <label>${t('settings.lang')}
       <select name="lang">${opt('vi', 'Tiếng Việt', s.lang ?? 'vi')}${opt('en', 'English', s.lang)}</select></label>
+    <label><span>${t('settings.volume')}: <output data-for="volume">${Math.round(s.volume * 100)}%</output></span>
+      <input type="range" name="volume" min="0" max="100" step="5" value="${Math.round(s.volume * 100)}"></label>
+    <label class="mt-check"><input type="checkbox" name="dayNight" ${s.dayNight ? 'checked' : ''}> ${t('settings.dayNight')}</label>
     <label class="mt-check"><input type="checkbox" name="autosave" ${s.autosave ? 'checked' : ''}> ${t('settings.autosave')}</label>
     <small>${t('settings.reloadHint')}</small>
     <div class="mt-save-row">
@@ -30,6 +38,12 @@ export function showSettings(parent: HTMLElement, apply: () => void): void {
   const form = el.querySelector('form') as HTMLFormElement;
   const range = form.elements.namedItem('radius') as HTMLInputElement;
   const out = form.querySelector('output') as HTMLOutputElement;
+  const vol = form.elements.namedItem('volume') as HTMLInputElement;
+  const volOut = form.querySelector('output[data-for=volume]') as HTMLOutputElement;
+  vol.addEventListener('input', () => {
+    volOut.textContent = `${vol.value}%`;
+    previewVolume?.(Number(vol.value) / 100);
+  });
   let radiusTouched = s.radius !== undefined;
   range.addEventListener('input', () => {
     radiusTouched = true;
@@ -38,9 +52,14 @@ export function showSettings(parent: HTMLElement, apply: () => void): void {
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
   el.addEventListener('keydown', (e) => {
     e.stopPropagation();
-    if (e.key === 'Escape') el.remove();
+    if (e.key === 'Escape') close();
   });
-  el.querySelector('[data-act=close]')?.addEventListener('click', () => el.remove());
+  // Closing without applying puts the previewed volume back.
+  const close = (): void => {
+    previewVolume?.(s.volume);
+    el.remove();
+  };
+  el.querySelector('[data-act=close]')?.addEventListener('click', close);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const fd = new FormData(form);
@@ -48,6 +67,9 @@ export function showSettings(parent: HTMLElement, apply: () => void): void {
     const next: Settings = {
       autosave: fd.get('autosave') !== null,
       lang: fd.get('lang') === 'en' ? 'en' : 'vi',
+      volume: Number(vol.value) / 100,
+      muted: s.muted,
+      dayNight: fd.get('dayNight') !== null,
     };
     if (q === 'low' || q === 'medium' || q === 'high') next.quality = q;
     if (radiusTouched) next.radius = Number(range.value);

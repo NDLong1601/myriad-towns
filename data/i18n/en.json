@@ -270,6 +270,10 @@
   "settings.lang": "Language",
   "settings.autosave": "Autosave every 2 minutes and when leaving",
   "settings.reloadHint": "The game is saved and reloaded to apply.",
+  "settings.volume": "Volume",
+  "settings.dayNight": "Day and night cycle",
+  "audio.mute": "Mute",
+  "audio.muteShort": "Mute or unmute",
   "settings.apply": "Save and apply",
   "ui.close": "Close"
 }

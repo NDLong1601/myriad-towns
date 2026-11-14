@@ -98,6 +98,7 @@ export class History {
   private done: Command[] = [];
   private undone: Command[] = [];
   private listeners: (() => void)[] = [];
+  private rejectListeners: ((cmd: Command) => void)[] = [];
 
   constructor(
     private readonly city: City,
@@ -105,7 +106,10 @@ export class History {
   ) {}
 
   run(cmd: Command): boolean {
-    if (!cmd.do(this.city)) return false;
+    if (!cmd.do(this.city)) {
+      for (const l of this.rejectListeners) l(cmd);
+      return false;
+    }
     this.done.push(cmd);
     if (this.done.length > this.limit) this.done.shift();
     this.undone = [];
@@ -136,6 +140,11 @@ export class History {
 
   get canRedo(): boolean {
     return this.undone.length > 0;
+  }
+
+  /** Called when a command could not be done (invalid site, not enough resources). */
+  onRejected(fn: (cmd: Command) => void): void {
+    this.rejectListeners.push(fn);
   }
 
   onChange(fn: () => void): void {

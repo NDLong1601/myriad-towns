@@ -10,6 +10,7 @@ import { CameraController, type CameraState } from './cameraController';
 import { FloatingOrigin } from './floatingOrigin';
 import { AdaptiveResolution, qualitySettings, type QualitySettings } from './quality';
 import { TerrainRenderer } from './terrainRenderer';
+import { lightingAt, type Lighting } from './dayNight';
 
 const SKY = new THREE.Color('#9cc9dc');
 
@@ -37,6 +38,12 @@ export class WorldView {
   readonly chunks: ChunkManager;
   private readonly terrain: TerrainRenderer;
   private readonly sun: THREE.DirectionalLight;
+  private readonly hemi: THREE.HemisphereLight;
+  private readonly sky = SKY.clone();
+  /** Direction towards the sun; the classic fixed sun until a time of day is set. */
+  private readonly sunDir = new THREE.Vector3(60, 110, 35).normalize();
+  private lighting: Lighting | undefined;
+  private timeOfDayValue: number | null = null;
   private readonly fog: THREE.Fog;
   private readonly clock = new THREE.Clock();
   private readonly resizeObserver: ResizeObserver;
@@ -68,13 +75,14 @@ export class WorldView {
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(this.renderer.domElement);
 
-    this.scene.background = SKY;
-    this.fog = new THREE.Fog(SKY, 100, 300);
+    this.scene.background = this.sky;
+    this.fog = new THREE.Fog(this.sky, 100, 300);
     this.scene.fog = this.fog;
 
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1200);
 
-    this.scene.add(new THREE.HemisphereLight('#dceeff', '#5a6b48', 1.1));
+    this.hemi = new THREE.HemisphereLight('#dceeff', '#5a6b48', 1.1);
+    this.scene.add(this.hemi);
     this.sun = new THREE.DirectionalLight('#fff1d6', 2.0);
     this.sun.castShadow = q.shadows;
     this.sun.shadow.mapSize.set(q.shadowMapSize, q.shadowMapSize);
@@ -116,6 +124,41 @@ export class WorldView {
     this.renderer.setAnimationLoop(() => this.frame());
   }
 
+  /**
+   * Lights the scene for a time of day (0 midnight, 0.5 noon), or null for the classic fixed
+   * daylight. Cheap: only colours and one light direction change.
+   */
+  setTimeOfDay(time: number | null): void {
+    this.timeOfDayValue = time;
+    if (time === null) {
+      this.sky.copy(SKY);
+      this.sun.color.set('#fff1d6');
+      this.sun.intensity = 2.0;
+      this.hemi.color.set('#dceeff');
+      this.hemi.groundColor.set('#5a6b48');
+      this.hemi.intensity = 1.1;
+      this.sunDir.set(60, 110, 35).normalize();
+      return;
+    }
+    const l = (this.lighting = lightingAt(time, this.lighting));
+    this.sky.copy(l.sky);
+    this.sun.color.copy(l.sunColor);
+    this.sun.intensity = l.sunIntensity;
+    this.hemi.color.copy(l.hemiSky);
+    this.hemi.groundColor.copy(l.hemiGround);
+    this.hemi.intensity = l.hemiIntensity;
+    this.sunDir.copy(l.sunDir);
+  }
+
+  get timeOfDay(): number | null {
+    return this.timeOfDayValue;
+  }
+
+  /** 0 by day … 1 at midnight (0 when day/night is off). */
+  get nightness(): number {
+    return this.timeOfDayValue === null ? 0 : (this.lighting?.night ?? 0);
+  }
+
   onFrame(fn: (dt: number) => void): void {
     this.frameListeners.push(fn);
   }
@@ -131,6 +174,17 @@ export class WorldView {
     const i = localIndex(lx, lz);
     if ((chunk.flags[i] as number) & TileFlag.Water) return WATER_Y;
     return (chunk.level[i] as number) * LEVEL_HEIGHT;
+  }
+
+  /** Tile flags (water, trees…) at a world position, if its chunk is loaded. */
+  tileFlagsAt(wx: number, wz: number): number | undefined {
+    const tx = Math.floor(wx);
+    const tz = Math.floor(wz);
+    const { cx, cz } = tileToChunk(tx, tz);
+    const chunk = this.chunks.get(chunkKey(cx, cz));
+    if (!chunk) return undefined;
+    const { lx, lz } = tileToLocal(tx, tz);
+    return chunk.flags[localIndex(lx, lz)] as number;
   }
 
   /** Re-apply edits and rebuild the meshes of loaded chunks containing these tiles. */
@@ -204,7 +258,8 @@ export class WorldView {
       cam.bottom = -span;
       cam.updateProjectionMatrix();
     }
-    this.sun.position.set(t.x + 60, 110, t.z + 35);
+    const d = this.sunDir;
+    this.sun.position.set(t.x + d.x * 130, d.y * 130, t.z + d.z * 130);
     this.sun.target.position.set(t.x, 0, t.z);
 
     for (const fn of this.frameListeners) fn(dt);
