@@ -9,13 +9,32 @@ import type { BuildingDef } from '@/sim/catalog';
  */
 const cache = new Map<string, THREE.BufferGeometry>();
 
-export function buildingGeometry(def: BuildingDef): THREE.BufferGeometry {
-  let g = cache.get(def.id);
+/** Road connections: which of the four neighbours are roads. */
+export const ROAD_E = 1; // +x
+export const ROAD_W = 2; // -x
+export const ROAD_S = 4; // +z
+export const ROAD_N = 8; // -z
+
+/** Colour of a lit window or lamp; the shader scales it by the night factor. */
+const LIT = '#ffcf70';
+
+/**
+ * Geometry for a building. `variant` only matters for roads: the mask of connected
+ * neighbours, so roads auto-tile into straights, corners, junctions and dead ends.
+ */
+export function buildingGeometry(def: BuildingDef, variant = 0): THREE.BufferGeometry {
+  const key = `${def.id}#${variant}`;
+  let g = cache.get(key);
   if (!g) {
-    g = makeGeometry(def);
-    cache.set(def.id, g);
+    g = makeGeometry(def, variant);
+    cache.set(key, g);
   }
   return g;
+}
+
+/** Number of set bits in a road mask. */
+function arms(mask: number): number {
+  return (mask & 1) + ((mask >> 1) & 1) + ((mask >> 2) & 1) + ((mask >> 3) & 1);
 }
 
 function part(
@@ -24,6 +43,7 @@ function part(
   x: number,
   y: number,
   z: number,
+  glow = 0,
 ): THREE.BufferGeometry {
   const g = geo.index ? geo.toNonIndexed() : geo;
   g.translate(x, y, z);
@@ -32,6 +52,7 @@ function part(
   const colors = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) colors.set([c.r, c.g, c.b], i * 3);
   g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  g.setAttribute('glow', new THREE.BufferAttribute(new Float32Array(n).fill(glow), 1));
   g.deleteAttribute('uv');
   return g;
 }
@@ -45,8 +66,38 @@ function box(
   x: number,
   z: number,
   y = 0,
+  glow = 0,
 ): THREE.BufferGeometry {
-  return part(new THREE.BoxGeometry(w, h, d), color, x, y + h / 2, z);
+  return part(new THREE.BoxGeometry(w, h, d), color, x, y + h / 2, z, glow);
+}
+
+/**
+ * Small lit windows on the four walls of a w×d box standing on y0 with wall height h.
+ * They look dark by day and glow at night (see the shader patch in buildingRenderer).
+ */
+function windows(
+  w: number,
+  d: number,
+  cx: number,
+  cz: number,
+  y0: number,
+  h: number,
+  out: THREE.BufferGeometry[],
+): void {
+  const y = y0 + h * 0.5;
+  const size = Math.min(0.16, h * 0.28);
+  const nx = Math.max(1, Math.round(w / 0.55));
+  const nz = Math.max(1, Math.round(d / 0.55));
+  for (let i = 0; i < nx; i++) {
+    const x = cx - w / 2 + ((i + 0.5) / nx) * w;
+    for (const side of [-1, 1])
+      out.push(box(size, size, 0.03, '#6c7a8c', x, cz + (side * d) / 2, y - size / 2, 1));
+  }
+  for (let i = 0; i < nz; i++) {
+    const z = cz - d / 2 + ((i + 0.5) / nz) * d;
+    for (const side of [-1, 1])
+      out.push(box(0.03, size, size, '#6c7a8c', cx + (side * w) / 2, z, y - size / 2, 1));
+  }
 }
 
 /** Four-sided pyramid roof sitting on top of a w×d box. */
@@ -83,7 +134,7 @@ function gable(
   return part(g, color, x, y + h / 3, z);
 }
 
-function makeGeometry(def: BuildingDef): THREE.BufferGeometry {
+function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const { w, d } = def.footprint;
   const v = def.visual;
   const h = v.height ?? 0.6;
@@ -93,9 +144,29 @@ function makeGeometry(def: BuildingDef): THREE.BufferGeometry {
   const cz = d / 2;
   const parts: THREE.BufferGeometry[] = [];
   switch (v.shape) {
-    case 'road':
-      parts.push(box(1, h, 1, color, cx, cz));
+    case 'road': {
+      const half = 0.36; // the carriageway is 0.72 wide, leaving a verge on each side
+      parts.push(box(half * 2, h, half * 2, color, cx, cz));
+      const arm = (len: number, ax: number, az: number, w2: number, d2: number): void => {
+        parts.push(box(w2, h, d2, color, cx + ax * len, cz + az * len));
+      };
+      const l = (0.5 + half) / 2; // arm centre offset: spans from the centre block to the tile edge
+      if (variant & ROAD_E) arm(l, 1, 0, 0.5 - half, half * 2);
+      if (variant & ROAD_W) arm(l, -1, 0, 0.5 - half, half * 2);
+      if (variant & ROAD_S) arm(l, 0, 1, half * 2, 0.5 - half);
+      if (variant & ROAD_N) arm(l, 0, -1, half * 2, 0.5 - half);
+      const lane = shade(color, 1.25);
+      const eastWest = (variant & (ROAD_E | ROAD_W)) === (ROAD_E | ROAD_W) && arms(variant) === 2;
+      const northSouth = (variant & (ROAD_S | ROAD_N)) === (ROAD_S | ROAD_N) && arms(variant) === 2;
+      if (eastWest) parts.push(box(0.32, 0.01, 0.06, lane, cx, cz, h));
+      if (northSouth) parts.push(box(0.06, 0.01, 0.32, lane, cx, cz, h));
+      // A street lamp at junctions and dead ends.
+      if (arms(variant) >= 3 || arms(variant) === 1) {
+        parts.push(box(0.05, 0.5, 0.05, '#4a4a4a', cx + 0.3, cz + 0.3, h));
+        parts.push(box(0.12, 0.1, 0.12, LIT, cx + 0.3, cz + 0.3, h + 0.5, 1));
+      }
       break;
+    }
     case 'field': {
       parts.push(box(w * 0.94, 0.06, d * 0.94, shade(color, 0.6), cx, cz));
       const rows = Math.max(3, d * 3);
@@ -147,20 +218,27 @@ function makeGeometry(def: BuildingDef): THREE.BufferGeometry {
     case 'tall':
       parts.push(box(0.78 * w, h, 0.78 * d, color, cx, cz));
       parts.push(gable(0.8 * w, 0.35, 0.82 * d, roof, cx, cz, h));
+      windows(0.78 * w, 0.78 * d, cx, cz, 0, h, parts);
       break;
     case 'block':
       parts.push(box(0.86 * w, h * 0.75, 0.86 * d, color, cx, cz));
+      windows(0.86 * w, 0.86 * d, cx, cz, 0, h * 0.75, parts);
       parts.push(box(0.9 * w, 0.08, 0.9 * d, roof, cx, cz, h * 0.75));
       parts.push(box(0.15, h * 0.4, 0.15, shade(roof, 0.8), cx + 0.2 * w, cz - 0.2 * d, h * 0.75));
       break;
     case 'hall':
       parts.push(box(0.88 * w, h * 0.65, 0.88 * d, color, cx, cz));
       parts.push(gable(0.92 * w, h * 0.5, 0.94 * d, roof, cx, cz, h * 0.65));
+      windows(0.88 * w, 0.88 * d, cx, cz, 0, h * 0.65, parts);
       break;
     case 'house':
     default:
       parts.push(box(0.68 * w, h * 0.6, 0.68 * d, color, cx, cz));
       parts.push(pyramid(0.8 * w, h * 0.55, 0.8 * d, roof, cx, cz, h * 0.6));
+      windows(0.68 * w, 0.68 * d, cx, cz, 0, h * 0.6, parts);
+      // A little garden: hedge along one side, a flower patch at the corner.
+      parts.push(box(0.5 * w, 0.12, 0.08, '#4f8a4a', cx, cz + 0.42 * d));
+      parts.push(box(0.1, 0.06, 0.1, '#e8a0b8', cx + 0.34 * w, cz - 0.4 * d));
       break;
   }
   const merged = mergeGeometries(parts, false);

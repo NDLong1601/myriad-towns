@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { previewColors } from '@/ui/palette';
 import type { BuildingDef } from '@/sim/catalog';
 import { buildingGeometry } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
@@ -87,7 +88,7 @@ export class PlacementPreview {
     this.ghost.visible = def !== null;
     if (!def) return;
     this.ghost.geometry = buildingGeometry(def);
-    this.ghostMat.color.set(ok ? '#ffffff' : '#ff8080');
+    this.ghostMat.color.set(ok ? '#ffffff' : previewColors().ghostBad);
     this.placeGhost();
   }
 
@@ -102,7 +103,10 @@ export class PlacementPreview {
     this.fill(this.checks, t.checks, 0.03);
     this.fill(this.affects, t.affects, 0.04);
     this.fill(this.footprint, t.footprint, 0.05, (i) =>
-      this.footprint.setColorAt(i, this.c.set(t.footprint[i]?.ok ? '#5cd65c' : '#ff4d4d')),
+      this.footprint.setColorAt(
+        i,
+        this.c.set(t.footprint[i]?.ok ? previewColors().ok : previewColors().bad),
+      ),
     );
     const n = Math.min(t.markers.length, MAX_MARKERS);
     for (let i = 0; i < n; i++) {

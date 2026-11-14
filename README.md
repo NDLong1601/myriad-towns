@@ -7,7 +7,7 @@ Chơi thử: https://ndlong1601.github.io/myriad-towns/
 
 ![Một ngôi làng đang lớn: nhà lều nâng cấp thành nhà gỗ quanh giếng, ruộng dâu, bản đồ nhỏ góc phải](docs/images/hero.jpg)
 
-> Trạng thái: **M6a xong** (ngày đêm, âm thanh, hiệu ứng xây). Tiếp theo: M6b (đồ hoạ công trình, đường tự nối, bảng màu cho người mù màu). Lộ trình ở cuối trang.
+> Trạng thái: **M6 xong** (ngày đêm, âm thanh, đường tự nối, đèn đêm, bảng màu cho người mù màu). Tiếp theo: M7 (phát hành công khai, PWA). Lộ trình ở cuối trang.
 
 ## Có gì trong game
 
@@ -69,7 +69,22 @@ làm; bỏ qua được bất cứ lúc nào.
 
 ![Cùng một làng lúc trưa, hoàng hôn và nửa đêm](docs/images/day-night.jpg)
 
-![Làng về đêm](docs/images/night.jpg)
+### Đường tự nối, đèn đêm và trang trí
+
+- **Đường tự nối:** đường nhìn thấy láng giềng và tự đổi hình: đoạn thẳng có vạch giữa, góc, ngã ba, ngã tư, đường cụt. Phá một ô thì các ô quanh nó đổi lại ngay.
+- **Đèn đường** ở ngã ba, ngã tư và đầu đường cụt.
+- **Cửa sổ sáng đèn về đêm** trên nhà, toà nhà và hội trường. Công trình bị bỏ hoang thì tối om.
+- **Nhà có vườn nhỏ:** hàng rào cây và mảng hoa.
+
+![Đường tự nối, ban ngày](docs/images/roads.jpg)
+
+![Cùng khu đó về đêm: đèn đường và cửa sổ sáng](docs/images/night.jpg)
+
+### Bảng màu cho người mù màu
+
+Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.
+
+![Thông báo có ký hiệu, tông màu xanh dương](docs/images/palette.jpg)
 
 ### Chơi trên điện thoại
 
@@ -143,8 +158,8 @@ task spec trong [docs/tasks/](docs/tasks/), bắt đầu từ [\_TEMPLATE.md](do
 | M4  | Chế độ chơi, chương, gói công trình, biome, di tích, nhiều thị trấn, hướng dẫn | ✔          |
 | M5  | Lưu/tải, tự lưu, xuất/nhập file, cài đặt                                       | ✔          |
 | M6a | Ngày đêm, âm thanh tự tổng hợp, hiệu ứng xây, cài đặt âm lượng                 | ✔          |
-| M6b | Đồ hoạ công trình, đường tự nối, trang trí, bảng màu cho người mù màu          | Tiếp theo  |
-| M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      |            |
+| M6b | Đường tự nối, đèn đêm, nhà có vườn, bảng màu cho người mù màu                  | ✔          |
+| M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      | Tiếp theo  |
 
 Chi tiết kỹ thuật: [docs/architecture.md](docs/architecture.md) và các ADR trong [docs/adr](docs/adr).
 

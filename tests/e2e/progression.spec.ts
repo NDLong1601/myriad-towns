@@ -126,14 +126,20 @@ test('a town hall far away founds a second town that sleeps while the camera is 
   expect(errors).toEqual([]);
 });
 
+// Software WebGL on CI renders about one frame a second; the tutorial checks run between frames.
+const SLOW_POLL = { timeout: 30_000 };
+
 test('the tutorial advances as the player does each step, and can be skipped', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto('./?seed=e2e-tut&mode=goals&tut=1&speed=0');
   await page.waitForFunction(() => window.__MYRIAD__?.ready(), null, { timeout: 30_000 });
   const card = page.locator('.mt-tutorial');
   await expect(card).toBeVisible();
   expect(await page.evaluate(() => window.__MYRIAD__!.tutorialStep())).toBe('camera');
   await page.evaluate(() => window.__MYRIAD__!.teleport(8, 8));
-  await expect.poll(() => page.evaluate(() => window.__MYRIAD__!.tutorialStep())).toBe('road');
+  await expect
+    .poll(() => page.evaluate(() => window.__MYRIAD__!.tutorialStep()), SLOW_POLL)
+    .toBe('road');
   await page.evaluate(() => {
     const A = window.__MYRIAD__!;
     A.grant({ wood: 500, stone: 500 });
@@ -148,7 +154,9 @@ test('the tutorial advances as the player does each step, and can be skipped', a
           }
         }
   });
-  await expect.poll(() => page.evaluate(() => window.__MYRIAD__!.tutorialStep())).toBe('hut');
+  await expect
+    .poll(() => page.evaluate(() => window.__MYRIAD__!.tutorialStep()), SLOW_POLL)
+    .toBe('hut');
   await card.getByRole('button').click();
   await expect(card).toHaveCount(0);
   expect(page.url()).not.toContain('tut=1');

@@ -688,3 +688,23 @@
     display: none;
   }
 }
+
+/* Colourblind palette: blue = good, orange = bad (Okabe-Ito inspired). */
+:root[data-palette='cvd'] .mt-toast.good {
+  border-left-color: #0072b2;
+}
+:root[data-palette='cvd'] .mt-toast.warn {
+  border-left-color: #e69f00;
+}
+:root[data-palette='cvd'] .mt-toast.bad {
+  border-left-color: #d55e00;
+}
+:root[data-palette='cvd'] .mt-resources i.up {
+  color: #0072b2;
+}
+:root[data-palette='cvd'] .mt-resources i.down {
+  color: #d55e00;
+}
+:root[data-palette='cvd'] .mt-slots li.bad {
+  color: #d55e00;
+}

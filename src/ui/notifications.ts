@@ -7,6 +7,9 @@ import type { PoiStore } from '@/sim/poi';
 import { PACKS } from '@/sim/progress';
 import { buildingName, formatAmounts, t } from './i18n';
 
+/** Symbol per kind, so good and bad never differ by colour alone. */
+const ICON: Record<string, string> = { good: '✔ ', warn: '▲ ', bad: '✖ ' };
+
 const MAX_TOASTS = 4;
 const LIFETIME_MS = 6000;
 
@@ -97,7 +100,7 @@ export function mountNotifications(
     const item = document.createElement('button');
     item.type = 'button';
     item.className = `mt-toast ${cls}`;
-    item.textContent = text;
+    item.textContent = (ICON[cls] ?? '') + text;
     if (onClick) item.addEventListener('click', onClick);
     el.prepend(item);
     while (el.children.length > MAX_TOASTS) el.lastElementChild?.remove();
@@ -133,7 +136,7 @@ export function mountNotifications(
     const item = document.createElement('button');
     item.type = 'button';
     item.className = `mt-toast ${cls}`;
-    item.textContent = text;
+    item.textContent = (ICON[cls] ?? '') + text;
     const uid = 'uid' in e ? e.uid : undefined;
     if (uid !== undefined) {
       item.addEventListener('click', () => {

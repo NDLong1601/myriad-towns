@@ -274,6 +274,7 @@
   "settings.dayNight": "Chu kỳ ngày đêm",
   "audio.mute": "Tắt tiếng",
   "audio.muteShort": "Tắt/bật tiếng",
+  "settings.cvd": "Bảng màu cho người mù màu (xanh dương / cam)",
   "settings.apply": "Lưu và áp dụng",
   "ui.close": "Đóng"
 }
