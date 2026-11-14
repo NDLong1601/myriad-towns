@@ -273,3 +273,12 @@
     padding: 8px 12px;
   }
 }
+
+/* Narrow screens: the build menu spans the width, so sit above it on the right. */
+@media (max-width: 1000px) {
+  .mt-encyclopedia-btn {
+    left: auto;
+    right: 12px;
+    bottom: 132px;
+  }
+}

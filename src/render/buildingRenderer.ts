@@ -3,6 +3,12 @@ import type { City, PlacedBuilding } from '@/sim/city';
 import { buildingGeometry } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
 
+const WHITE = new THREE.Color(1, 1, 1);
+/** Abandoned buildings are drawn dark and desaturated. */
+const ABANDONED = new THREE.Color(0.45, 0.42, 0.4);
+/** Buildings with a pending decline get a warm warning tint. */
+export const WARNING_TINT = new THREE.Color(1.25, 0.85, 0.55);
+
 interface Batch {
   mesh: THREE.InstancedMesh;
   uids: number[];
@@ -18,6 +24,8 @@ export class BuildingRenderer {
   private batches = new Map<string, Batch>();
   private where = new Map<number, { batch: Batch; index: number }>();
   private readonly m = new THREE.Matrix4();
+  private readonly c = new THREE.Color();
+  private tints = new Map<number, THREE.Color>();
 
   constructor(
     private readonly city: City,
@@ -29,9 +37,18 @@ export class BuildingRenderer {
     city.on((e) => {
       if (e.type === 'added') this.add(e.building);
       else if (e.type === 'removed') this.remove(e.building.uid);
+      else if (e.type === 'status') this.setTint(e.building.uid, e.active ? null : ABANDONED);
     });
     for (const b of city.all()) this.add(b);
     origin.onShift(() => this.refreshAll());
+  }
+
+  /** Multiplies a building's colours (null = normal). Survives upgrades (same uid). */
+  setTint(uid: number, color: THREE.ColorRepresentation | null): void {
+    if (color === null) this.tints.delete(uid);
+    else this.tints.set(uid, new THREE.Color(color));
+    const w = this.where.get(uid);
+    if (w) this.writeColor(w.batch, w.index, uid);
   }
 
   get drawnCount(): number {
@@ -55,6 +72,10 @@ export class BuildingRenderer {
       capacity,
     );
     mesh.count = 0;
+    mesh.instanceColor = new THREE.InstancedBufferAttribute(
+      new Float32Array(capacity * 3).fill(1),
+      3,
+    );
     mesh.castShadow = defId !== 'road';
     mesh.receiveShadow = true;
     mesh.frustumCulled = false; // instances span the whole map; bounding volumes are not updated
@@ -70,9 +91,12 @@ export class BuildingRenderer {
     batch.mesh.count = batch.uids.length;
     this.where.set(b.uid, { batch, index });
     this.writeMatrix(batch, index, b);
+    this.writeColor(batch, index, b.uid);
   }
 
   private remove(uid: number): void {
+    // A replace (upgrade/decline) re-adds the same uid right away; keep its tint then.
+    if (!this.city.get(uid)) this.tints.delete(uid);
     const w = this.where.get(uid);
     if (!w) return;
     const { batch, index } = w;
@@ -82,6 +106,9 @@ export class BuildingRenderer {
       const lastUid = batch.uids[last] as number;
       batch.mesh.getMatrixAt(last, this.m);
       batch.mesh.setMatrixAt(index, this.m);
+      batch.mesh.getColorAt(last, this.c);
+      batch.mesh.setColorAt(index, this.c);
+      if (batch.mesh.instanceColor) batch.mesh.instanceColor.needsUpdate = true;
       batch.uids[index] = lastUid;
       this.where.set(lastUid, { batch, index });
     }
@@ -95,6 +122,8 @@ export class BuildingRenderer {
     const old = batch.mesh;
     const next = this.makeMesh(defId, old.instanceMatrix.count * 2);
     next.instanceMatrix.array.set(old.instanceMatrix.array);
+    if (old.instanceColor && next.instanceColor)
+      next.instanceColor.array.set(old.instanceColor.array);
     next.count = old.count;
     this.group.remove(old);
     old.dispose();
@@ -107,6 +136,11 @@ export class BuildingRenderer {
     this.m.makeTranslation(p.x, this.heightAt(b.x, b.z), p.z);
     batch.mesh.setMatrixAt(index, this.m);
     batch.mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  private writeColor(batch: Batch, index: number, uid: number): void {
+    batch.mesh.setColorAt(index, this.tints.get(uid) ?? WHITE);
+    if (batch.mesh.instanceColor) batch.mesh.instanceColor.needsUpdate = true;
   }
 
   private refreshAll(): void {
