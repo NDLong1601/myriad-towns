@@ -127,6 +127,10 @@ export function checkPlacement(city: City, def: BuildingDef, x: number, z: numbe
   if (occupied) site.push({ ok: false, key: 'req.occupied', params: {} });
   const lock = city.progress.lockReason(def);
   if (lock) site.push({ ok: false, key: lock.key, params: lock.params });
+  for (const rule of city.siteRules) {
+    const c = rule(def, rect);
+    if (c) site.push(c);
+  }
   for (const tag of city.catalog.placeOn(def)) {
     let ok: boolean;
     if (tag === 'flat') ok = flat;

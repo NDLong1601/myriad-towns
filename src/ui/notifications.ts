@@ -1,6 +1,8 @@
 import type { City } from '@/sim/city';
 import type { SimEvent, Simulation } from '@/sim/simulation';
 import type { Goals } from '@/sim/goals';
+import type { TownStore } from '@/sim/towns';
+import { townName } from './townsPanel';
 import type { PoiStore } from '@/sim/poi';
 import { PACKS } from '@/sim/progress';
 import { buildingName, formatAmounts, t } from './i18n';
@@ -17,7 +19,11 @@ export function mountNotifications(
   city: City,
   parent: HTMLElement,
   focus: (x: number, z: number, uid: number) => void,
-  extra: { goals?: Goals | undefined; pois?: PoiStore | undefined } = {},
+  extra: {
+    goals?: Goals | undefined;
+    pois?: PoiStore | undefined;
+    towns?: TownStore | undefined;
+  } = {},
 ): void {
   const el = document.createElement('div');
   el.className = 'mt-toasts';
@@ -71,6 +77,13 @@ export function mountNotifications(
         'good',
       );
     }
+  });
+  extra.towns?.on((e) => {
+    // The first town is founded by the first building: no toast for that.
+    if (e.type === 'founded' && e.town.id > 1)
+      plain(t('note.townFounded', { name: townName(e.town.id) }), 'good', () =>
+        focus(e.town.x, e.town.z, -1),
+      );
   });
   extra.pois?.on((e) =>
     plain(

@@ -30,11 +30,11 @@ UI (`src/ui/buildTool.ts`) turns pointer input into commands and shows the same 
 
 ## Simulation tiers
 
-| Tier     | Which chunks                          | What runs                                              |
-| -------- | ------------------------------------- | ------------------------------------------------------ |
-| Active   | towns near the camera / selected town | full 4 Hz tick: rules, upgrades, decline, fields       |
-| Dormant  | modified but far away                 | town summary only (net production/consumption) at 1 Hz |
-| Pristine | never touched                         | nothing; regenerated from the seed                     |
+| Tier     | Which chunks                           | What runs                                        |
+| -------- | -------------------------------------- | ------------------------------------------------ |
+| Active   | towns near the camera / selected town  | full 4 Hz tick: rules, upgrades, decline, fields |
+| Dormant  | towns > 96 tiles from the camera (M4b) | frozen town rates every tick, no rules (ADR-004) |
+| Pristine | never touched                          | nothing; regenerated from the seed               |
 
 ## Rendering
 
@@ -68,4 +68,4 @@ slow GPU). Shadows use PCF, not PCFSoft. Measured 2026-11-14 on Iris Xe at DPR 1
 ## Milestones
 
 M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ✔ ·
-M4a progression and biomes ✔ (ADR-004) · M4b second town, dormant tier, tutorial · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.
+M4 progression, biomes, towns, dormant tier, tutorial ✔ (ADR-004) · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.

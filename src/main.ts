@@ -33,7 +33,11 @@ import { PoiRenderer } from '@/render/poiRenderer';
 import { Goals } from '@/sim/goals';
 import { PoiStore } from '@/sim/poi';
 import { applySandbox, mountGoalsPanel, mountSandboxPanel } from '@/ui/goalsPanel';
-import { readSetup, showNewGame } from '@/ui/newGame';
+import { markTutorialDone, readSetup, showNewGame } from '@/ui/newGame';
+import { TownStore } from '@/sim/towns';
+import { TerritoryRenderer } from '@/render/territoryRenderer';
+import { mountTownsPanel } from '@/ui/townsPanel';
+import { mountTutorial } from '@/ui/tutorial';
 import { t } from '@/ui/i18n';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
@@ -88,6 +92,17 @@ interface DebugApi {
   goals(): { chapter: string | null; done: boolean[]; pending: readonly string[] | null };
   choosePack(id: string): boolean;
   skipChapter(): void;
+  towns(): {
+    id: number;
+    x: number;
+    z: number;
+    population: number;
+    radius: number;
+    dormant: boolean;
+  }[];
+  /** Re-evaluates which towns sleep, as if the camera were at (x, z). */
+  updateTiers(): void;
+  tutorialStep(): string | null;
   explored(): number;
   poisNear(x: number, z: number): { x: number; z: number; kind: string; explored: boolean }[];
 }
@@ -122,8 +137,17 @@ const setup = readSetup(params);
 const history = new History(city);
 const sim = new Simulation(city);
 const pois = new PoiStore(city, seed);
+const towns = new TownStore(city);
+towns.enforceTerritory = setup.mode === 'goals';
+// ?tiers=0 keeps every town fully simulated (for comparisons).
+const tiersOn = params.get('tiers') !== '0';
+sim.tiers = towns;
 const goals = setup.mode === 'goals' ? new Goals(city, sim, pois) : undefined;
-if (setup.mode === 'sandbox') applySandbox(setup.sandbox, city, sim);
+if (goals) goals.townCount = () => towns.all().length;
+if (setup.mode === 'sandbox') {
+  applySandbox(setup.sandbox, city, sim);
+  city._addStock({ charter: 3 }, 1);
+}
 const clock = new SimClock();
 const startSpeed = num('speed', 1);
 clock.setSpeed((SPEEDS as readonly number[]).includes(startSpeed) ? (startSpeed as Speed) : 1);
@@ -163,7 +187,15 @@ const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
 const planView = new PlanRenderer(plans, city.catalog, view.origin, surfaceY);
 const poiView = new PoiRenderer(pois, view.origin, surfaceY, viewRadius);
-view.scene.add(buildings.group, preview.group, heatmap.group, planView.group, poiView.group);
+const territory = new TerritoryRenderer(towns, view.origin, surfaceY);
+view.scene.add(
+  buildings.group,
+  preview.group,
+  heatmap.group,
+  planView.group,
+  poiView.group,
+  territory.group,
+);
 // Warn visibly on the building itself, not only in a toast.
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
@@ -194,6 +226,7 @@ const renderSimBar = mountSimBar(sim, clock, document.body);
 mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
+  towns,
 });
 
 // Left column: the HUD, then the chapter goals (or the Sandbox options).
@@ -203,6 +236,24 @@ document.body.appendChild(left);
 left.appendChild(hud);
 if (goals) mountGoalsPanel(goals, left);
 else mountSandboxPanel(setup.sandbox, city, sim, left);
+const renderTowns = mountTownsPanel(towns, sim, left, (x, z) => view.controller.teleport(x, z));
+towns.on((e) => {
+  if (e.type === 'removed') sim.setDormant(e.town.id, false);
+});
+const tutorial = setup.tutorial
+  ? mountTutorial(
+      left,
+      left.children[1] ?? null,
+      city,
+      () => view.controller.state,
+      () => {
+        markTutorialDone();
+        const q = new URLSearchParams(window.location.search);
+        q.delete('tut');
+        history_replace(q);
+      },
+    )
+  : undefined;
 const newGameBtn = document.createElement('button');
 newGameBtn.type = 'button';
 newGameBtn.className = 'mt-newgame-btn';
@@ -219,8 +270,25 @@ mountHeatmapControls(heatmap, document.body);
 mountPlanBar(plans, history, document.body);
 mountMinimap(document.body, seed, view.controller, city, view);
 
+/** Towns far from the camera sleep: a production summary instead of the full tick. */
+const DORMANT_DISTANCE = 96;
+function updateTiers(): void {
+  const c = view.controller.state;
+  for (const tw of towns.all()) {
+    const away = Math.hypot(tw.x - c.x, tw.z - c.z) - towns.radiusOf(tw);
+    sim.setDormant(tw.id, tiersOn && away > DORMANT_DISTANCE);
+  }
+  renderTowns();
+}
+let tierClock = 0;
+
 let simHud = 0;
 view.onFrame((dt) => {
+  tierClock += dt;
+  if (tierClock >= 1) {
+    tierClock = 0;
+    updateTiers();
+  }
   const n = clock.advance(dt);
   if (n > 0) {
     sim.run(n, () => performance.now());
@@ -295,6 +363,17 @@ const api: DebugApi = {
   }),
   choosePack: (id) => goals?.choose(id) ?? false,
   skipChapter: () => goals?.skip(),
+  towns: () =>
+    towns.all().map((tw) => ({
+      id: tw.id,
+      x: tw.x,
+      z: tw.z,
+      population: tw.population,
+      radius: towns.radiusOf(tw),
+      dormant: sim.isDormant(tw.id),
+    })),
+  updateTiers,
+  tutorialStep: () => tutorial?.step() ?? null,
   explored: () => pois.exploredCount,
   poisNear: (x, z) => {
     const c = tileToChunk(Math.floor(x), Math.floor(z));
@@ -345,4 +424,9 @@ view.onFrame((dt) => {
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
+function history_replace(q: URLSearchParams): void {
+  const qs = q.toString();
+  window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
 }

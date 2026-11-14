@@ -13,6 +13,27 @@ export interface GameSetup {
   sandbox: SandboxOptions;
   /** True when the URL did not choose a game yet (show the new-game dialog). */
   undecided: boolean;
+  /** Show the step-by-step tutorial (?tut=1, set by the new-game dialog). */
+  tutorial: boolean;
+}
+
+const TUTORIAL_DONE = 'mt.tutorialDone';
+
+/** Whether this browser already finished or skipped the tutorial. */
+export function tutorialDone(): boolean {
+  try {
+    return localStorage.getItem(TUTORIAL_DONE) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markTutorialDone(): void {
+  try {
+    localStorage.setItem(TUTORIAL_DONE, '1');
+  } catch {
+    // Private mode: the tutorial simply shows again next time it is asked for.
+  }
 }
 
 /**
@@ -26,6 +47,7 @@ export function readSetup(params: URLSearchParams): GameSetup {
       mode: 'sandbox',
       sandbox: { unlockAll: true, freeBuild: false, noDecline: false },
       undecided: false,
+      tutorial: false,
     };
   }
   const mode: GameMode = params.get('mode') === 'sandbox' ? 'sandbox' : 'goals';
@@ -38,6 +60,7 @@ export function readSetup(params: URLSearchParams): GameSetup {
       noDecline: flag('nodecline', false),
     },
     undecided: !params.has('mode') && !params.has('seed'),
+    tutorial: params.get('tut') === '1',
   };
 }
 
@@ -51,6 +74,7 @@ export function showNewGame(parent: HTMLElement, current: { seed: string }): voi
       <label><input type="radio" name="mode" value="goals" checked><b>${t('mode.goals')}</b><small>${t('mode.goalsHint')}</small></label>
       <label><input type="radio" name="mode" value="sandbox"><b>${t('mode.sandbox')}</b><small>${t('mode.sandboxHint')}</small></label>
     </fieldset>
+    <label class="mt-tut"><input type="checkbox" name="tut" ${tutorialDone() ? '' : 'checked'}> ${t('ui.tutorial')}</label>
     <fieldset class="mt-sb" disabled>
       <label><input type="checkbox" name="unlock" checked> ${t('sandbox.unlockAll')}</label>
       <label><input type="checkbox" name="free"> ${t('sandbox.freeBuild')}</label>
@@ -80,7 +104,8 @@ export function showNewGame(parent: HTMLElement, current: { seed: string }): voi
     const mode = String(fd.get('mode'));
     q.set('seed', String(fd.get('seed') || 'myriad'));
     q.set('mode', mode);
-    for (const k of ['unlock', 'free', 'nodecline', 'sandbox']) q.delete(k);
+    for (const k of ['unlock', 'free', 'nodecline', 'sandbox', 'tut']) q.delete(k);
+    if (fd.get('tut')) q.set('tut', '1');
     if (mode === 'sandbox') {
       for (const k of ['unlock', 'free', 'nodecline']) q.set(k, fd.get(k) ? '1' : '0');
     }

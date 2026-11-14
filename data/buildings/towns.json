@@ -1,0 +1,12 @@
+[
+  {
+    "id": "town_hall",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "charter": 1, "wood": 60, "stone": 60 },
+    "visual": { "shape": "hall", "color": "#d9cbb0", "roof": "#3f5f8a", "height": 1.1 },
+    "emits": [{ "field": "commerce", "amount": 1, "radius": 5 }],
+    "unlock": { "revealAt": 100 },
+    "tags": ["town"]
+  }
+]
