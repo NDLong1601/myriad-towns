@@ -38,12 +38,29 @@ chain, so players can plan without trial and error (a common complaint about gam
 
 ## Acceptance criteria
 
-- [ ] `npm run check` passes
-- [ ] Unit test: search + category filtering logic (pure function)
-- [ ] E2E: press B, type "giếng", one result; click Xây → panel closes and the build tool is active
+- [x] `npm run check` passes
+- [x] Unit test: search + category filtering logic (pure function)
+- [x] E2E: press B, type "giếng", one result; click Xây → panel closes and the build tool is active
 
 ## Out of scope
 
 - Live evaluation at a map position (that is the hover checklist).
 
 ## Result (filled in by the assignee)
+
+### Files changed
+
+- `src/ui/encyclopedia.ts` (new): Implemented `mountEncyclopedia(parent, catalog, buildMenu)`, pure functions `normalizeText`, `filterBuildings`, `buildUpgradedFromMap`, and `formatRequirement`.
+- `src/ui/encyclopedia.css` (new): Styles for the modal dialog with blurred backdrop, responsive single-column layout at 360px, category chip styling, building card details, and floating 📖 toggle button.
+- `src/main.ts`: Imported `mountEncyclopedia` and mounted it (2 lines added).
+- `data/i18n/vi.json`: Added `encyclopedia.*` localization keys in Vietnamese.
+- `data/i18n/en.json`: Added `encyclopedia.*` localization keys in English.
+- `tests/unit/ui/encyclopedia.test.ts` (new): 15 unit tests covering diacritics removal (including đ/Đ), search by name (with and without accents), category filtering, combined filtering, empty query, reverse upgrade chain mapping, and requirement formatting.
+- `tests/e2e/encyclopedia.spec.ts` (new): Playwright E2E tests verifying opening with key B, search filtering, build tool activation with panel close, typing "x" in search box without triggering demolish mode, opening via 📖 button, and Esc closing modal without cancelling active tool.
+- `docs/tasks/AG-004-encyclopedia.md`: Marked acceptance criteria and documented results.
+
+### Testing
+
+- `npm run format`: Prettier check clean (`npm run format:check`).
+- `npm run check`: All checks passed (eslint, typecheck, validate-data, 72 unit tests across 9 test files, and production build).
+- `npx playwright test`: All 10 Playwright E2E tests passed (smoke, world streaming & camera, debugOverlay, build tool, and encyclopedia).

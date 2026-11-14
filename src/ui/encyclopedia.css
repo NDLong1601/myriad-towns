@@ -1,0 +1,284 @@
+/* Backdrop / Modal */
+.mt-encyclopedia-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.mt-encyclopedia-backdrop[hidden] {
+  display: none;
+}
+
+.mt-encyclopedia-modal {
+  background: var(--hud-bg);
+  color: var(--hud-fg);
+  border-radius: 12px;
+  width: min(880px, calc(100vw - 32px));
+  max-height: min(85vh, 760px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.28);
+  overflow: hidden;
+  font-size: 13px;
+  border: 1px solid rgb(127 127 127 / 0.2);
+}
+
+.mt-encyclopedia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgb(127 127 127 / 0.18);
+  flex-shrink: 0;
+}
+
+.mt-encyclopedia-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mt-encyclopedia-close {
+  font: inherit;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.mt-encyclopedia-close:hover {
+  background: rgb(127 127 127 / 0.18);
+}
+
+.mt-encyclopedia-controls {
+  padding: 12px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid rgb(127 127 127 / 0.12);
+  flex-shrink: 0;
+}
+
+.mt-encyclopedia-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgb(127 127 127 / 0.3);
+  background: rgb(127 127 127 / 0.08);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.mt-encyclopedia-search:focus {
+  border-color: #2f80ed;
+}
+
+.mt-encyclopedia-categories {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+
+.mt-encyclopedia-cat {
+  font: inherit;
+  color: inherit;
+  background: rgb(127 127 127 / 0.12);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.mt-encyclopedia-cat:hover {
+  background: rgb(127 127 127 / 0.22);
+}
+
+.mt-encyclopedia-cat.active {
+  border-color: #2f80ed;
+  background: rgb(47 128 237 / 0.15);
+  font-weight: 600;
+}
+
+.mt-encyclopedia-list {
+  padding: 12px 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 12px;
+  flex: 1 1 auto;
+}
+
+.mt-encyclopedia-empty {
+  padding: 32px 16px;
+  text-align: center;
+  opacity: 0.65;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+.mt-encyclopedia-card {
+  border: 1px solid rgb(127 127 127 / 0.18);
+  border-radius: 10px;
+  padding: 12px;
+  background: rgb(127 127 127 / 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mt-encyclopedia-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgb(127 127 127 / 0.12);
+  padding-bottom: 6px;
+}
+
+.mt-encyclopedia-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mt-encyclopedia-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(127 127 127 / 0.18);
+  opacity: 0.85;
+}
+
+.mt-encyclopedia-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mt-encyclopedia-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mt-encyclopedia-label {
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.mt-encyclopedia-section-title {
+  font-weight: 600;
+  margin-top: 4px;
+  opacity: 0.85;
+}
+
+.mt-encyclopedia-items {
+  list-style: none;
+  margin: 0;
+  padding-left: 12px;
+}
+
+.mt-encyclopedia-items li::before {
+  content: '• ';
+  opacity: 0.6;
+}
+
+.mt-encyclopedia-card-footer {
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgb(127 127 127 / 0.1);
+  padding-top: 8px;
+}
+
+.mt-encyclopedia-build-btn {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #2f80ed;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.mt-encyclopedia-build-btn:hover {
+  background: #256ecc;
+}
+
+/* Launcher button beside build menu */
+.mt-encyclopedia-btn {
+  position: fixed;
+  bottom: 12px;
+  left: calc(50% + min(460px, calc(50vw - 12px)) + 8px);
+  z-index: 40;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--hud-bg);
+  color: var(--hud-fg);
+  border: 1px solid rgb(127 127 127 / 0.25);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+}
+
+.mt-encyclopedia-btn:hover {
+  background: rgb(127 127 127 / 0.22);
+}
+
+@media (max-width: 1040px) {
+  .mt-encyclopedia-btn {
+    left: auto;
+    right: 12px;
+    bottom: 84px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mt-encyclopedia-backdrop {
+    padding: 8px;
+  }
+  .mt-encyclopedia-modal {
+    width: 100%;
+    max-height: 90vh;
+  }
+  .mt-encyclopedia-list {
+    grid-template-columns: 1fr;
+    padding: 8px 12px;
+  }
+}
+
+/* Narrow screens: the build menu spans the width, so sit above it on the right. */
+@media (max-width: 1000px) {
+  .mt-encyclopedia-btn {
+    left: auto;
+    right: 12px;
+    bottom: 132px;
+  }
+}
