@@ -8,6 +8,7 @@ import { sampleTile } from '@/world/terrain';
 import { buildTerrainMesh, LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
 import { CameraController, type CameraState } from './cameraController';
 import { FloatingOrigin } from './floatingOrigin';
+import { AdaptiveResolution, qualitySettings, type QualitySettings } from './quality';
 import { TerrainRenderer } from './terrainRenderer';
 
 const SKY = new THREE.Color('#9cc9dc');
@@ -22,6 +23,8 @@ export interface WorldViewOptions {
    * Returns true if anything changed, so the mesh is rebuilt on the main thread.
    */
   patchChunk?: (chunk: ChunkData) => boolean;
+  /** Defaults to the 'medium' preset for this device. */
+  quality?: QualitySettings;
 }
 
 /** The 3D world: renderer, lights, camera, and terrain chunks that stream around the camera. */
@@ -40,6 +43,8 @@ export class WorldView {
   private frameListeners: ((dt: number) => void)[] = [];
   private readonly seed: number;
   private readonly patch: ((chunk: ChunkData) => boolean) | undefined;
+  readonly quality: QualitySettings;
+  private readonly adaptive: AdaptiveResolution | undefined;
 
   constructor(
     private readonly container: HTMLElement,
@@ -51,9 +56,16 @@ export class WorldView {
       antialias: true,
       powerPreference: 'high-performance',
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.quality = opts.quality ?? qualitySettings('medium', window.devicePixelRatio);
+    const q = this.quality;
+    // Fill rate dominates on integrated GPUs: cap the pixel ratio and adapt it at runtime.
+    this.adaptive = q.adaptive
+      ? new AdaptiveResolution(q.maxPixelRatio, { min: q.minPixelRatio, max: q.maxPixelRatio })
+      : undefined;
+    this.renderer.setPixelRatio(q.maxPixelRatio);
+    this.renderer.shadowMap.enabled = q.shadows;
+    // PCF (hardware 2x2) instead of PCFSoft: a fraction of the cost, barely visible at this scale.
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(this.renderer.domElement);
 
     this.scene.background = SKY;
@@ -64,8 +76,8 @@ export class WorldView {
 
     this.scene.add(new THREE.HemisphereLight('#dceeff', '#5a6b48', 1.1));
     this.sun = new THREE.DirectionalLight('#fff1d6', 2.0);
-    this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.castShadow = q.shadows;
+    this.sun.shadow.mapSize.set(q.shadowMapSize, q.shadowMapSize);
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.05;
     this.scene.add(this.sun, this.sun.target);
@@ -154,8 +166,18 @@ export class WorldView {
     return this.terrain.count;
   }
 
+  /** Current pixel ratio actually rendered (after adaptive resolution). */
+  get renderScale(): number {
+    return this.renderer.getPixelRatio();
+  }
+
   private frame(): void {
-    const dt = Math.min(0.1, this.clock.getDelta());
+    const raw = this.clock.getDelta();
+    if (this.adaptive?.push(raw * 1000)) {
+      this.renderer.setPixelRatio(this.adaptive.scale);
+      this.resize();
+    }
+    const dt = Math.min(0.1, raw);
     const s = this.controller.state;
 
     const ground = this.groundYAt(s.x, s.z);

@@ -48,6 +48,14 @@ UI (`src/ui/buildTool.ts`) turns pointer input into commands and shows the same 
 `SaveMeta` (seed, versions, towns, camera…) + one compressed `ChunkRec` per **modified** chunk in IndexedDB.
 `SAVE_SCHEMA_VERSION` and `GEN_VERSION` in `src/core/version.ts`; migrations in `src/io/migrations/`.
 
+## Render quality
+
+`src/render/quality.ts`: presets `low` / `medium` (default) / `high`, chosen with `?quality=`. Medium caps the pixel
+ratio at 1.5 and runs adaptive resolution (scale down when p90 frame time > 1.3× the display interval, back up after
+calm windows; the display interval is estimated from the fastest frames, so a 30 Hz-capped browser is not treated as a
+slow GPU). Shadows use PCF, not PCFSoft. Measured 2026-11-14 on Iris Xe at DPR 1.88: the game was fill-rate bound
+(full res 27 fps / p95 50 ms; at ~1.4 px ratio it reached the browser's 30 Hz cap with p95 34 ms).
+
 ## Performance budget (targets, to be measured from M1)
 
 | Metric           | Desktop mid-range          | Weak laptop / phone |
