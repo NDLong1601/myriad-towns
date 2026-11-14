@@ -23,6 +23,11 @@ export const Purpose = {
   PointsOfInterest: 7,
   Decoration: 8,
   Events: 9,
+  WarpX: 10,
+  WarpZ: 11,
+  Continent: 12,
+  Ruins: 13,
+  TreeDensity: 14,
 } as const;
 export type Purpose = (typeof Purpose)[keyof typeof Purpose];
 

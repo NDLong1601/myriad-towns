@@ -9,6 +9,19 @@ depends on, and is updated as milestones land.
 - Every chunk is generated from `(worldSeed, cx, cz)` alone (`src/core/prng.ts`), so untouched chunks need no storage.
 - Generation runs in a Web Worker and returns typed arrays by transfer (no SharedArrayBuffer in v1).
 
+### Generation pipeline (M1, `src/world/terrain.ts`)
+
+1. Domain warp (x, z) with two fBm fields.
+2. Elevation = detail fBm + low-frequency continent fBm, reshaped (flat lowlands, sharp peaks) → level 0..15.
+   Sea level 5.
+3. Rivers: ridge lines of a low-frequency noise on the warped coordinates, through land below level 12.
+4. Moisture and temperature fBm (temperature drops with height) → biome: Ocean, Beach, Temperate, Forest,
+   Steppe, Cold, Mountain, plus rare Ruins patches.
+5. Resources (stone, iron, clay, fertile soil) from a deposit noise; trees and rocks from per-tile hashes.
+
+Mesh (`src/world/terrainMesh.ts`): blocky terraces, walls only toward lower neighbours (neighbours in other
+chunks are sampled, so no seams), trees/rocks merged in. Colours are sRGB palettes converted to linear.
+
 ## Simulation tiers
 
 | Tier     | Which chunks                          | What runs                                              |
@@ -19,9 +32,9 @@ depends on, and is updated as milestones land.
 
 ## Rendering
 
-- three.js WebGLRenderer (WebGL2). Terrain: one merged mesh per chunk. Buildings: one InstancedMesh per model per
-  4×4-chunk group. One shared palette material.
-- Floating origin: integer world coordinates; the render origin shifts when the camera is > 4096 tiles away.
+- three.js WebGLRenderer (WebGL2). Terrain: one merged mesh per chunk. Trees/rocks are baked into that mesh.
+  Buildings (M2): instancing, decided by AG-002. One shared palette material.
+- Floating origin: float64 world coordinates; the render origin shifts (whole chunks) when the camera is > 1024 tiles away.
 - Load radius R = 6 chunks desktop / 4 mobile; generate at R+1; unload at R+2.
 
 ## Saves
@@ -40,5 +53,5 @@ depends on, and is updated as milestones land.
 
 ## Milestones
 
-M0 setup ✔ · M1 infinite terrain · M2 placement and adjacency rules · M3 economy and simulation ·
+M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules · M3 economy and simulation ·
 M4 progression and biomes · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.

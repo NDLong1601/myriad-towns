@@ -13,7 +13,7 @@ performance budget.
 ## Context to read first
 
 - AGENTS.md
-- `src/main.ts`, `src/render/helloScene.ts` (`createHelloScene` returns `{ renderer }`)
+- `src/main.ts` (`view.renderer` is the `THREE.WebGLRenderer`; `view.onFrame(dt => …)` runs every frame; `window.__MYRIAD__.stats()` already exposes chunk counts)
 - three.js docs: `WebGLRenderer.info` (render.calls, render.triangles, memory.geometries, memory.textures)
 
 ## Allowed to edit
@@ -31,14 +31,15 @@ performance budget.
 
 ## Contracts used
 
-- `THREE.WebGLRenderer` instance from `createHelloScene(...).renderer` (read-only).
+- `THREE.WebGLRenderer` instance `view.renderer` (read-only), `view.onFrame`, `view.chunks.stats()` (read-only).
 
 ## Functional requirements
 
 1. Export `mountDebugOverlay(renderer: THREE.WebGLRenderer, parent: HTMLElement): { toggle(): void; dispose(): void }`.
 2. F3 toggles visibility (prevent the browser default). Hidden by default. `?debug=1` in the URL shows it at start.
-3. Shows, updated twice per second: FPS (averaged), frame time ms (avg and worst of the last 0.5 s), draw calls,
-   triangles, geometries, textures, JS heap MB when `performance.memory` exists (else "n/a").
+3. Shows, updated twice per second: FPS (averaged), frame time ms (avg, p95 and worst of the last 0.5 s), draw calls,
+   triangles, geometries, textures, chunks visible/loaded/pending, avg chunk generation ms,
+   JS heap MB when `performance.memory` exists (else "n/a").
 4. Positioned bottom-left, monospace, does not capture mouse events.
 5. Labels come from `data/i18n` keys `debug.*`.
 

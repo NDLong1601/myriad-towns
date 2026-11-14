@@ -9,4 +9,4 @@ Interfaces other modules (and other agents) build against. Owned by Claude; chan
 | Save/gen versions                  | `src/core/version.ts`                   | M0    |
 | Building data                      | `data/schema/building.schema.json` (v0) | M0    |
 
-Planned: `CameraController` (M1), `PlacementPreview` and command/undo (M2), sim read store (M3), `AudioZones` (M6).
+Planned: `PlacementPreview` and command/undo (M2), sim read store (M3), `AudioZones` (M6).

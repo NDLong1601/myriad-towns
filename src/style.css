@@ -44,3 +44,13 @@ body {
 #hud strong {
   font-size: 15px;
 }
+#hud .hint {
+  opacity: 0.75;
+  font-size: 12px;
+}
+#app canvas {
+  cursor: grab;
+}
+#app canvas:active {
+  cursor: grabbing;
+}

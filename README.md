@@ -3,7 +3,18 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M0** (khung dự án). Cảnh hiện tại chỉ là một chunk 32×32 minh hoạ, chưa chơi được.
+> Trạng thái: **M1** (thế giới vô hạn). Đã đi khắp thế giới được; chưa xây công trình (M2).
+
+## Điều khiển
+
+| Thao tác                              | Việc                           |
+| ------------------------------------- | ------------------------------ |
+| Kéo chuột trái / WASD / phím mũi tên  | Di chuyển (giữ Shift để nhanh) |
+| Kéo chuột phải                        | Xoay và nghiêng                |
+| Q / E                                 | Xoay 90°                       |
+| R / F                                 | Nghiêng lên / xuống            |
+| Cuộn chuột                            | Zoom                           |
+| Cảm ứng: 1 ngón kéo, 2 ngón chụm/xoay | Di chuyển, zoom, xoay          |
 
 ## Chạy trên máy (Windows / macOS / Linux)
 
@@ -14,7 +25,11 @@ npm install          # lần đầu
 npm run dev          # mở http://localhost:5173
 ```
 
-Thêm `?seed=chu-bat-ky` vào URL để đổi thế giới, ví dụ http://localhost:5173/?seed=hanoi
+Tham số URL:
+
+- `?seed=hanoi` đổi thế giới (cùng seed luôn ra cùng thế giới)
+- `&x=1000000&z=-500` bắt đầu tại ô bất kỳ
+- `&r=4` bán kính hiển thị (chunk), giảm nếu máy yếu
 
 ## Lệnh thường dùng
 
