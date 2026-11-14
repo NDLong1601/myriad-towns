@@ -10,6 +10,7 @@ import {
 import { FieldStore } from './fields';
 import { Progress } from './progress';
 import { type Rect, rectDistance } from './geometry';
+import type { CheckResult } from './requirements';
 import { type TerrainQuery, tileKey } from './terrainQuery';
 
 export interface PlacedBuilding {
@@ -46,6 +47,8 @@ export class City {
   readonly progress: Progress;
   /** Sandbox option: placing costs nothing. */
   freeBuild = false;
+  /** Extra site checks for placement (towns add the territory rule). */
+  readonly siteRules: ((def: BuildingDef, rect: Rect) => CheckResult | null)[] = [];
   private buildings = new Map<number, PlacedBuilding>();
   private inactive = new Set<number>();
   private perDef = new Map<string, number>();

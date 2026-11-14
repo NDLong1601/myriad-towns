@@ -1,4 +1,4 @@
-# ADR-004 — Progression: modes, chapters, packs, biome buildings and ruins (M4a)
+# ADR-004 — Progression: modes, chapters, packs, biome buildings, ruins, towns (M4)
 
 - Status: accepted
 - Date: 2026-11-14
@@ -31,4 +31,32 @@
 
 - Determinism holds: no new randomness outside the seeded streams; chapters and packs depend only on actions.
 - M5 must save: explored POI keys, chapter index, pending choice, chosen packs and the sandbox flags.
-- Deferred to M4b: a second town, dormant-town simulation tier, tutorial.
+- M5 must also save the towns (centre, founding uid) and the tutorial flag stays in localStorage.
+
+## M4b: towns, the dormant tier, the tutorial
+
+- **Towns** (`src/sim/towns.ts`). The first building founds the first town at its centre. A **Town hall**
+  (`data/buildings/towns.json`) founds another one; it costs a **Charter** (a stock resource: the "town" chapter
+  rewards one, Sandbox starts with 3) and must be at least `MIN_TOWN_GAP` = 64 tiles from every other town centre.
+  The last chapter now asks for 2 towns.
+- **Territory**: radius `28 + 3·√population` around each centre, drawn as a line on the ground. In Goals mode
+  buildings must be placed inside a territory (`req.territory` says how far outside); Sandbox does not enforce it.
+  Placement rules are pluggable: `City.siteRules` lets a system add a site check without touching
+  `requirements.ts` again.
+- **Membership** is the nearest town centre, not the territory, so it only changes when a town is founded or
+  removed. The simulation caches it per building and rebuilds when `TownStore.version` changes.
+- **Dormant tier** (`Simulation.setDormant`). A town whose border is more than 96 tiles from the camera sleeps:
+  its buildings leave the per-tick lists, and its economy continues as the rates it had on its last active tick
+  (production, consumption, population, its own labour). Consumption takes at most what the stock holds, so a
+  sleeping town can run short but never drives stock negative. No rule checks run, so nothing upgrades or declines
+  while nobody watches; waking resumes from the frozen per-building state. Re-evaluated once a second; `?tiers=0`
+  turns it off.
+  - Measured (Node, 8,551 buildings in two equal towns, best of 5 × 200 ticks): both active 1.11 ms/tick, one
+    asleep 0.53–0.68 ms, both asleep 0.06 ms.
+  - Trade-off: a sleeping town's rates do not react to stock running out elsewhere; good enough for a summary
+    tier, and the town catches up with real rules the moment the camera comes back.
+- **Tutorial** (`src/ui/tutorial.ts`): seven steps in the left column (move, road, hut, food, well, inspect,
+  finish). Each finishes by doing it, steps already done are skipped, and it can be skipped at any time. The
+  new-game dialog turns it on (`?tut=1`) until this browser has finished or skipped it once.
+- Not done: the "Wilderness" expansion cost from the plan, and trade routes between towns (shared stock stands in
+  for trade for now).

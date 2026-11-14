@@ -15,7 +15,8 @@ export type Goal =
   | { type: 'count'; building: string; min: number }
   | { type: 'stock'; resource: string; min: number }
   | { type: 'production'; resource: string; min: number }
-  | { type: 'explore'; min: number };
+  | { type: 'explore'; min: number }
+  | { type: 'towns'; min: number };
 
 export interface Chapter {
   id: string;
@@ -44,6 +45,8 @@ export class Goals {
   /** Packs offered and waiting for the player's pick. */
   pending: readonly string[] | null = null;
   private busy = false;
+  /** Number of towns (set by the game once towns exist; 1 by default). */
+  townCount: () => number = () => 1;
   private listeners: ((e: GoalsEvent) => void)[] = [];
 
   constructor(
@@ -157,6 +160,8 @@ export class Goals {
         return Math.round((this.sim.flows.produced[g.resource] ?? 0) * 10) / 10;
       case 'explore':
         return this.pois.exploredCount;
+      case 'towns':
+        return this.townCount();
     }
   }
 

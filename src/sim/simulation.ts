@@ -69,6 +69,22 @@ interface Compiled {
   ruled: boolean;
 }
 
+/** Where buildings belong, for the dormant tier (TownStore implements it). */
+export interface TierSource {
+  townOfBuilding(b: PlacedBuilding): number;
+  /** Bumped whenever membership may have changed. */
+  readonly version: number;
+}
+
+/** A dormant town's economy, frozen from its last active tick and applied as a rate. */
+export interface TownSummary {
+  produced: [string, number][];
+  consumed: [string, number][];
+  population: number;
+  laborTotal: Record<string, number>;
+  laborUsed: Record<string, number>;
+}
+
 function compile(def: BuildingDef): Compiled {
   const up = Object.entries(def.upkeep ?? {});
   const pr = Object.entries(def.produces ?? {});
@@ -98,6 +114,15 @@ export class Simulation {
   noDecline = false;
   /** Duration of the last tick in ms (filled in by the caller that times it). */
   lastTickMs = 0;
+  /** Town membership for the dormant tier; without it every building is active. */
+  tiers: TierSource | undefined;
+  private tiersVersion = -1;
+  private townOfUid = new Map<number, number>();
+  private dormant = new Map<number, TownSummary>();
+  /** `order` and `byUid` without the buildings of dormant towns (what each tick visits). */
+  private runOrder: PlacedBuilding[] = [];
+  private runByUid: number[] = [];
+  private runDirty = true;
 
   constructor(readonly city: City) {
     city.on((e) => {
@@ -148,8 +173,80 @@ export class Simulation {
     return out;
   }
 
-  step(): void {
+  /** Towns currently simulated as a summary. */
+  dormantTowns(): number[] {
+    return [...this.dormant.keys()];
+  }
+
+  isDormant(town: number): boolean {
+    return this.dormant.has(town);
+  }
+
+  summaryOf(town: number): TownSummary | undefined {
+    return this.dormant.get(town);
+  }
+
+  /**
+   * Puts a town to sleep (its economy continues as a fixed rate, no rule checks) or wakes it
+   * (full simulation resumes from the per-building state it had when it fell asleep).
+   */
+  setDormant(town: number, dormant: boolean): void {
+    if (dormant === this.dormant.has(town)) return;
+    this.runDirty = true;
+    if (!dormant) {
+      this.dormant.delete(town);
+      return;
+    }
     this.refreshOrder();
+    const sum: TownSummary = {
+      produced: [],
+      consumed: [],
+      population: 0,
+      laborTotal: {},
+      laborUsed: {},
+    };
+    const prod: Record<string, number> = {};
+    const cons: Record<string, number> = {};
+    for (const b of this.order) {
+      if (this.townOfUid.get(b.uid) !== town || !this.city.isActive(b.uid)) continue;
+      const s = this.state.get(b.uid) as BuildingState;
+      const c = this.info(b.def);
+      if (b.def.housing) {
+        sum.population += b.def.housing;
+        if (s.supplied)
+          for (const [r, n] of c.laborOut) sum.laborTotal[r] = (sum.laborTotal[r] ?? 0) + n;
+      }
+      if (!s.staffed) continue;
+      for (const [r, n] of c.labor) sum.laborUsed[r] = (sum.laborUsed[r] ?? 0) + n;
+      if (!s.supplied) continue;
+      for (const [r, n] of c.inputs) cons[r] = (cons[r] ?? 0) + n;
+      for (const [r, n] of c.outputs) prod[r] = (prod[r] ?? 0) + n;
+    }
+    sum.produced = Object.entries(prod).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    sum.consumed = Object.entries(cons).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    this.dormant.set(town, sum);
+  }
+
+  private asleep(uid: number): boolean {
+    return this.dormant.size > 0 && this.dormant.has(this.townOfUid.get(uid) ?? -1);
+  }
+
+  /** Rebuilds the per-tick lists after membership or the dormant set changed. */
+  private refreshRun(): void {
+    this.refreshOrder();
+    if (!this.runDirty) return;
+    this.runDirty = false;
+    if (!this.dormant.size) {
+      this.runOrder = this.order;
+      this.runByUid = this.byUid;
+      return;
+    }
+    this.runOrder = this.order.filter((b) => !this.asleep(b.uid));
+    this.runByUid = this.byUid.filter((uid) => !this.asleep(uid));
+  }
+
+  step(): void {
+    this.refreshRun();
     this.economy();
     this.rules();
     const fresh = this.city.progress.update(this.flows.population, this.city.catalog.defs);
@@ -200,7 +297,7 @@ export class Simulation {
     for (const tier of LABOR_TIERS) free[tier] = 0;
 
     // 1. Labour comes from housing that was fed on the previous tick.
-    for (const b of this.order) {
+    for (const b of this.runOrder) {
       if (!b.def.housing || !city.isActive(b.uid)) continue;
       flows.population += b.def.housing;
       const s = this.state.get(b.uid) as BuildingState;
@@ -211,7 +308,8 @@ export class Simulation {
 
     // 2. Staff, then run, every active building in priority order (housing last).
     const stock = city.stock;
-    for (const b of this.order) {
+    // Buildings of dormant towns are not in runOrder: their towns run as a summary below.
+    for (const b of this.runOrder) {
       const s = this.state.get(b.uid) as BuildingState;
       const c = this.info(b.def);
       if (s.shortages.length) s.shortages = [];
@@ -255,6 +353,24 @@ export class Simulation {
     for (const tier of LABOR_TIERS) {
       flows.laborUsed[tier] = (flows.laborTotal[tier] ?? 0) - (free[tier] ?? 0);
     }
+    // 3. Dormant towns: their frozen rates. They keep to their own labour; consumption takes
+    // what the stock has, so a far town can run short but never drives stock negative.
+    for (const [, sum] of this.dormant) {
+      flows.population += sum.population;
+      for (const [r, n] of Object.entries(sum.laborTotal))
+        flows.laborTotal[r] = (flows.laborTotal[r] ?? 0) + n;
+      for (const [r, n] of Object.entries(sum.laborUsed))
+        flows.laborUsed[r] = (flows.laborUsed[r] ?? 0) + n;
+      for (const [r, n] of sum.consumed) {
+        const take = Math.min(stock[r] ?? 0, n * TICK_DT);
+        stock[r] = (stock[r] ?? 0) - take;
+        flows.consumed[r] = (flows.consumed[r] ?? 0) + take / TICK_DT;
+      }
+      for (const [r, n] of sum.produced) {
+        stock[r] = (stock[r] ?? 0) + n * TICK_DT;
+        flows.produced[r] = (flows.produced[r] ?? 0) + n;
+      }
+    }
     this.flows = flows;
     // Stock listeners (resource bar, menu affordability) hear about it once per game second.
     if (this.tick % TICK_HZ === 0) city._addStock({}, 1);
@@ -266,8 +382,8 @@ export class Simulation {
     const city = this.city;
     const phase = this.tick % RULE_STRIDE;
     const changes: (() => void)[] = [];
-    for (let i = phase; i < this.byUid.length; i += RULE_STRIDE) {
-      const uid = this.byUid[i] as number;
+    for (let i = phase; i < this.runByUid.length; i += RULE_STRIDE) {
+      const uid = this.runByUid[i] as number;
       const b = city.get(uid);
       const s = this.state.get(uid);
       if (!b || !s || !this.info(b.def).ruled) continue;
@@ -374,12 +490,19 @@ export class Simulation {
   // ----------------------------------------------------------------- helpers
 
   private refreshOrder(): void {
+    if (this.tiers && this.tiers.version !== this.tiersVersion) this.dirty = true;
     if (!this.dirty) return;
     this.dirty = false;
     const all = [...this.city.all()];
     for (const b of all) if (!this.state.has(b.uid)) this.state.set(b.uid, freshState());
     for (const uid of [...this.state.keys()]) if (!this.city.get(uid)) this.state.delete(uid);
     this.byUid = all.map((b) => b.uid).sort((a, b) => a - b);
+    this.runDirty = true;
+    this.townOfUid.clear();
+    if (this.tiers) {
+      this.tiersVersion = this.tiers.version;
+      for (const b of all) this.townOfUid.set(b.uid, this.tiers.townOfBuilding(b));
+    }
     const rank = (d: BuildingDef): number => {
       if (d.housing) return CATEGORY_PRIORITY.length + 1;
       const i = CATEGORY_PRIORITY.indexOf(d.category);

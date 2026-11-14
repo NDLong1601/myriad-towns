@@ -150,7 +150,7 @@ for (const p of packs) {
     packOf.set(id, p.id);
   }
 }
-const goalTypes = new Set(['population', 'count', 'stock', 'production', 'explore']);
+const goalTypes = new Set(['population', 'count', 'stock', 'production', 'explore', 'towns']);
 for (const c of chapters) {
   for (const g of c.goals) {
     if (!goalTypes.has(g.type)) errors.push(`chapter "${c.id}": unknown goal type "${g.type}"`);

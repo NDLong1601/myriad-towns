@@ -381,6 +381,41 @@
   margin-top: 4px;
   opacity: 0.75;
 }
+.mt-towns button {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 1px 0;
+}
+.mt-towns button:hover,
+.mt-towns button:focus-visible {
+  text-decoration: underline;
+}
+.mt-towns em {
+  font-style: normal;
+  opacity: 0.7;
+}
+.mt-tutorial {
+  border-left: 4px solid #2f80ed;
+}
+.mt-tutorial p {
+  margin: 0 0 6px;
+  max-width: 300px;
+  line-height: 1.35;
+}
+.mt-tutorial button {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: rgb(127 127 127 / 0.2);
+  color: inherit;
+  cursor: pointer;
+}
+.mt-tut {
+  display: block;
+  margin: 4px 0;
+}
 .mt-goals label {
   display: block;
   padding: 2px 0;

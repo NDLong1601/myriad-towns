@@ -3,7 +3,7 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M4a** (tiến trình). Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox** (mở khoá hết, xây miễn phí, không xuống cấp). Công trình riêng theo biome, di tích rải trên bản đồ thưởng tài nguyên khi khám phá. Bên dưới là kinh tế và mô phỏng của M3.
+> Trạng thái: **M4** (tiến trình). Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox**. Công trình theo biome, di tích thưởng khi khám phá. **Nhiều thị trấn**: Toà thị chính lập thị trấn mới (cần Hiến chương), lãnh thổ lớn dần theo dân số, thị trấn ở xa camera chỉ chạy tóm tắt cho nhẹ. Có hướng dẫn cho người mới.
 
 ## Điều khiển
 
