@@ -307,7 +307,7 @@ export function mountEncyclopedia(
           </div>
         </div>
         <div class="mt-encyclopedia-card-footer">
-          <button type="button" class="mt-encyclopedia-build-btn" data-build="${esc(def.id)}">${esc(t('encyclopedia.build'))}</button>
+          ${def.tags?.includes('upgrade_only') ? `<span>${esc(t('req.upgradeOnly'))}</span>` : `<button type="button" class="mt-encyclopedia-build-btn" data-build="${esc(def.id)}">${esc(t('encyclopedia.build'))}</button>`}
         </div>
       </article>
     `;

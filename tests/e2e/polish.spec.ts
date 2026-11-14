@@ -88,7 +88,7 @@ test('menu shows pictures and icons; the right panel shows the chosen building a
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('./?mode=sandbox&seed=e2e-detail&speed=0&autosave=0');
   await ready(page);
-  await expect(page.locator('.mt-resources svg.mt-ico').first()).toBeVisible();
+  await expect(page.locator('.mt-resources img.mt-ico').first()).toBeVisible();
   await page.locator('.mt-tabs button', { hasText: 'Nhà ở' }).click();
   await expect(page.locator('.mt-item img.mt-thumb').first()).toBeVisible();
   const src = await page.locator('.mt-item img.mt-thumb').first().getAttribute('src');

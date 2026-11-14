@@ -294,5 +294,20 @@
   "ui.topLevel": "Đã là cấp cao nhất",
   "ui.requirements": "Điều kiện",
   "ui.details": "Chi tiết công trình",
-  "ui.close": "Đóng"
+  "ui.close": "Đóng",
+  "building.craft_studio.name": "Xưởng thủ công",
+  "building.community_classroom.name": "Lớp học cộng đồng",
+  "building.public_library.name": "Thư viện công cộng",
+  "building.research_campus.name": "Khu nghiên cứu",
+  "building.flower_garden.name": "Vườn hoa",
+  "building.planted_grove.name": "Cụm cây trồng",
+  "building.botanical_park.name": "Vườn bách thảo",
+  "building.waterside_retreat.name": "Khu nghỉ dưỡng ven nước",
+  "building.fishing_harbor.name": "Cảng đánh bắt",
+  "building.rail_track.name": "Đường ray",
+  "building.rail_station.name": "Ga đường sắt",
+  "building.airfield.name": "Sân bay nhỏ",
+  "req.upgradeOnly": "Tự nâng cấp khi khu vực đủ điều kiện",
+  "ui.goalProducer": "Có thể xây {building} để sản xuất.",
+  "ui.resources": "Tài nguyên"
 }

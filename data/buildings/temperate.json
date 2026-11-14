@@ -17,21 +17,16 @@
     "tags": ["road"],
     "upgrades": [
       {
-        "to": "brick_road",
-        "when": [
-          {
-            "type": "field",
-            "field": "urban",
-            "min": 4
-          }
-        ]
-      },
-      {
         "to": "stone_road",
         "when": [
           {
             "type": "field",
             "field": "urban",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
             "min": 1
           }
         ]
@@ -271,7 +266,7 @@
       "shape": "hall",
       "color": "#f6f0e2",
       "roof": "#7a4b8c",
-      "height": 1.0
+      "height": 1
     },
     "housing": 6,
     "upkeep": {
@@ -394,7 +389,7 @@
       "labor": 1
     },
     "produces": {
-      "food": 1.5
+      "food": 1.2
     },
     "emits": [
       {
@@ -431,7 +426,7 @@
       "labor": 2
     },
     "produces": {
-      "food": 3
+      "food": 2.2
     },
     "placeOn": ["land", "flat", "grass"],
     "requires": [
@@ -468,7 +463,7 @@
       "labor": 1
     },
     "produces": {
-      "food": 2
+      "food": 1.4
     },
     "placeOn": ["land", "shore"],
     "requires": [
@@ -532,10 +527,11 @@
       "height": 0.7
     },
     "upkeep": {
-      "labor": 2
+      "labor": 2,
+      "food": 1
     },
     "produces": {
-      "food": 2.5
+      "food": 2
     },
     "emits": [
       {

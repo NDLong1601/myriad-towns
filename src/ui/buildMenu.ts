@@ -45,12 +45,18 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   };
   const renderItems = (): void => {
     items.innerHTML = city.catalog.defs
-      .filter((d) => d.category === category && city.progress.isRevealed(d))
+      .filter(
+        (d) =>
+          d.category === category &&
+          !d.tags?.includes('upgrade_only') &&
+          city.progress.isRevealed(d),
+      )
       .map((d) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const url = thumbnail(d);
         const img = url ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44">` : '';
         const poor = city.canAfford(d.cost) ? '' : ' poor';
+        const size = `${d.footprint.w}×${d.footprint.d}`;
         const lock = city.progress.lockReason(d);
         if (lock) {
           // Locked buildings stay visible (greyed) with what unlocks them.
@@ -58,9 +64,9 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
             lock.key === 'req.pack'
               ? t('ui.packLocked', { pack: t(`pack.${lock.params.pack}`) })
               : t('ui.unlockAt', { n: lock.params.pop });
-          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}">${img}<span class="mt-item-text"><span>🔒 ${buildingName(d.id)}</span><small>${need}</small></span></button>`;
+          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}">${img}<span class="mt-item-text"><span>🔒 ${buildingName(d.id)}</span><small>${size} · ${need}</small></span></button>`;
         }
-        return `<button class="mt-item${active}${poor}" data-def="${d.id}">${img}<span class="mt-item-text"><span>${buildingName(d.id)}</span><small>${amountsHtml(d.cost) || '—'}</small></span></button>`;
+        return `<button class="mt-item${active}${poor}" data-def="${d.id}">${img}<span class="mt-item-text"><span>${buildingName(d.id)}</span><small>${size} · ${amountsHtml(d.cost) || '—'}</small></span></button>`;
       })
       .join('');
     demolishBtn.classList.toggle('active', tool.kind === 'demolish');

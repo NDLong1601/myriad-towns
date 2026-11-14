@@ -294,5 +294,20 @@
   "ui.topLevel": "Already at the top level",
   "ui.requirements": "Requirements",
   "ui.details": "Building details",
-  "ui.close": "Close"
+  "ui.close": "Close",
+  "building.craft_studio.name": "Craft studio",
+  "building.community_classroom.name": "Community classroom",
+  "building.public_library.name": "Public library",
+  "building.research_campus.name": "Research campus",
+  "building.flower_garden.name": "Flower garden",
+  "building.planted_grove.name": "Planted grove",
+  "building.botanical_park.name": "Botanical park",
+  "building.waterside_retreat.name": "Waterside retreat",
+  "building.fishing_harbor.name": "Fishing harbor",
+  "building.rail_track.name": "Rail track",
+  "building.rail_station.name": "Rail station",
+  "building.airfield.name": "Airfield",
+  "req.upgradeOnly": "Upgrades automatically when local requirements are met",
+  "ui.goalProducer": "Build a {building} to start production.",
+  "ui.resources": "Resources"
 }

@@ -12,6 +12,11 @@ function goalText(g: Goal, have: number): string {
   return t(`goal.${g.type}`, p);
 }
 
+const CHAPTER_PRODUCER: Readonly<Record<string, string>> = {
+  goods: 'craft_studio',
+  knowledge: 'public_library',
+};
+
 /** Goals mode: the current chapter's checklist, and the pack choice when a chapter ends. */
 export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
   const el = document.createElement('section');
@@ -28,10 +33,15 @@ export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
     }
     const rows = goals
       .status()
-      .map(
-        (s) =>
-          `<li class="${s.done ? 'ok' : ''}">${s.done ? '✓' : '○'} ${goalText(s.goal, s.have)}</li>`,
-      )
+      .map((s) => {
+        const producer =
+          s.goal.type === 'production' ? CHAPTER_PRODUCER[s.goal.resource] : undefined;
+        const hint =
+          !s.done && producer
+            ? `<small>${t('ui.goalProducer', { building: buildingName(producer) })}</small>`
+            : '';
+        return `<li class="${s.done ? 'ok' : ''}">${s.done ? '✓' : '○'} ${goalText(s.goal, s.have)}${hint}</li>`;
+      })
       .join('');
     const reward = ch.reward
       ? `<small>${t('ui.reward', { what: formatAmounts(ch.reward) })}</small>`

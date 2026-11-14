@@ -125,6 +125,8 @@ export function checkPlacement(city: City, def: BuildingDef, x: number, z: numbe
     }
   }
   if (occupied) site.push({ ok: false, key: 'req.occupied', params: {} });
+  if (def.tags?.includes('upgrade_only'))
+    site.push({ ok: false, key: 'req.upgradeOnly', params: {} });
   const lock = city.progress.lockReason(def);
   if (lock) site.push({ ok: false, key: lock.key, params: lock.params });
   for (const rule of city.siteRules) {

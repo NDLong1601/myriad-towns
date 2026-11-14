@@ -1,0 +1,502 @@
+[
+  {
+    "id": "craft_studio",
+    "category": "production",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#d4aa79",
+      "roof": "#844d35",
+      "height": 0.8
+    },
+    "cost": {
+      "wood": 18,
+      "stone": 10
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "unlock": {
+      "population": 100,
+      "revealAt": 60
+    },
+    "upkeep": {
+      "labor": 3,
+      "wood": 0.8
+    },
+    "produces": {
+      "goods": 1.5
+    }
+  },
+  {
+    "id": "community_classroom",
+    "category": "service",
+    "footprint": {
+      "w": 2,
+      "d": 3
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#e5d7ad",
+      "roof": "#54856b",
+      "height": 0.85
+    },
+    "cost": {
+      "wood": 18,
+      "stone": 12
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "unlock": {
+      "population": 75,
+      "revealAt": 40
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "emits": [
+      {
+        "field": "education",
+        "amount": 1,
+        "radius": 5
+      }
+    ]
+  },
+  {
+    "id": "public_library",
+    "category": "service",
+    "footprint": {
+      "w": 3,
+      "d": 3
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#dfceb0",
+      "roof": "#435970",
+      "height": 1.2
+    },
+    "cost": {
+      "wood": 35,
+      "stone": 30,
+      "goods": 6
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "unlock": {
+      "population": 300,
+      "revealAt": 150
+    },
+    "upkeep": {
+      "labor": 4,
+      "goods": 0.15
+    },
+    "produces": {
+      "knowledge": 1.2
+    },
+    "emits": [
+      {
+        "field": "education",
+        "amount": 2,
+        "radius": 7
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 5
+      }
+    ]
+  },
+  {
+    "id": "research_campus",
+    "category": "service",
+    "footprint": {
+      "w": 4,
+      "d": 4
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#dedbd1",
+      "roof": "#396d75",
+      "height": 1.75
+    },
+    "cost": {
+      "wood": 100,
+      "stone": 100,
+      "goods": 30
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "near",
+        "building": "public_library",
+        "radius": 9
+      }
+    ],
+    "unlock": {
+      "population": 650,
+      "revealAt": 300
+    },
+    "upkeep": {
+      "skilled": 8,
+      "goods": 0.6,
+      "energy": 1
+    },
+    "produces": {
+      "knowledge": 4
+    },
+    "emits": [
+      {
+        "field": "education",
+        "amount": 3,
+        "radius": 9
+      }
+    ]
+  },
+  {
+    "id": "flower_garden",
+    "category": "nature",
+    "footprint": {
+      "w": 2,
+      "d": 3
+    },
+    "visual": {
+      "shape": "park",
+      "color": "#76a456",
+      "roof": "#e98caa",
+      "height": 0.1
+    },
+    "cost": {
+      "wood": 8,
+      "stone": 3
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      },
+      {
+        "field": "leisure",
+        "amount": 2,
+        "radius": 4
+      }
+    ]
+  },
+  {
+    "id": "planted_grove",
+    "category": "nature",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "visual": {
+      "shape": "park",
+      "color": "#5f8b56",
+      "roof": "#38704e",
+      "height": 0.06
+    },
+    "cost": {
+      "wood": 2
+    },
+    "requires": [],
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "botanical_park",
+    "category": "nature",
+    "footprint": {
+      "w": 4,
+      "d": 4
+    },
+    "visual": {
+      "shape": "park",
+      "color": "#679e63",
+      "roof": "#76b083",
+      "height": 0.1
+    },
+    "cost": {
+      "wood": 28,
+      "stone": 20
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "near",
+        "building": "flower_garden",
+        "radius": 7
+      }
+    ],
+    "unlock": {
+      "population": 160,
+      "revealAt": 100
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 4,
+        "radius": 7,
+        "falloff": "linear"
+      },
+      {
+        "field": "leisure",
+        "amount": 3,
+        "radius": 6
+      }
+    ]
+  },
+  {
+    "id": "waterside_retreat",
+    "category": "culture",
+    "footprint": {
+      "w": 3,
+      "d": 3
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#e5c690",
+      "roof": "#537d80",
+      "height": 1
+    },
+    "cost": {
+      "wood": 35,
+      "stone": 22,
+      "goods": 6
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "terrain",
+        "terrain": "shore",
+        "radius": 2,
+        "min": 2
+      },
+      {
+        "type": "field",
+        "field": "greenery",
+        "min": 1
+      }
+    ],
+    "unlock": {
+      "population": 200,
+      "revealAt": 120
+    },
+    "upkeep": {
+      "labor": 3,
+      "food": 0.4
+    },
+    "emits": [
+      {
+        "field": "leisure",
+        "amount": 4,
+        "radius": 7
+      },
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 4
+      }
+    ]
+  },
+  {
+    "id": "fishing_harbor",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 3
+    },
+    "visual": {
+      "shape": "dock",
+      "color": "#9a7958",
+      "roof": "#5b8490",
+      "height": 0.12
+    },
+    "cost": {
+      "wood": 20,
+      "stone": 12
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "terrain",
+        "terrain": "shore",
+        "radius": 1,
+        "min": 2
+      },
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 1,
+        "min": 2
+      }
+    ],
+    "unlock": {
+      "population": 90,
+      "revealAt": 50
+    },
+    "upkeep": {
+      "labor": 3
+    },
+    "produces": {
+      "food": 3.4
+    }
+  },
+  {
+    "id": "rail_track",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#8b7863",
+      "roof": "#58616a",
+      "height": 0.09
+    },
+    "cost": {
+      "wood": 1,
+      "stone": 1
+    },
+    "requires": [],
+    "unlock": {
+      "population": 250,
+      "revealAt": 180
+    }
+  },
+  {
+    "id": "rail_station",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 3,
+      "d": 2
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#cbbca2",
+      "roof": "#435c64",
+      "height": 0.9
+    },
+    "cost": {
+      "wood": 28,
+      "stone": 26,
+      "goods": 6
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "near",
+        "building": "rail_track",
+        "radius": 1
+      }
+    ],
+    "unlock": {
+      "population": 250,
+      "revealAt": 180
+    },
+    "upkeep": {
+      "labor": 4
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 5
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 3
+      }
+    ]
+  },
+  {
+    "id": "airfield",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 4,
+      "d": 4
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#7a8389",
+      "roof": "#e1b167",
+      "height": 0.85
+    },
+    "cost": {
+      "wood": 45,
+      "stone": 72,
+      "goods": 18
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "unlock": {
+      "population": 500,
+      "revealAt": 350
+    },
+    "upkeep": {
+      "skilled": 4,
+      "energy": 0.5
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 3,
+        "radius": 6
+      },
+      {
+        "field": "noise",
+        "amount": 3,
+        "radius": 5
+      }
+    ]
+  }
+]

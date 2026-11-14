@@ -1,7 +1,7 @@
 import { STOCK_RESOURCES } from '@/sim/catalog';
 import type { City } from '@/sim/city';
 import { netFlows, type Simulation } from '@/sim/simulation';
-import { fmt, t } from './i18n';
+import { fmt, getLang, t } from './i18n';
 import { icon } from './icons';
 
 /**
@@ -11,7 +11,13 @@ import { icon } from './icons';
 export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulation): void {
   const el = document.createElement('div');
   el.className = 'mt-resources';
-  el.setAttribute('aria-label', 'resources');
+  el.setAttribute('aria-label', t('ui.resources'));
+  const locale = getLang();
+  const stockNumber = new Intl.NumberFormat(locale);
+  const compactStock = new Intl.NumberFormat(locale, {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  });
   parent.appendChild(el);
   const always = new Set(['food', 'wood', 'stone']);
   const render = (): void => {
@@ -25,7 +31,9 @@ export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulati
           Math.abs(n) < 0.05
             ? ''
             : `<i class="${n > 0 ? 'up' : 'down'}">${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}${t('ui.perSecond')}</i>`;
-        return `<span data-res="${r}" title="${t(`resource.${r}`)}">${icon(r)}<b>${fmt(Math.floor(city.stock[r] ?? 0))}</b>${rate}</span>`;
+        const stock = Math.floor(city.stock[r] ?? 0);
+        const full = stockNumber.format(stock);
+        return `<span data-res="${r}" title="${t(`resource.${r}`)} · ${full}">${icon(r)}<b aria-label="${full}">${stock >= 10000 ? compactStock.format(stock) : full}</b>${rate}</span>`;
       })
       .join('');
   };

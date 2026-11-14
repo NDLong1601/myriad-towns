@@ -136,4 +136,22 @@ test.describe('minimap', () => {
     await expect(minimap).toBeVisible();
     expect(errors).toEqual([]);
   });
+
+  test('the map toggle stays aligned with planning on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('./?seed=42&r=2&speed=0&autosave=0&minimap=0&tut=0');
+    const map = page.locator('.mt-minimap');
+    const button = page.locator('.mt-minimap-btn');
+    await expect(map).toBeHidden();
+    const closed = (await button.boundingBox())!;
+    await button.click();
+    await expect(map).toBeVisible();
+    const open = (await button.boundingBox())!;
+    const plan = (await page.locator('.mt-planbar').boundingBox())!;
+    const bounds = (await map.boundingBox())!;
+    expect(open).toEqual(closed);
+    expect(bounds.y + bounds.height).toBeLessThan(open.y);
+    expect(plan.x).toBeGreaterThan(open.x + open.width);
+    expect(plan.y).toBeLessThan(open.y + open.height);
+  });
 });

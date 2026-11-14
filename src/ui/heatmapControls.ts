@@ -10,6 +10,7 @@ export function mountHeatmapControls(
 ): void {
   const el = document.createElement('div');
   el.className = 'mt-heat';
+  el.id = 'mt-heat-controls';
   el.innerHTML = `<label>${t('ui.heatmap')} <select>
       <option value="">${t('ui.heatmapOff')}</option>
       ${FIELDS.map((f, i) => `<option value="${f}">${(i + 1) % 10}: ${t(`field.${f}`)}</option>`).join('')}
@@ -22,6 +23,7 @@ export function mountHeatmapControls(
   btn.textContent = '🔥';
   btn.title = t('ui.heatmap');
   btn.setAttribute('aria-label', t('ui.heatmap'));
+  btn.setAttribute('aria-controls', el.id);
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
   parent.appendChild(btn);
   let open = opts.open ?? true;

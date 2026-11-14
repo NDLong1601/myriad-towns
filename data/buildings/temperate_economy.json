@@ -7,14 +7,14 @@
       "d": 1
     },
     "cost": {
-      "stone": 2
+      "stone": 1
     },
     "visual": {
       "shape": "road",
       "color": "#8e8e86",
       "height": 0.08
     },
-    "tags": ["road"],
+    "tags": ["road", "upgrade_only"],
     "upgrades": [
       {
         "to": "brick_road",
@@ -23,6 +23,11 @@
             "type": "field",
             "field": "urban",
             "min": 4
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
           }
         ]
       }
@@ -40,15 +45,14 @@
       "d": 1
     },
     "cost": {
-      "stone": 3,
-      "wood": 1
+      "stone": 1
     },
     "visual": {
       "shape": "road",
       "color": "#b3654a",
       "height": 0.09
     },
-    "tags": ["road"],
+    "tags": ["road", "upgrade_only"],
     "unlock": {
       "population": 150,
       "revealAt": 80
@@ -80,7 +84,24 @@
     "unlock": {
       "population": 15,
       "revealAt": 10
-    }
+    },
+    "upgrades": [
+      {
+        "to": "stone_bridge",
+        "when": [
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "stone_bridge",
@@ -90,14 +111,14 @@
       "d": 1
     },
     "cost": {
-      "stone": 8
+      "wood": 6
     },
     "visual": {
       "shape": "bridge",
       "color": "#a9a9a2",
       "height": 0.09
     },
-    "tags": ["road", "bridge"],
+    "tags": ["road", "bridge", "upgrade_only"],
     "placeOn": ["water"],
     "requires": [
       {
@@ -165,7 +186,7 @@
       "labor": 1
     },
     "produces": {
-      "stone": 0.4
+      "stone": 0.3
     },
     "emits": [
       {
@@ -202,17 +223,17 @@
     },
     "upkeep": {
       "labor": 1,
-      "food": 1.5
+      "food": 0.8
     },
     "produces": {
-      "stone": 0.8,
-      "wood": 0.5
+      "stone": 0.35,
+      "wood": 0.3
     },
     "emits": [
       {
         "field": "commerce",
         "amount": 1,
-        "radius": 2
+        "radius": 5
       }
     ],
     "requires": [
@@ -332,7 +353,7 @@
       "shape": "block",
       "color": "#7a5a4a",
       "roof": "#3a2f2a",
-      "height": 1.0
+      "height": 1
     },
     "upkeep": {
       "skilled": 2,

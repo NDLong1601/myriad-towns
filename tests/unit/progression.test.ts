@@ -174,3 +174,58 @@ describe('chapters', () => {
     expect([...pops].sort((a, b) => a - b)).toEqual(pops);
   });
 });
+
+describe('production routes in the bundled chapters', () => {
+  it('supplies housing and meets the goods and knowledge goals for every pack path', () => {
+    const paths = [
+      ['trade', 'crafts', 'learning'],
+      ['trade', 'crafts', 'faith'],
+      ['trade', 'learning', 'crafts'],
+      ['trade', 'learning', 'faith'],
+      ['crafts', 'trade', 'learning'],
+      ['crafts', 'trade', 'faith'],
+      ['crafts', 'learning', 'trade'],
+      ['crafts', 'learning', 'faith'],
+    ];
+    for (const picks of paths) {
+      const { city, history } = makeCity({ sandbox: false });
+      const sim = new Simulation(city);
+      const goals = new Goals(city, sim, new PoiStore(city, 1));
+      goals.skip();
+      city.progress.update(600, city.catalog.defs);
+      for (const pick of picks) {
+        goals.skip();
+        expect(goals.choose(pick)).toBe(true);
+      }
+      expect(goals.current?.id).toBe('capital');
+      city.stock.goods = 0;
+      city.stock.knowledge = 0;
+
+      const place = (id: string, x: number, z: number) => {
+        expect(history.run(new PlaceCommand(id, x, z)), id).toBe(true);
+      };
+      for (let x = 0; x < 28; x++) place('road', x, 0);
+      for (let x = 0; x < 8; x++) place('hut', x, 1);
+      for (const x of [0, 2, 4]) place('berry_field', x, -2);
+      place('well', 7, -1);
+      place('trading_post', 8, 1);
+      place('community_classroom', 9, -3);
+      place('craft_studio', 13, -2);
+
+      sim.run(48);
+      const goods = goals.chapters
+        .find((ch) => ch.id === 'prosper')
+        ?.goals.find((g) => g.type === 'production' && g.resource === 'goods');
+      expect(sim.flows.produced.goods).toBeGreaterThanOrEqual(goods!.min);
+      expect(city.countOf('townhouse')).toBeGreaterThan(0);
+      expect(city.stock.goods).toBeGreaterThanOrEqual(6);
+
+      place('public_library', 17, -3);
+      expect(city.at(19, -1)?.def.id).toBe('public_library');
+      expect(city.at(20, -1)).toBeUndefined();
+      sim.run(16);
+      const knowledge = goals.status().find((s) => s.goal.type === 'production');
+      expect(knowledge).toMatchObject({ done: true, have: 1.2 });
+    }
+  });
+});

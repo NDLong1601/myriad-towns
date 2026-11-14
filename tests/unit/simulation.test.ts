@@ -52,8 +52,8 @@ describe('economy', () => {
     expect(sim.flows.population).toBe(16);
     expect(sim.flows.laborTotal.labor).toBe(8);
     expect(sim.flows.laborUsed.labor).toBe(2);
-    // 2 fields × 1.5 − 4 huts × 0.2 = +2.2 food per second.
-    expect((city.stock.food as number) - food0).toBeCloseTo(22, 5);
+    // 2 fields × 1.2 − 4 huts × 0.2 = +1.6 food per second.
+    expect((city.stock.food as number) - food0).toBeCloseTo(16, 5);
   });
 
   it('workplaces without workers stand idle and say why', () => {
