@@ -1,0 +1,55 @@
+{
+  "chapters": [
+    {
+      "id": "settle",
+      "goals": [
+        { "type": "population", "min": 20 },
+        { "type": "count", "building": "road", "min": 10 },
+        { "type": "production", "resource": "food", "min": 1 }
+      ],
+      "reward": { "wood": 60, "stone": 40 },
+      "packChoice": false
+    },
+    {
+      "id": "village",
+      "goals": [
+        { "type": "population", "min": 60 },
+        { "type": "count", "building": "well", "min": 2 },
+        { "type": "count", "building": "cottage", "min": 4 },
+        { "type": "explore", "min": 1 }
+      ],
+      "reward": { "wood": 120, "stone": 80, "food": 60 },
+      "packChoice": true
+    },
+    {
+      "id": "town",
+      "goals": [
+        { "type": "population", "min": 150 },
+        { "type": "production", "resource": "wood", "min": 3 },
+        { "type": "stock", "resource": "stone", "min": 150 }
+      ],
+      "reward": { "wood": 200, "stone": 200 },
+      "packChoice": true
+    },
+    {
+      "id": "prosper",
+      "goals": [
+        { "type": "population", "min": 300 },
+        { "type": "count", "building": "townhouse", "min": 5 },
+        { "type": "production", "resource": "goods", "min": 1 }
+      ],
+      "reward": { "wood": 300, "stone": 300, "goods": 50 },
+      "packChoice": true
+    },
+    {
+      "id": "capital",
+      "goals": [
+        { "type": "population", "min": 600 },
+        { "type": "explore", "min": 5 },
+        { "type": "production", "resource": "knowledge", "min": 1 }
+      ],
+      "reward": { "stone": 500, "goods": 100 },
+      "packChoice": false
+    }
+  ]
+}

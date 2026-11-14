@@ -1,0 +1,476 @@
+[
+  {
+    "id": "yurt",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 3
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#e6d8b8",
+      "roof": "#b5533c",
+      "height": 0.45
+    },
+    "housing": 3,
+    "upkeep": {
+      "food": 0.15
+    },
+    "produces": {
+      "labor": 2
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 1,
+        "radius": 1
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "placeOn": ["land", "flat", "steppe"],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "tags": ["residential", "steppe"]
+  },
+  {
+    "id": "pasture",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 3
+    },
+    "visual": {
+      "shape": "field",
+      "color": "#a8b85a",
+      "height": 0.06
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 2
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 1
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "placeOn": ["land", "flat", "steppe"],
+    "tags": ["farm", "steppe"]
+  },
+  {
+    "id": "log_cabin",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#8a5a34",
+      "roof": "#e9eef2",
+      "height": 0.55
+    },
+    "housing": 4,
+    "upkeep": {
+      "food": 0.2,
+      "wood": 0.1
+    },
+    "produces": {
+      "labor": 2
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "placeOn": ["land", "flat", "cold"],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "tags": ["residential", "cold"]
+  },
+  {
+    "id": "ice_fishery",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 4
+    },
+    "visual": {
+      "shape": "dock",
+      "color": "#b8d4e3",
+      "height": 0.3
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 1.5
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 2,
+        "min": 3
+      }
+    ],
+    "placeOn": ["land", "cold"],
+    "tags": ["coastal", "cold"]
+  },
+  {
+    "id": "fur_trapper",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 5
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#6b4a2e",
+      "roof": "#d9d2c4",
+      "height": 0.45
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "goods": 0.3
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 3,
+        "min": 4
+      }
+    ],
+    "placeOn": ["land", "flat", "cold"],
+    "tags": ["cold"]
+  },
+  {
+    "id": "mountain_hut",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 4,
+      "wood": 1
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#9a948a",
+      "roof": "#4d4a46",
+      "height": 0.5
+    },
+    "housing": 3,
+    "upkeep": {
+      "food": 0.2
+    },
+    "produces": {
+      "labor": 2
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "placeOn": ["land", "mountain"],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "tags": ["residential", "mountain"]
+  },
+  {
+    "id": "stone_cutter",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 5
+    },
+    "visual": {
+      "shape": "mine",
+      "color": "#8c8c8c",
+      "height": 0.4
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "stone": 1.5
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "placeOn": ["land", "mountain"],
+    "tags": ["mountain"]
+  },
+  {
+    "id": "salt_pan",
+    "category": "production",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 3,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "field",
+      "color": "#f2f0e6",
+      "height": 0.05
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "goods": 0.4
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 2,
+        "min": 2
+      }
+    ],
+    "placeOn": ["land", "flat", "beach"],
+    "tags": ["coastal", "beach"]
+  },
+  {
+    "id": "lighthouse",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 12,
+      "wood": 4
+    },
+    "visual": {
+      "shape": "tower",
+      "color": "#f4f1ea",
+      "roof": "#c0392b",
+      "height": 2.2
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 8,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "placeOn": ["land", "shore"],
+    "unlock": {
+      "population": 80
+    },
+    "tags": ["coastal"]
+  },
+  {
+    "id": "forester",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 3
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#7d6a46",
+      "roof": "#2f5a2a",
+      "height": 0.5
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "wood": 1.5
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 3,
+        "min": 8
+      }
+    ],
+    "tags": ["forest"]
+  },
+  {
+    "id": "herb_garden",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 3
+    },
+    "visual": {
+      "shape": "park",
+      "color": "#6fa35b",
+      "height": 0.1
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "emits": [
+      {
+        "field": "health",
+        "amount": 1,
+        "radius": 4
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 3,
+        "min": 2
+      }
+    ],
+    "unlock": {
+      "population": 30
+    },
+    "tags": ["forest"]
+  },
+  {
+    "id": "scholar_camp",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 4
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#b9a37e",
+      "roof": "#5b4b8a",
+      "height": 0.55
+    },
+    "upkeep": {
+      "labor": 1,
+      "food": 0.1
+    },
+    "produces": {
+      "knowledge": 0.3
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "ruins",
+        "radius": 3,
+        "min": 3
+      }
+    ],
+    "unlock": {
+      "population": 40
+    },
+    "tags": ["ruins"]
+  }
+]

@@ -147,6 +147,11 @@
         "buildings": {
           "$ref": "#/$defs/amounts",
           "description": "Need at least N of each built."
+        },
+        "revealAt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Hidden from the build menu until peak population reaches this."
         }
       }
     },

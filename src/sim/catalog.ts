@@ -53,7 +53,7 @@ export interface BuildingDef {
   requires?: Requirement[];
   upgrades?: { to: string; when: Requirement[] }[];
   decline?: { warnAtTicks?: number; graceTicks?: number; to?: string };
-  unlock?: { population?: number; buildings?: Amounts };
+  unlock?: { population?: number; buildings?: Amounts; revealAt?: number };
   visual: BuildingVisual;
   tags?: string[];
   biomes?: string[];

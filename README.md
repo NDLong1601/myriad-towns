@@ -3,7 +3,7 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M3** (kinh tế và mô phỏng). Làng chạy theo thời gian: sản xuất, tiêu thụ, lao động, nâng cấp và xuống cấp có cảnh báo, mở khoá theo dân số, chế độ quy hoạch, bản đồ nhiệt.
+> Trạng thái: **M4a** (tiến trình). Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox** (mở khoá hết, xây miễn phí, không xuống cấp). Công trình riêng theo biome, di tích rải trên bản đồ thưởng tài nguyên khi khám phá. Bên dưới là kinh tế và mô phỏng của M3.
 
 ## Điều khiển
 
