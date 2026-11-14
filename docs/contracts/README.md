@@ -17,3 +17,4 @@ Interfaces other modules (and other agents) build against. Owned by Claude; chan
 | Build menu tool handle | `src/ui/buildMenu.ts` (`BuildMenu`, `Tool`) | M2 |
 
 Planned: sim read store (M3), `AudioZones` (M6).
+| Save format and migrations (`SaveData`, `takeSave`, `applySave`) | `src/io/save.ts`, `src/io/migrations/` | M5 |

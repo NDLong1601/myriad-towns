@@ -45,7 +45,8 @@ UI (`src/ui/buildTool.ts`) turns pointer input into commands and shows the same 
 
 ## Saves
 
-`SaveMeta` (seed, versions, towns, camera…) + one compressed `ChunkRec` per **modified** chunk in IndexedDB.
+See ADR-005. One gzip(JSON) record per game in IndexedDB: `SaveMeta` (seed, mode, options), camera and game
+state, plus one `ChunkRec` per **modified** chunk.
 `SAVE_SCHEMA_VERSION` and `GEN_VERSION` in `src/core/version.ts`; migrations in `src/io/migrations/`.
 
 ## Render quality
@@ -68,4 +69,4 @@ slow GPU). Shadows use PCF, not PCFSoft. Measured 2026-11-14 on Iris Xe at DPR 1
 ## Milestones
 
 M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ✔ ·
-M4 progression, biomes, towns, dormant tier, tutorial ✔ (ADR-004) · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.
+M4 progression, biomes, towns, dormant tier, tutorial ✔ (ADR-004) · M5 save/load and settings ✔ (ADR-005) · M6 polish, audio, art · M7 public deploy and PWA.

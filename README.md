@@ -3,7 +3,67 @@
 Game city builder gốc chạy trên trình duyệt: thế giới sinh thủ tục vô hạn, công trình nâng cấp hoặc suy thoái theo
 những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) và deploy tĩnh lên GitHub Pages.
 
-> Trạng thái: **M4** (tiến trình). Màn hình ván mới với hai chế độ: **Mục tiêu** (5 chương, phần thưởng, chọn 1 trong 2 gói công trình) và **Sandbox**. Công trình theo biome, di tích thưởng khi khám phá. **Nhiều thị trấn**: Toà thị chính lập thị trấn mới (cần Hiến chương), lãnh thổ lớn dần theo dân số, thị trấn ở xa camera chỉ chạy tóm tắt cho nhẹ. Có hướng dẫn cho người mới.
+Chơi thử: https://ndlong1601.github.io/myriad-towns/
+
+![Một ngôi làng đang lớn: nhà lều nâng cấp thành nhà gỗ quanh giếng, ruộng dâu, bản đồ nhỏ góc phải](docs/images/hero.jpg)
+
+> Trạng thái: **M5 xong** (lưu ván và cài đặt). Tiếp theo: M6 (hoàn thiện đồ hoạ, âm thanh). Lộ trình ở cuối trang.
+
+## Có gì trong game
+
+### Thế giới vô hạn và công trình sống theo láng giềng
+
+Bản đồ sinh từ seed, đi mãi không hết: đồng cỏ, rừng, núi, thảo nguyên, vùng lạnh, bãi biển, phế tích. Mỗi công trình
+tự nâng cấp khi đủ điều kiện xung quanh (ví dụ Lều tranh gần giếng thành Nhà gỗ) và xuống cấp nếu thiếu, luôn có cảnh
+báo trước. Bấm vào một công trình để xem **"Vì sao?"**: nó cần gì, còn thiếu gì. Phím 1–0 bật **bản đồ nhiệt** để thấy
+vùng phủ của nước, dịch vụ, ô nhiễm...
+
+![Bản đồ nhiệt nước sạch quanh hai giếng](docs/images/heatmap.jpg)
+
+### Hai chế độ chơi
+
+Màn hình ván mới cho chọn **Mục tiêu** hoặc **Sandbox**, nhập seed (hoặc 🎲 ngẫu nhiên), bật hướng dẫn cho người mới,
+hoặc **Tiếp tục** ván gần nhất.
+
+![Màn hình ván mới](docs/images/new-game.jpg)
+
+- **Mục tiêu**: 5 chương. Xong mỗi chương được thưởng tài nguyên, và từ chương 2 được **chọn 1 trong 2 gói công
+  trình** (thương mại, thủ công, học thuật, tín ngưỡng, công nghiệp). Gói không chọn sẽ được đề xuất lại sau.
+- **Sandbox**: mở khoá mọi công trình, xây miễn phí, tắt xuống cấp; bật tắt được ngay trong ván.
+
+![Hoàn thành chương: chọn một gói công trình](docs/images/pack-choice.jpg)
+
+### Nhiều thị trấn
+
+Công trình đầu tiên lập thị trấn thứ nhất. Mỗi thị trấn có **lãnh thổ** (đường viền trên mặt đất) lớn dần theo dân số;
+ở chế độ Mục tiêu chỉ xây được trong lãnh thổ. Muốn mở rộng xa hơn thì xây **Toà thị chính** (cần 1 Hiến chương) cách
+các thị trấn khác ít nhất 64 ô. Bảng Thị trấn ở cột trái cho bay tới từng nơi; thị trấn ở xa camera chỉ chạy tóm tắt
+sản xuất cho nhẹ máy. **Di tích** vàng rải trên bản đồ: xây gần là khám phá được và nhận thưởng.
+
+![Hai thị trấn với đường viền lãnh thổ](docs/images/towns.jpg)
+
+### Hướng dẫn cho người mới
+
+Bảy bước ngắn ở cột trái (di chuyển, làm đường, đặt nhà, lương thực, giếng, xem "Vì sao?"), mỗi bước tự xong khi bạn
+làm; bỏ qua được bất cứ lúc nào.
+
+![Hướng dẫn bước 1](docs/images/tutorial.jpg)
+
+### Lưu ván và cài đặt
+
+- **💾 Lưu** hoặc Ctrl+S; tự lưu mỗi 2 phút và khi rời tab. Đóng tab mở lại là chơi tiếp.
+- Nhiều bản lưu trong trình duyệt; **xuất/nhập** file `.mtsave` để chuyển máy hoặc gửi bạn bè.
+- **⚙ Cài đặt**: chất lượng đồ hoạ, tầm nhìn, ngôn ngữ (Tiếng Việt / English), tự lưu.
+
+| Lưu và tải                                  | Cài đặt                                   |
+| ------------------------------------------- | ----------------------------------------- |
+| ![Danh sách bản lưu](docs/images/saves.jpg) | ![Menu cài đặt](docs/images/settings.jpg) |
+
+### Chơi trên điện thoại
+
+Giao diện tự xếp lại cho màn hình nhỏ; chạm để xây, hai ngón để zoom/xoay. Bản đồ nhỏ ẩn sẵn, mở bằng nút 🗺.
+
+<img src="docs/images/phone.jpg" alt="Giao diện trên điện thoại" width="280">
 
 ## Điều khiển
 
@@ -21,6 +81,7 @@ những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) 
 | X / Esc / Ctrl+Z / Ctrl+Y             | Phá / huỷ / hoàn tác / làm lại       |
 | Bấm vào công trình                    | Xem trạng thái và "Vì sao?"          |
 | M                                     | Bật/tắt bản đồ nhỏ                   |
+| Ctrl+S                                | Lưu ván                              |
 
 ## Chạy trên máy (Windows / macOS / Linux)
 
@@ -58,6 +119,21 @@ Tham số URL:
 
 Quy ước chung cho Claude Code và Antigravity nằm trong [AGENTS.md](AGENTS.md). Việc giao cho agent viết thành
 task spec trong [docs/tasks/](docs/tasks/), bắt đầu từ [\_TEMPLATE.md](docs/tasks/_TEMPLATE.md).
+
+## Lộ trình
+
+| Mốc | Nội dung                                                                       | Trạng thái |
+| --- | ------------------------------------------------------------------------------ | ---------- |
+| M0  | Khung dự án, công cụ, CI                                                       | ✔          |
+| M1  | Thế giới vô hạn theo chunk, camera                                             | ✔          |
+| M2  | Đặt công trình, luật bán kính, hoàn tác                                        | ✔          |
+| M3  | Kinh tế, mô phỏng, nâng cấp/xuống cấp, bản đồ nhiệt, quy hoạch                 | ✔          |
+| M4  | Chế độ chơi, chương, gói công trình, biome, di tích, nhiều thị trấn, hướng dẫn | ✔          |
+| M5  | Lưu/tải, tự lưu, xuất/nhập file, cài đặt                                       | ✔          |
+| M6  | Hoàn thiện đồ hoạ, âm thanh, hiệu ứng                                          | Tiếp theo  |
+| M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      |            |
+
+Chi tiết kỹ thuật: [docs/architecture.md](docs/architecture.md) và các ADR trong [docs/adr](docs/adr).
 
 ## Giấy phép
 

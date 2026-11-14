@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test('without a game in the URL the new-game dialog opens and starts the chosen mode', async ({
   page,
 }) => {
+  test.setTimeout(90_000); // boots the game twice
   await page.goto('./?speed=0');
   const dialog = page.locator('.mt-newgame');
   await expect(dialog).toBeVisible({ timeout: 30_000 });

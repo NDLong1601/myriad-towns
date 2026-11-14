@@ -1,5 +1,6 @@
 import en from '../../data/i18n/en.json';
 import vi from '../../data/i18n/vi.json';
+import { loadSettings } from './settingsStore';
 
 type Dict = Record<string, string>;
 const DICTS: Record<string, Dict> = { vi, en };
@@ -8,7 +9,9 @@ function pickLang(): string {
   try {
     const q = new URLSearchParams(window.location.search).get('lang');
     if (q && q in DICTS) return q;
-    return 'vi'; // Vietnamese by default; ?lang=en for English
+    const saved = loadSettings().lang;
+    if (saved && saved in DICTS) return saved;
+    return 'vi'; // Vietnamese by default; ?lang=en or the settings menu for English
   } catch {
     return 'vi';
   }
