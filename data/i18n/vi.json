@@ -3,5 +3,14 @@
   "building.cottage.name": "Nhà gỗ",
   "building.well.name": "Giếng nước",
   "building.berry_field.name": "Ruộng dâu",
-  "building.woodcutter.name": "Trại đốn gỗ"
+  "building.woodcutter.name": "Trại đốn gỗ",
+  "debug.fps": "FPS",
+  "debug.frameTime": "Thời gian khung",
+  "debug.drawCalls": "Draw call",
+  "debug.triangles": "Tam giác",
+  "debug.geometries": "Hình học",
+  "debug.textures": "Họa tiết",
+  "debug.chunks": "Chunk (thấy/tải/chờ)",
+  "debug.chunkGen": "Tạo chunk TB",
+  "debug.memory": "Bộ nhớ JS"
 }

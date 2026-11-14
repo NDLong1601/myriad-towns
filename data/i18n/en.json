@@ -3,5 +3,14 @@
   "building.cottage.name": "Cottage",
   "building.well.name": "Well",
   "building.berry_field.name": "Berry field",
-  "building.woodcutter.name": "Woodcutter"
+  "building.woodcutter.name": "Woodcutter",
+  "debug.fps": "FPS",
+  "debug.frameTime": "Frame time",
+  "debug.drawCalls": "Draw calls",
+  "debug.triangles": "Triangles",
+  "debug.geometries": "Geometries",
+  "debug.textures": "Textures",
+  "debug.chunks": "Chunks (vis/load/pend)",
+  "debug.chunkGen": "Avg chunk gen",
+  "debug.memory": "JS Heap"
 }

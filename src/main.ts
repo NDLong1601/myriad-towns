@@ -3,6 +3,7 @@ import { tileToChunk } from '@/core/coords';
 import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
 import { WorldView } from '@/render/worldView';
+import { mountDebugOverlay } from '@/ui/debugOverlay';
 import { BIOME_NAMES, type Biome } from '@/world/biomes';
 import { InlineGenerator, WorkerPoolGenerator } from '@/world/genPool';
 import { sampleTile } from '@/world/terrain';
@@ -78,6 +79,7 @@ const api: DebugApi = {
   ready: (radius) => view.chunks.isReady(radius),
 };
 window.__MYRIAD__ = api;
+mountDebugOverlay(view.renderer, document.body);
 
 // HUD: refreshed a few times per second, not every frame.
 let acc = 0;

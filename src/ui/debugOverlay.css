@@ -1,0 +1,28 @@
+.debug-overlay {
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--hud-bg, rgb(255 255 255 / 0.82));
+  color: var(--hud-fg, #1d2b2f);
+  font-family:
+    ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
+  white-space: pre-line;
+}
+
+@media (prefers-color-scheme: dark) {
+  .debug-overlay {
+    background: var(--hud-bg, rgb(20 28 31 / 0.82));
+    color: var(--hud-fg, #e6eef0);
+  }
+}
+
+.debug-overlay.hidden {
+  display: none;
+}

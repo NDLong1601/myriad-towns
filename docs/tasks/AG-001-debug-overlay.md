@@ -50,13 +50,42 @@ performance budget.
 
 ## Acceptance criteria and how to check
 
-- [ ] `npm run check` passes
-- [ ] Unit test for the FPS / frame-time averaging logic (pure function, no DOM needed)
-- [ ] E2E: open `/?debug=1`, overlay visible and shows a draw-call number > 0; press F3, overlay hidden
-- [ ] Manual: `npm run dev`, press F3, numbers update
+- [x] `npm run check` passes
+- [x] Unit test for the FPS / frame-time averaging logic (pure function, no DOM needed)
+- [x] E2E: open `/?debug=1`, overlay visible and shows a draw-call number > 0; press F3, overlay hidden
+- [x] Manual: `npm run dev`, press F3, numbers update
 
 ## Out of scope
 
 - GPU timer queries, graphs/charts, settings menu.
 
 ## Result (filled in by the assignee)
+
+### Files changed
+
+- `src/ui/debugOverlay.ts` (new): Implemented `mountDebugOverlay`, `computeFrameStats` (pure function for FPS/frame time stats), and zero-allocation per-frame `FrameTracker`.
+- `src/ui/debugOverlay.css` (new): Styles for the overlay positioned bottom-left, monospace font, `pointer-events: none`, hidden state toggle.
+- `src/main.ts`: Imported `mountDebugOverlay` and mounted it to `document.body` (2 lines added).
+- `tests/unit/ui/debugOverlay.test.ts` (new): Unit tests for `computeFrameStats` (empty, single sample, 60fps uniform, uneven frame times with p95/worst, elapsed duration) and `FrameTracker`.
+- `tests/e2e/debugOverlay.spec.ts` (new): Playwright E2E tests for `/?debug=1` (visible on load, draw calls > 0, F3 toggle) and default hidden state (F3 toggle).
+- `data/i18n/vi.json`: Added `debug.*` keys in Vietnamese.
+- `data/i18n/en.json`: Added `debug.*` keys in English.
+- `docs/tasks/AG-001-debug-overlay.md`: Checked acceptance criteria and documented task results.
+
+### Testing
+
+- `npm run format`: Prettier check clean (`npm run format:check`).
+- `npm run check`: All checks passed (eslint, typecheck, validate-data, 41 unit tests across 7 test files, and production build).
+- `npm run test:e2e`: All 5 Playwright E2E tests passed on Chromium (smoke, world streaming, world camera, and the 2 new debug overlay tests).
+
+### Numbers measured on this machine (`npm run dev` + F3)
+
+- FPS: 7 - 8 FPS (headless Chromium with SwiftShader / software WebGL)
+- Frame time: 126.6 ms (p95: 133.4 ms, worst: 133.4 ms)
+- Draw calls: 87
+- Triangles: 402,508
+- Geometries: 65
+- Textures: 2
+- Chunks: 169 visible / 225 loaded / 0 pending
+- Avg chunk gen: 17.9 ms
+- JS Heap: 48.1 MB
