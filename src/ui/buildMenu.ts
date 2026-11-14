@@ -1,0 +1,99 @@
+import type { City } from '@/sim/city';
+import type { History } from '@/sim/commands';
+import { buildingName, formatAmounts, t } from './i18n';
+
+export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
+
+export interface BuildMenu {
+  setTool(tool: Tool): void;
+  readonly tool: Tool;
+  onToolChange(fn: (tool: Tool) => void): void;
+}
+
+/** Bottom bar: category tabs, buildings of the current category, and tool buttons. */
+export function mountBuildMenu(city: City, history: History, parent: HTMLElement): BuildMenu {
+  const el = document.createElement('div');
+  el.className = 'mt-menu';
+  el.innerHTML = `<div class="mt-row"><div class="mt-tabs"></div><div class="mt-tools">
+    <button data-tool="demolish" title="${t('ui.demolish')}">⛏ ${t('ui.demolish').replace(/ \(.*\)/, '')}</button>
+    <button data-tool="undo" title="${t('ui.undo')}">↶</button>
+    <button data-tool="redo" title="${t('ui.redo')}">↷</button>
+  </div></div><div class="mt-items"></div>`;
+  parent.appendChild(el);
+  const tabs = el.querySelector('.mt-tabs') as HTMLElement;
+  const items = el.querySelector('.mt-items') as HTMLElement;
+  const undoBtn = el.querySelector('[data-tool=undo]') as HTMLButtonElement;
+  const redoBtn = el.querySelector('[data-tool=redo]') as HTMLButtonElement;
+  const demolishBtn = el.querySelector('[data-tool=demolish]') as HTMLButtonElement;
+
+  const cats = [...city.catalog.categories].sort((a, b) =>
+    a === 'infrastructure' ? -1 : b === 'infrastructure' ? 1 : 0,
+  );
+  let category = cats[0] ?? 'housing';
+  let tool: Tool = { kind: 'none' };
+  const listeners: ((t: Tool) => void)[] = [];
+
+  const renderTabs = (): void => {
+    tabs.innerHTML = cats
+      .map(
+        (c) =>
+          `<button data-cat="${c}" class="${c === category ? 'active' : ''}">${t(`category.${c}`)}</button>`,
+      )
+      .join('');
+  };
+  const renderItems = (): void => {
+    items.innerHTML = city.catalog.defs
+      .filter((d) => d.category === category)
+      .map((d) => {
+        const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
+        const poor = city.canAfford(d.cost) ? '' : ' poor';
+        return `<button class="mt-item${active}${poor}" data-def="${d.id}"><span>${buildingName(d.id)}</span><small>${formatAmounts(d.cost) || '—'}</small></button>`;
+      })
+      .join('');
+    demolishBtn.classList.toggle('active', tool.kind === 'demolish');
+    undoBtn.disabled = !history.canUndo;
+    redoBtn.disabled = !history.canRedo;
+  };
+
+  const setTool = (next: Tool): void => {
+    tool = next;
+    renderItems();
+    for (const l of listeners) l(tool);
+  };
+
+  el.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    if (!b) return;
+    if (b.dataset.cat) {
+      category = b.dataset.cat;
+      renderTabs();
+      renderItems();
+    } else if (b.dataset.def) {
+      const same = tool.kind === 'build' && tool.defId === b.dataset.def;
+      setTool(same ? { kind: 'none' } : { kind: 'build', defId: b.dataset.def });
+    } else if (b.dataset.tool === 'demolish') {
+      setTool(tool.kind === 'demolish' ? { kind: 'none' } : { kind: 'demolish' });
+    } else if (b.dataset.tool === 'undo') {
+      history.undo();
+    } else if (b.dataset.tool === 'redo') {
+      history.redo();
+    }
+  });
+  // Keep the canvas from treating menu clicks as map clicks.
+  el.addEventListener('pointerdown', (e) => e.stopPropagation());
+
+  city.on((e) => {
+    if (e.type === 'stock') renderItems();
+  });
+  history.onChange(renderItems);
+  renderTabs();
+  renderItems();
+
+  return {
+    setTool,
+    get tool() {
+      return tool;
+    },
+    onToolChange: (fn) => listeners.push(fn),
+  };
+}

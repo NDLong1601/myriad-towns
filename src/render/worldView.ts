@@ -3,7 +3,9 @@ import { CHUNK_SIZE, chunkKey, localIndex, tileToChunk, tileToLocal } from '@/co
 import { TileFlag } from '@/world/biomes';
 import { ChunkManager } from '@/world/chunkManager';
 import type { ChunkGenerator } from '@/world/genPool';
-import { LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
+import type { ChunkData } from '@/world/chunk';
+import { sampleTile } from '@/world/terrain';
+import { buildTerrainMesh, LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
 import { CameraController, type CameraState } from './cameraController';
 import { FloatingOrigin } from './floatingOrigin';
 import { TerrainRenderer } from './terrainRenderer';
@@ -15,6 +17,11 @@ export interface WorldViewOptions {
   viewRadius: number;
   generator: ChunkGenerator;
   start?: Partial<CameraState>;
+  /**
+   * Applies player edits (e.g. cut trees) to freshly generated chunk data.
+   * Returns true if anything changed, so the mesh is rebuilt on the main thread.
+   */
+  patchChunk?: (chunk: ChunkData) => boolean;
 }
 
 /** The 3D world: renderer, lights, camera, and terrain chunks that stream around the camera. */
@@ -31,11 +38,15 @@ export class WorldView {
   private readonly clock = new THREE.Clock();
   private readonly resizeObserver: ResizeObserver;
   private frameListeners: ((dt: number) => void)[] = [];
+  private readonly seed: number;
+  private readonly patch: ((chunk: ChunkData) => boolean) | undefined;
 
   constructor(
     private readonly container: HTMLElement,
     opts: WorldViewOptions,
   ) {
+    this.seed = opts.seed;
+    this.patch = opts.patchChunk;
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
@@ -76,7 +87,11 @@ export class WorldView {
       opts.seed,
       opts.generator,
       {
-        onChunkLoaded: (chunk, mesh) => this.terrain.add(chunk, mesh),
+        onChunkLoaded: (chunk, mesh) =>
+          this.terrain.add(
+            chunk,
+            opts.patchChunk?.(chunk) ? buildTerrainMesh(opts.seed, chunk) : mesh,
+          ),
         onChunkUnloaded: (key) => this.terrain.remove(key),
         onChunkVisibility: (key, v) => this.terrain.setVisible(key, v),
       },
@@ -104,6 +119,35 @@ export class WorldView {
     const i = localIndex(lx, lz);
     if ((chunk.flags[i] as number) & TileFlag.Water) return WATER_Y;
     return (chunk.level[i] as number) * LEVEL_HEIGHT;
+  }
+
+  /** Re-apply edits and rebuild the meshes of loaded chunks containing these tiles. */
+  refreshTiles(tiles: readonly { x: number; z: number }[]): void {
+    const keys = new Set<number>();
+    for (const t of tiles) {
+      const { cx, cz } = tileToChunk(t.x, t.z);
+      keys.add(chunkKey(cx, cz));
+    }
+    for (const key of keys) {
+      const chunk = this.chunks.get(key as ReturnType<typeof chunkKey>);
+      if (!chunk) continue;
+      // Reset the touched tiles to generated state, then re-apply edits.
+      for (const t of tiles) {
+        const { cx, cz } = tileToChunk(t.x, t.z);
+        if (cx !== chunk.cx || cz !== chunk.cz) continue;
+        const { lx, lz } = tileToLocal(t.x, t.z);
+        chunk.flags[localIndex(lx, lz)] = sampleTile(this.seed, t.x, t.z).flags;
+      }
+      this.patch?.(chunk);
+      const visible = this.terrain.isVisible(key as ReturnType<typeof chunkKey>);
+      this.terrain.add(chunk, buildTerrainMesh(this.seed, chunk));
+      this.terrain.setVisible(key as ReturnType<typeof chunkKey>, visible);
+    }
+  }
+
+  /** Ground y used to stand buildings on (top of the tile, water surface for water). */
+  surfaceY(wx: number, wz: number): number {
+    return this.groundYAt(wx, wz) ?? 0;
   }
 
   get terrainMeshCount(): number {

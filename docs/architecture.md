@@ -22,6 +22,12 @@ depends on, and is updated as milestones land.
 Mesh (`src/world/terrainMesh.ts`): blocky terraces, walls only toward lower neighbours (neighbours in other
 chunks are sampled, so no seams), trees/rocks merged in. Colours are sRGB palettes converted to linear.
 
+## City and rules (M2)
+
+See ADR-002. `src/sim/city.ts` holds placed buildings, tile occupancy, a per-chunk spatial index and integer local
+fields. All rule checks go through `src/sim/requirements.ts`; all changes go through commands with a 50-step undo.
+UI (`src/ui/buildTool.ts`) turns pointer input into commands and shows the same `CheckResult`s as a checklist.
+
 ## Simulation tiers
 
 | Tier     | Which chunks                          | What runs                                              |
@@ -33,7 +39,7 @@ chunks are sampled, so no seams), trees/rocks merged in. Colours are sRGB palett
 ## Rendering
 
 - three.js WebGLRenderer (WebGL2). Terrain: one merged mesh per chunk. Trees/rocks are baked into that mesh.
-  Buildings (M2): instancing, decided by AG-002. One shared palette material.
+  Buildings: one InstancedMesh per type (ADR-002), to be confirmed by AG-002. One shared palette material.
 - Floating origin: float64 world coordinates; the render origin shifts (whole chunks) when the camera is > 1024 tiles away.
 - Load radius R = 6 chunks desktop / 4 mobile; generate at R+1; unload at R+2.
 
@@ -53,5 +59,5 @@ chunks are sampled, so no seams), trees/rocks merged in. Colours are sRGB palett
 
 ## Milestones
 
-M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules · M3 economy and simulation ·
+M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ·
 M4 progression and biomes · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.

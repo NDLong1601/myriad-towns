@@ -1,0 +1,1167 @@
+[
+  {
+    "id": "road",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 1
+    },
+    "visual": {
+      "shape": "road",
+      "color": "#7a6a55",
+      "height": 0.07
+    },
+    "tags": ["road"]
+  },
+  {
+    "id": "hut",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 4
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#d9c7a3",
+      "roof": "#9c6b3f",
+      "height": 0.55
+    },
+    "housing": 4,
+    "upkeep": {
+      "food": 0.2
+    },
+    "produces": {
+      "labor": 2
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "cottage",
+        "when": [
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "tags": ["starter", "residential"]
+  },
+  {
+    "id": "cottage",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#efe6d2",
+      "roof": "#b5533c",
+      "height": 0.75
+    },
+    "housing": 8,
+    "upkeep": {
+      "food": 0.4
+    },
+    "produces": {
+      "labor": 3
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 2,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "townhouse",
+        "when": [
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "density",
+            "min": 6
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "hut"
+    },
+    "unlock": {
+      "population": 40
+    },
+    "tags": ["residential"]
+  },
+  {
+    "id": "townhouse",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 8
+    },
+    "visual": {
+      "shape": "tall",
+      "color": "#f2ead8",
+      "roof": "#3f6f8f",
+      "height": 1.5
+    },
+    "housing": 16,
+    "upkeep": {
+      "food": 0.8,
+      "goods": 0.1
+    },
+    "produces": {
+      "labor": 4,
+      "skilled": 2
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 3,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "cottage"
+    },
+    "unlock": {
+      "population": 200
+    },
+    "tags": ["residential"]
+  },
+  {
+    "id": "villa",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 10,
+      "stone": 16
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#f6f0e2",
+      "roof": "#7a4b8c",
+      "height": 1.0
+    },
+    "housing": 6,
+    "upkeep": {
+      "food": 0.6,
+      "goods": 0.2
+    },
+    "produces": {
+      "expert": 1
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "notNear",
+        "building": "hut",
+        "radius": 4
+      },
+      {
+        "type": "notNear",
+        "building": "cottage",
+        "radius": 4
+      },
+      {
+        "type": "notNear",
+        "building": "townhouse",
+        "radius": 4
+      },
+      {
+        "type": "field",
+        "field": "greenery",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "noise",
+        "max": 0
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "unlock": {
+      "population": 150
+    },
+    "tags": ["residential"]
+  },
+  {
+    "id": "fisher_hut",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 5
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#c9d6dc",
+      "roof": "#4f7f95",
+      "height": 0.55
+    },
+    "housing": 4,
+    "upkeep": {
+      "food": 0.1
+    },
+    "produces": {
+      "labor": 2
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 2
+      },
+      {
+        "type": "near",
+        "building": "fishing_dock",
+        "radius": 6
+      }
+    ],
+    "tags": ["residential", "coastal"]
+  },
+  {
+    "id": "berry_field",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 2
+    },
+    "visual": {
+      "shape": "field",
+      "color": "#7a5c8f",
+      "height": 0.12
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 1.5
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 1
+      }
+    ],
+    "placeOn": ["land", "flat", "grass"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "tags": ["starter"]
+  },
+  {
+    "id": "wheat_farm",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 4
+    },
+    "visual": {
+      "shape": "field",
+      "color": "#d9b44a",
+      "height": 0.14
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 3
+    },
+    "placeOn": ["land", "flat", "grass"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      }
+    ],
+    "unlock": {
+      "population": 60
+    }
+  },
+  {
+    "id": "fishing_dock",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6
+    },
+    "visual": {
+      "shape": "dock",
+      "color": "#8a6a48",
+      "height": 0.3
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 2
+    },
+    "placeOn": ["land", "shore"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "tags": ["coastal"]
+  },
+  {
+    "id": "hunting_lodge",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 5
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#7c5a3a",
+      "roof": "#4e3b28",
+      "height": 0.5
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 1
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 4,
+        "min": 10
+      }
+    ]
+  },
+  {
+    "id": "bakery",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 4,
+      "stone": 4
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#f0d9b5",
+      "roof": "#a0522d",
+      "height": 0.7
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 2.5
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "near",
+        "building": "wheat_farm",
+        "radius": 6
+      }
+    ],
+    "unlock": {
+      "population": 100
+    }
+  },
+  {
+    "id": "woodcutter",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#a07850",
+      "roof": "#5c7a3a",
+      "height": 0.5
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "wood": 1
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 3,
+        "min": 6
+      }
+    ],
+    "tags": ["starter"]
+  },
+  {
+    "id": "quarry",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6
+    },
+    "visual": {
+      "shape": "mine",
+      "color": "#9a9890",
+      "height": 0.4
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "stone": 1
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 3
+      },
+      {
+        "field": "pollution",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "placeOn": ["land"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "stone",
+        "radius": 2,
+        "min": 2
+      }
+    ],
+    "tags": ["starter"]
+  },
+  {
+    "id": "clay_pit",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 4
+    },
+    "visual": {
+      "shape": "mine",
+      "color": "#b5764f",
+      "height": 0.3
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "stone": 0.5
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "clay",
+        "radius": 2
+      }
+    ]
+  },
+  {
+    "id": "iron_mine",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 10,
+      "stone": 6
+    },
+    "visual": {
+      "shape": "mine",
+      "color": "#6d6a70",
+      "height": 0.6
+    },
+    "upkeep": {
+      "labor": 3
+    },
+    "produces": {
+      "ore": 1
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 2,
+        "radius": 3
+      },
+      {
+        "field": "pollution",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "placeOn": ["land"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "iron",
+        "radius": 2,
+        "min": 2
+      }
+    ],
+    "unlock": {
+      "population": 120
+    }
+  },
+  {
+    "id": "sawmill",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 8,
+      "stone": 4
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#b08860",
+      "roof": "#6b4a2b",
+      "height": 0.8
+    },
+    "upkeep": {
+      "labor": 2,
+      "wood": 1
+    },
+    "produces": {
+      "goods": 0.5
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "near",
+        "building": "woodcutter",
+        "radius": 6
+      }
+    ],
+    "unlock": {
+      "population": 80
+    }
+  },
+  {
+    "id": "smelter",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 12
+    },
+    "visual": {
+      "shape": "tower",
+      "color": "#5a5550",
+      "roof": "#3a3632",
+      "height": 1.6
+    },
+    "upkeep": {
+      "labor": 3,
+      "ore": 1,
+      "wood": 1
+    },
+    "produces": {
+      "metal": 0.5
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 3,
+        "radius": 5,
+        "falloff": "linear"
+      },
+      {
+        "field": "noise",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "near",
+        "building": "iron_mine",
+        "radius": 8
+      }
+    ],
+    "unlock": {
+      "population": 200
+    }
+  },
+  {
+    "id": "workshop",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 8,
+      "stone": 8
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#c8a878",
+      "roof": "#5f5f7a",
+      "height": 0.9
+    },
+    "upkeep": {
+      "skilled": 2,
+      "metal": 0.2,
+      "wood": 0.5
+    },
+    "produces": {
+      "goods": 1
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 2
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "near",
+        "building": "sawmill",
+        "radius": 8
+      }
+    ],
+    "unlock": {
+      "population": 250
+    }
+  },
+  {
+    "id": "brickworks",
+    "category": "production",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 6
+    },
+    "visual": {
+      "shape": "tower",
+      "color": "#a65a3f",
+      "roof": "#5a2f20",
+      "height": 1.1
+    },
+    "upkeep": {
+      "labor": 2,
+      "wood": 0.5
+    },
+    "produces": {
+      "stone": 1.5
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "near",
+        "building": "clay_pit",
+        "radius": 6
+      }
+    ],
+    "unlock": {
+      "population": 120
+    }
+  },
+  {
+    "id": "well",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 3
+    },
+    "visual": {
+      "shape": "well",
+      "color": "#8f8f8f",
+      "roof": "#6b4a2b",
+      "height": 0.4
+    },
+    "emits": [
+      {
+        "field": "water_access",
+        "amount": 1,
+        "radius": 4
+      }
+    ],
+    "tags": ["starter"]
+  },
+  {
+    "id": "market",
+    "category": "service",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 10,
+      "stone": 6
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#e8c07a",
+      "roof": "#c0543c",
+      "height": 0.7
+    },
+    "upkeep": {
+      "labor": 2,
+      "food": 0.2
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 6
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      }
+    ],
+    "unlock": {
+      "population": 50
+    }
+  },
+  {
+    "id": "school",
+    "category": "service",
+    "footprint": {
+      "w": 2,
+      "d": 1
+    },
+    "cost": {
+      "wood": 12,
+      "stone": 10
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#e6dcc4",
+      "roof": "#355e7a",
+      "height": 0.9
+    },
+    "upkeep": {
+      "skilled": 1
+    },
+    "emits": [
+      {
+        "field": "education",
+        "amount": 1,
+        "radius": 7
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "field",
+        "field": "noise",
+        "max": 1
+      }
+    ],
+    "unlock": {
+      "population": 120
+    }
+  },
+  {
+    "id": "clinic",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 10
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#f4f4f0",
+      "roof": "#c23b3b",
+      "height": 0.9
+    },
+    "upkeep": {
+      "skilled": 1
+    },
+    "emits": [
+      {
+        "field": "health",
+        "amount": 1,
+        "radius": 6
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      }
+    ],
+    "unlock": {
+      "population": 150
+    }
+  },
+  {
+    "id": "tavern",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 8,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#a4693d",
+      "roof": "#6e2f22",
+      "height": 0.8
+    },
+    "upkeep": {
+      "labor": 1,
+      "food": 0.3
+    },
+    "emits": [
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 5
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      }
+    ],
+    "unlock": {
+      "population": 60
+    }
+  },
+  {
+    "id": "chapel",
+    "category": "service",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "stone": 14
+    },
+    "visual": {
+      "shape": "tower",
+      "color": "#ece6d8",
+      "roof": "#4a4a5a",
+      "height": 1.8
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "emits": [
+      {
+        "field": "faith",
+        "amount": 1,
+        "radius": 7
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "unlock": {
+      "population": 100
+    }
+  },
+  {
+    "id": "park",
+    "category": "nature",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 4
+    },
+    "visual": {
+      "shape": "park",
+      "color": "#6fae5a",
+      "height": 0.1
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ]
+  }
+]

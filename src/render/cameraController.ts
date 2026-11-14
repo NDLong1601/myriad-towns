@@ -40,6 +40,8 @@ export class CameraController {
   private readonly ac = new AbortController();
   /** Ground height under the target, set by the game each frame. */
   groundY = 2.5;
+  /** Left-drag pans the map. Tools that drag (roads) turn this off while active. */
+  panWithLeftButton = true;
 
   constructor(
     private readonly camera: THREE.PerspectiveCamera,
@@ -164,6 +166,7 @@ export class CameraController {
           }
         } else if (this.pointers.size === 1) {
           if (p.button === 0) {
+            if (!this.panWithLeftButton) return;
             const u = this.unitsPerPixel();
             // Dragging moves the world with the cursor; vertical drag is stretched by the tilt.
             this.panScreen(-dx * u, (-dy * u) / Math.max(0.35, Math.sin(this.state.pitch)));

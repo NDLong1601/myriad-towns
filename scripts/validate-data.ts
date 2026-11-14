@@ -18,10 +18,18 @@ const errors: string[] = [];
 interface Requirement {
   type: string;
   building?: string;
+  field?: string;
+  terrain?: string;
 }
 interface Building {
   id: string;
   nameKey?: string;
+  category: string;
+  cost?: Record<string, number>;
+  upkeep?: Record<string, number>;
+  produces?: Record<string, number>;
+  emits?: { field: string }[];
+  placeOn?: string[];
   requires?: Requirement[];
   upgrades?: { to: string; when: Requirement[] }[];
   decline?: { to?: string };
@@ -68,6 +76,42 @@ for (const file of readdirSync(buildingDir)
   });
 }
 
+const resources = readJson(join(dataDir, 'resources.json')) as { stock: string[]; labor: string[] };
+const resourceIds = new Set([...resources.stock, ...resources.labor]);
+const fieldIds = new Set((readJson(join(dataDir, 'fields.json')) as { fields: string[] }).fields);
+const terrainTags = new Set(
+  (readJson(join(dataDir, 'terrain-tags.json')) as { tags: string[] }).tags,
+);
+
+for (const b of all) {
+  for (const [what, amounts] of [
+    ['cost', b.cost],
+    ['upkeep', b.upkeep],
+    ['produces', b.produces],
+  ] as const) {
+    for (const r of Object.keys(amounts ?? {})) {
+      if (!resourceIds.has(r))
+        errors.push(`building "${b.id}": unknown resource "${r}" in ${what}`);
+    }
+  }
+  for (const e of b.emits ?? []) {
+    if (!fieldIds.has(e.field))
+      errors.push(`building "${b.id}": unknown field "${e.field}" in emits`);
+  }
+  for (const t of b.placeOn ?? []) {
+    if (!terrainTags.has(t))
+      errors.push(`building "${b.id}": unknown terrain tag "${t}" in placeOn`);
+  }
+  const allReqs = [...(b.requires ?? []), ...(b.upgrades ?? []).flatMap((u) => u.when)];
+  for (const r of allReqs) {
+    if (r.field && !fieldIds.has(r.field))
+      errors.push(`building "${b.id}": unknown field "${r.field}"`);
+    if (r.terrain && !terrainTags.has(r.terrain)) {
+      errors.push(`building "${b.id}": unknown terrain tag "${r.terrain}"`);
+    }
+  }
+}
+
 for (const b of all) {
   const refs: string[] = [];
   for (const r of b.requires ?? []) if (r.building) refs.push(r.building);
@@ -86,8 +130,14 @@ const i18nDir = join(dataDir, 'i18n');
 for (const file of readdirSync(i18nDir).filter((f) => f.endsWith('.json'))) {
   const strings = readJson(join(i18nDir, file)) as Record<string, string> | undefined;
   if (!strings) continue;
-  for (const b of all) {
-    const key = b.nameKey ?? `building.${b.id}.name`;
+  const keys = [
+    ...all.map((b) => b.nameKey ?? `building.${b.id}.name`),
+    ...new Set(all.map((b) => `category.${b.category}`)),
+    ...[...resourceIds].map((r) => `resource.${r}`),
+    ...[...fieldIds].map((f) => `field.${f}`),
+    ...[...terrainTags].map((t) => `terrain.${t}`),
+  ];
+  for (const key of keys) {
     if (!strings[key]) errors.push(`data/i18n/${file}: missing "${key}"`);
   }
 }
