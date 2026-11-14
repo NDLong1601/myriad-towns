@@ -234,7 +234,7 @@
 .mt-toasts {
   position: fixed;
   left: 12px;
-  bottom: 172px;
+  bottom: 236px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -274,7 +274,7 @@
 .mt-heat {
   position: fixed;
   left: 12px;
-  bottom: 84px;
+  bottom: 132px;
   background: var(--hud-bg);
   color: var(--hud-fg);
   border-radius: 10px;
@@ -301,7 +301,7 @@
 .mt-planbar {
   position: fixed;
   left: 12px;
-  bottom: 128px;
+  bottom: 192px;
   display: flex;
   gap: 6px;
   align-items: center;
