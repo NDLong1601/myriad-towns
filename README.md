@@ -7,7 +7,7 @@ Chơi thử: https://ndlong1601.github.io/myriad-towns/
 
 ![Một ngôi làng đang lớn: nhà lều nâng cấp thành nhà gỗ quanh giếng, ruộng dâu, bản đồ nhỏ góc phải](docs/images/hero.jpg)
 
-> Trạng thái: **M6 xong** (ngày đêm, âm thanh, đường tự nối, đèn đêm, bảng màu cho người mù màu). Tiếp theo: M7 (phát hành công khai, PWA). Lộ trình ở cuối trang.
+> Trạng thái: **M6 xong** và đang chỉnh theo góp ý trước M7: giao diện (xong), kinh tế và hạ tầng, người dân và phương tiện (tiếp theo). Lộ trình ở cuối trang.
 
 ## Có gì trong game
 
@@ -68,6 +68,20 @@ làm; bỏ qua được bất cứ lúc nào.
 - Công trình mới **"nảy" lên** khi đặt và khi nâng cấp, thay vì hiện ra cứng đơ.
 
 ![Cùng một làng lúc trưa, hoàng hôn và nửa đêm](docs/images/day-night.jpg)
+
+### Giao diện: icon tài nguyên, ảnh công trình, panel chi tiết
+
+- **Icon cho mọi loại tài nguyên** (lương thực, gỗ, đá, quặng, kim loại, hàng hoá, điện, tri thức, hiến chương, lao động). Icon vẽ bằng SVG ngay trong game, thanh tài nguyên và giá xây đều dùng icon; rê chuột vào icon để xem tên.
+- **Menu xây có ảnh từng công trình**: ảnh được dựng từ chính mô hình 3D của game.
+- **Panel bên phải**: chọn một công trình trong menu, hoặc bấm vào công trình đã xây, panel hiện ảnh lớn, chi phí, chỗ ở, sản xuất, tiêu hao, điều kiện (✓/✗) và **cấp tiếp theo** (ảnh cùng điều kiện để nâng cấp). Với công trình đã xây còn có mục "Trạng thái" và nút Phá dỡ. Thẻ nhỏ theo con trỏ vẫn cho biết đặt được hay không ở ô đang chỉ.
+
+![Chọn Lều tranh: ảnh trong menu, panel bên phải, thẻ theo con trỏ](docs/images/ui-build.jpg)
+
+![Bấm vào một nhà gỗ đã xây: trạng thái, điều kiện, cấp tiếp theo](docs/images/ui-inspect.jpg)
+
+| Thanh tài nguyên                                 | Menu xây                                |
+| ------------------------------------------------ | --------------------------------------- |
+| ![Icon tài nguyên](docs/images/ui-resources.jpg) | ![Menu có ảnh](docs/images/ui-menu.jpg) |
 
 ### Đường tự nối, đèn đêm và trang trí
 

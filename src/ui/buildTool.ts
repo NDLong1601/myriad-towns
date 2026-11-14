@@ -10,6 +10,7 @@ import type { BuildMenu, Tool } from './buildMenu';
 import { describeCheck } from './describe';
 import { buildingName, formatAmounts, t } from './i18n';
 import type { InfoPanel, PanelContent, PanelLine } from './infoPanel';
+import type { DetailPanel } from './detailPanel';
 import type { Problem, Simulation } from '@/sim/simulation';
 import type { PlanStore } from '@/sim/plan';
 import { EXPLORE_RADIUS, type Poi } from '@/sim/poi';
@@ -39,6 +40,8 @@ export class BuildTool {
     private readonly plans?: PlanStore,
     /** Ruins under the cursor, for the hover card. */
     private readonly poiAt?: (x: number, z: number) => { poi: Poi; explored: boolean } | undefined,
+    /** Right-hand panel for the chosen or selected building. */
+    private readonly detail?: DetailPanel,
   ) {
     const canvas = view.renderer.domElement;
     const signal = this.ac.signal;
@@ -222,6 +225,7 @@ export class BuildTool {
         } else {
           this.panel.hide();
         }
+        this.detail?.hide();
         return;
       }
       const rect = rectOf(b.def, b.x, b.z);
@@ -237,6 +241,27 @@ export class BuildTool {
         checks: checkTiles(all, rect),
         markers: markersFor(this.city, all),
       });
+      const demolishAction = {
+        label: t('ui.demolish').replace(/ \(.*\)/, ''),
+        run: () => {
+          this.history.run(new DemolishCommand(b.uid));
+          this.inspected = null;
+        },
+      };
+      if (this.detail) {
+        this.panel.hide();
+        this.detail.show({
+          def: b.def,
+          status: this.statusLines(b.uid),
+          conditions: sustain.map(line),
+          next: upgrades.map((u) => ({
+            def: this.city.catalog.get(u.to),
+            lines: u.checks.map(line),
+          })),
+          action: demolishAction,
+        });
+        return;
+      }
       this.panel.show(
         {
           title: buildingName(b.def.id),
@@ -249,18 +274,15 @@ export class BuildTool {
               lines: u.checks.map(line),
             })),
           ],
-          action: {
-            label: t('ui.demolish').replace(/ \(.*\)/, ''),
-            run: () => {
-              this.history.run(new DemolishCommand(b.uid));
-              this.inspected = null;
-            },
-          },
+          action: demolishAction,
         },
         'pinned',
       );
       return;
     }
+
+    if (tool.kind === 'build') this.showToolDetail(tool.defId);
+    else this.detail?.hide();
 
     if (!this.hover) {
       this.preview.clear();
@@ -335,11 +357,6 @@ export class BuildTool {
             ...(check.treesToCut ? [{ text: t('ui.treesCleared') }] : []),
           ],
         },
-        { title: t('ui.produces'), lines: info(def) },
-        ...(def.upgrades ?? []).slice(0, 1).map((u) => ({
-          title: t('ui.upgradeTo', { name: buildingName(u.to) }),
-          lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
-        })),
       ],
       verdict: this.planning
         ? {
@@ -349,6 +366,28 @@ export class BuildTool {
         : { ok: check.ok, text: check.ok ? t('ui.canPlace') : t('ui.cannotPlace') },
     };
     this.panel.show(content, this.screen);
+  }
+
+  /** Right-hand panel for the building chosen in the menu: what it is, needs and becomes. */
+  private showToolDetail(defId: string): void {
+    if (!this.detail) return;
+    const def = this.city.catalog.get(defId);
+    const live = this.hover && !(def.id === 'road' && this.down?.tile);
+    const conditions: PanelLine[] = live
+      ? (() => {
+          const c = this.corner(def, this.hover as { x: number; z: number });
+          return checkPlacement(this.city, def, c.x, c.z).requires.map(line);
+        })()
+      : (def.requires ?? []).map((r) => ({ text: describeCheck(placeholder(r)) }));
+    this.detail.show({
+      def,
+      cost: def.cost,
+      conditions,
+      next: (def.upgrades ?? []).map((u) => ({
+        def: this.city.catalog.get(u.to),
+        lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
+      })),
+    });
   }
 
   /** The "Why?" lines: is it working, what is missing, and what happens next. */

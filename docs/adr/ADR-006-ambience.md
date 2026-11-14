@@ -44,3 +44,14 @@ The debug API has `timeOfDay(fixed?)` and `audio()`.
 - **Colourblind palette** is a setting (`palette: 'cvd'`, `?palette=cvd`): `data-palette` on the root
   switches CSS colours and `previewColors()` switches the 3D placement colours. Toasts always carry a
   symbol (✔ ▲ ✖) so meaning never rests on hue alone.
+
+## M6c: icons, thumbnails, detail panel
+
+- **Icons are inline SVG** (`src/ui/icons.ts`), one per resource, with the name as tooltip and label.
+  A unit test fails if a resource in `data/resources.json` has no icon.
+- **Thumbnails are rendered from the real building models** (`src/render/thumbnails.ts`): one small
+  offscreen WebGL renderer, isometric orthographic camera, PNG data URL cached per `def#variant`.
+  Without WebGL it returns '' and the UI shows text only.
+- **Detail panel** (`src/ui/detailPanel.ts`) is docked on the right. `detailHtml()` is pure and tested.
+  It shows the chosen (menu) or selected (inspect) building with cost, stats, requirements and the
+  next upgrade step. The cursor card keeps only the live site checklist and verdict.

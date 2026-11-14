@@ -1,6 +1,8 @@
 import type { City } from '@/sim/city';
 import type { History } from '@/sim/commands';
-import { buildingName, formatAmounts, t } from './i18n';
+import { thumbnail } from '@/render/thumbnails';
+import { buildingName, t } from './i18n';
+import { amountsHtml } from './icons';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
 
@@ -46,6 +48,8 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
       .filter((d) => d.category === category && city.progress.isRevealed(d))
       .map((d) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
+        const url = thumbnail(d);
+        const img = url ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44">` : '';
         const poor = city.canAfford(d.cost) ? '' : ' poor';
         const lock = city.progress.lockReason(d);
         if (lock) {
@@ -54,9 +58,9 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
             lock.key === 'req.pack'
               ? t('ui.packLocked', { pack: t(`pack.${lock.params.pack}`) })
               : t('ui.unlockAt', { n: lock.params.pop });
-          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}"><span>🔒 ${buildingName(d.id)}</span><small>${need}</small></button>`;
+          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}">${img}<span class="mt-item-text"><span>🔒 ${buildingName(d.id)}</span><small>${need}</small></span></button>`;
         }
-        return `<button class="mt-item${active}${poor}" data-def="${d.id}"><span>${buildingName(d.id)}</span><small>${formatAmounts(d.cost) || '—'}</small></button>`;
+        return `<button class="mt-item${active}${poor}" data-def="${d.id}">${img}<span class="mt-item-text"><span>${buildingName(d.id)}</span><small>${amountsHtml(d.cost) || '—'}</small></span></button>`;
       })
       .join('');
     demolishBtn.classList.toggle('active', tool.kind === 'demolish');
