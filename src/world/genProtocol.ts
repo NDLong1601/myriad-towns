@@ -7,6 +7,8 @@ export interface GenRequest {
   seed: number;
   cx: number;
   cz: number;
+  /** Draw land flat (see setFlatTerrain). */
+  flat?: boolean;
 }
 
 /** Generation worker → main thread. All typed arrays are transferred, not copied. */

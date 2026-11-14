@@ -54,7 +54,7 @@ import { ambientMix } from '@/audio/ambientMix';
 import { timeOfDay } from '@/render/dayNight';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
-import { LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
+import { landY, setFlatTerrain, WATER_Y } from '@/world/terrainMesh';
 import { BIOME_NAMES, type Biome } from '@/world/biomes';
 import { InlineGenerator, WorkerPoolGenerator } from '@/world/genPool';
 import { sampleTile } from '@/world/terrain';
@@ -118,6 +118,8 @@ interface DebugApi {
   tutorialStep(): string | null;
   /** Time of day 0..1 (null when day/night is off); setting it fixes the clock (for screenshots). */
   timeOfDay(fixed?: number | null): number | null;
+  /** Ground height (world units) at a tile. */
+  groundY(x: number, z: number): number;
   /** Pedestrians and vehicles currently walking or driving. */
   traffic(): { pedestrians: number; vehicles: number; wantPedestrians: number };
   audio(): { started: boolean; muted: boolean; volume: number; popping: number };
@@ -195,7 +197,13 @@ const startSpeed = num('speed', 1);
 clock.setSpeed((SPEEDS as readonly number[]).includes(startSpeed) ? (startSpeed as Speed) : 1);
 const plans = new PlanStore(city);
 
-const generator = typeof Worker !== 'undefined' ? new WorkerPoolGenerator() : new InlineGenerator();
+// Land is drawn flat unless ?terrain=hills (or the setting) asks for the old stepped hills.
+const flatTerrain = params.has('terrain')
+  ? params.get('terrain') !== 'hills'
+  : settings.flatTerrain;
+setFlatTerrain(flatTerrain);
+const generator =
+  typeof Worker !== 'undefined' ? new WorkerPoolGenerator(flatTerrain) : new InlineGenerator();
 const view = new WorldView(app, {
   seed,
   viewRadius,
@@ -225,7 +233,7 @@ const view = new WorldView(app, {
 // Buildings stand on the generated surface, so they never depend on a chunk being loaded.
 const surfaceY = (x: number, z: number): number => {
   const s = terrain.tile(x, z);
-  return s.flags & TileFlag.Water ? WATER_Y : s.level * LEVEL_HEIGHT;
+  return s.flags & TileFlag.Water ? WATER_Y : landY(s.level);
 };
 const buildings = new BuildingRenderer(city, view.origin, surfaceY);
 // ?anim=0 turns the placement "pop" off (tests, screenshots).
@@ -429,9 +437,17 @@ let hudOpen = params.get('debug') === '1';
 window.addEventListener('keydown', (e) => {
   if (e.code === 'KeyH' && !(e.target instanceof HTMLInputElement)) hudOpen = !hudOpen;
 });
-mountHeatmapControls(heatmap, document.body);
+const savePanel = (key: 'showMinimap' | 'showHeatmap') => (open: boolean) =>
+  saveSettings({ ...loadSettings(), [key]: open });
+mountHeatmapControls(heatmap, document.body, {
+  open: settings.showHeatmap,
+  onToggle: savePanel('showHeatmap'),
+});
 mountPlanBar(plans, history, document.body);
-mountMinimap(document.body, seed, view.controller, city, view);
+mountMinimap(document.body, seed, view.controller, city, view, {
+  open: params.has('minimap') ? params.get('minimap') !== '0' : settings.showMinimap && !small,
+  onToggle: savePanel('showMinimap'),
+});
 
 /** Towns far from the camera sleep: a production summary instead of the full tick. */
 const DORMANT_DISTANCE = 96;
@@ -618,6 +634,7 @@ const api: DebugApi = {
     }
     return view.timeOfDay;
   },
+  groundY: (x, z) => surfaceY(x, z),
   traffic: () => ({ ...traffic.counts, wantPedestrians: traffic.planned.pedestrians }),
   audio: () => ({
     started: audio.started,

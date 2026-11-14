@@ -91,6 +91,15 @@ làm; bỏ qua được bất cứ lúc nào.
 
 ![Cận cảnh](docs/images/traffic-close.jpg)
 
+### Bố cục gọn hơn và địa hình phẳng
+
+- **Tài nguyên xếp dọc** ở góc trên bên phải, mỗi loại một dòng có icon, số lượng và tốc độ thay đổi, nên khi có nhiều loại tài nguyên cũng không bị tràn ngang hay che các bảng khác. Panel chi tiết công trình dời sang bên trái cột này.
+- **Bản đồ nhỏ (minimap) ở góc trái dưới**, chỗ bản đồ nhiệt trước đây; **bản đồ nhiệt chuyển sang góc phải dưới**.
+- **Nút bật/tắt** cho cả hai: nút 🗺 (hoặc phím M) cho minimap, nút 🔥 cho bản đồ nhiệt. Lựa chọn được nhớ cho lần chơi sau; `?minimap=0` tắt minimap lúc mở game.
+- **Địa hình phẳng** (mặc định): đất liền vẽ ở một độ cao, nên đường, nhà và xe không còn bị "khớp" bậc thang; cầu nằm ngang với đường hai bờ. Đồi núi vẫn còn trong luật chơi (quặng, đá) và thể hiện bằng màu đá, tuyết. Muốn bản đồ có đồi như trước: tắt "Địa hình phẳng" trong Cài đặt (cần tải lại trang) hoặc thêm `?terrain=hills`.
+
+![Tài nguyên dọc, minimap bên trái, bản đồ nhiệt bên phải, đất phẳng](docs/images/layout.jpg)
+
 ### Giao diện: icon tài nguyên, ảnh công trình, panel chi tiết
 
 - **Icon cho mọi loại tài nguyên** (lương thực, gỗ, đá, quặng, kim loại, hàng hoá, điện, tri thức, hiến chương, lao động). Icon vẽ bằng SVG ngay trong game, thanh tài nguyên và giá xây đều dùng icon; rê chuột vào icon để xem tên.
@@ -198,6 +207,7 @@ task spec trong [docs/tasks/](docs/tasks/), bắt đầu từ [\_TEMPLATE.md](do
 | M6c | Icon tài nguyên, ảnh công trình trong menu, panel chi tiết bên phải            | ✔          |
 | M6d | Cầu, đường tự nâng cấp, công nghiệp mới, dễ chơi hơn ở biome thiếu đá          | ✔          |
 | M6e | Người đi lại và phương tiện theo thời đại                                      | ✔          |
+| M6f | Tài nguyên xếp dọc, minimap và bản đồ nhiệt có nút bật/tắt, địa hình phẳng     | ✔          |
 | M7  | Phát hành công khai, cài như ứng dụng (PWA), chơi offline                      | Tiếp theo  |
 
 Chi tiết kỹ thuật: [docs/architecture.md](docs/architecture.md) và các ADR trong [docs/adr](docs/adr).

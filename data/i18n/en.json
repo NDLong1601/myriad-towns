@@ -285,6 +285,7 @@
   "settings.volume": "Volume",
   "settings.dayNight": "Day and night cycle",
   "settings.traffic": "People and vehicles",
+  "settings.flat": "Flat terrain (reload to apply)",
   "audio.mute": "Mute",
   "audio.muteShort": "Mute or unmute",
   "settings.cvd": "Colourblind palette (blue / orange)",

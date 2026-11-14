@@ -11,6 +11,11 @@ export interface Settings {
   dayNight: boolean;
   /** Pedestrians and vehicles on the roads. */
   traffic: boolean;
+  /** Draw land flat (true) or as stepped hills. Needs a reload. */
+  flatTerrain: boolean;
+  /** Corner panels. */
+  showMinimap: boolean;
+  showHeatmap: boolean;
   palette: 'default' | 'cvd';
 }
 
@@ -21,6 +26,9 @@ const DEFAULTS: Settings = {
   muted: false,
   dayNight: true,
   traffic: true,
+  flatTerrain: true,
+  showMinimap: true,
+  showHeatmap: true,
   palette: 'default',
 };
 

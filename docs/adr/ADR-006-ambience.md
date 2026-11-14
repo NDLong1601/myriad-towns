@@ -80,3 +80,15 @@ The debug API has `timeOfDay(fixed?)` and `audio()`.
   the era (carts by population, cars and buses also need a paved share of roads).
 - **Paused games still populate the streets** (agents just freeze), which also keeps screenshots and tests
   deterministic in time. `?traffic=0` and the settings toggle switch it off.
+
+## M6f: corner layout and flat land
+
+- **Resources are a column** (top right); the detail panel moved left of it. Minimap bottom left (where the
+  heat map used to be), heat map bottom right. Both have a corner toggle; the choice is saved in settings
+  (`showMinimap`, `showHeatmap`).
+- **Flat land is a drawing choice, not a world change.** `landY(level)` in `terrainMesh.ts` returns shore
+  height for every land level unless hills are on (`?terrain=hills`, setting `flatTerrain`). Generation,
+  biomes, resources and saves are untouched. The flag is per thread: main sets it at start and sends it with
+  every worker request. Steps between road tiles caused vehicles to jump; with flat land they cannot.
+- **Bridges** use one `BRIDGE_LIFT` (0.2 = shore height minus water surface) shared by the model and the
+  traffic renderer, so the deck is level with the roads at both ends.

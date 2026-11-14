@@ -17,6 +17,19 @@ import { SEA_LEVEL, SNOW_LEVEL, sampleTile } from './terrain';
 export const LEVEL_HEIGHT = 0.5;
 /** Water surface sits a little below the sea-level ground so shores read clearly. */
 export const WATER_Y = SEA_LEVEL * LEVEL_HEIGHT - 0.2;
+/**
+ * Flat land (the default): every land tile stands at shore level, so roads, buildings and vehicles
+ * never sit on a step. Hills and mountains stay in the game rules and in the colours (rock, snow),
+ * only their height is not drawn. Each thread (main, every worker) sets this once at start.
+ */
+let flatLand = true;
+export function setFlatTerrain(flat: boolean): void {
+  flatLand = flat;
+}
+/** Height of the ground at a land tile of height `level`. */
+export function landY(level: number): number {
+  return (flatLand ? SEA_LEVEL : level) * LEVEL_HEIGHT;
+}
 /** Lowest y any wall goes down to (sea bed). */
 const FLOOR_Y = -0.5;
 
@@ -167,7 +180,7 @@ function shade(c: RGB, f: number): RGB {
 
 /** Top surface y of a tile; water tiles render at the water surface. */
 function surfaceY(level: number, water: boolean): number {
-  return water ? WATER_Y : level * LEVEL_HEIGHT;
+  return water ? WATER_Y : landY(level);
 }
 
 export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {

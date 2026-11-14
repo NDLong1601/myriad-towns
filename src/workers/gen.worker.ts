@@ -1,12 +1,13 @@
 /// <reference lib="webworker" />
 import { chunkBuffers, generateChunk } from '@/world/chunk';
 import type { GenRequest, GenResult } from '@/world/genProtocol';
-import { buildTerrainMesh, meshBuffers } from '@/world/terrainMesh';
+import { buildTerrainMesh, meshBuffers, setFlatTerrain } from '@/world/terrainMesh';
 
 declare const self: DedicatedWorkerGlobalScope;
 
 self.onmessage = (e: MessageEvent<GenRequest>) => {
-  const { id, seed, cx, cz } = e.data;
+  const { id, seed, cx, cz, flat } = e.data;
+  setFlatTerrain(flat ?? true);
   const t0 = performance.now();
   const chunk = generateChunk(seed, cx, cz);
   const mesh = buildTerrainMesh(seed, chunk);
