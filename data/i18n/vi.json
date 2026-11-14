@@ -237,5 +237,7 @@
   "tutorial.well": "Đặt một Giếng nước (tab Dịch vụ) gần các lều để chúng nâng cấp thành nhà gỗ.",
   "tutorial.inspect": "Bấm vào một ngôi nhà để xem nó cần gì để nâng cấp, và vì sao.",
   "tutorial.finish": "Thế là đủ để bắt đầu! Theo dõi mục tiêu chương ở cột trái. Space để tạm dừng, P để quy hoạch, B mở bách khoa.",
-  "ui.tutorial": "Hướng dẫn cho người mới"
+  "ui.tutorial": "Hướng dẫn cho người mới",
+  "minimap.label": "Bản đồ nhỏ",
+  "minimap.toggle": "Bản đồ nhỏ (M)"
 }

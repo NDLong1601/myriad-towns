@@ -237,5 +237,7 @@
   "tutorial.well": "Place a Well (Services) near the huts so they upgrade into cottages.",
   "tutorial.inspect": "Click a house to see what it needs to upgrade, and why.",
   "tutorial.finish": "That's enough to start! Follow the chapter goals on the left. Space pauses, P plans, B opens the encyclopedia.",
-  "ui.tutorial": "Tutorial for new players"
+  "ui.tutorial": "Tutorial for new players",
+  "minimap.label": "Minimap",
+  "minimap.toggle": "Minimap (M)"
 }

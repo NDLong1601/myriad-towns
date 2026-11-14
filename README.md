@@ -20,6 +20,7 @@ những gì nằm trong bán kính quanh nó. Chơi được trên máy (local) 
 | P                                     | Chế độ quy hoạch (bản nháp miễn phí) |
 | X / Esc / Ctrl+Z / Ctrl+Y             | Phá / huỷ / hoàn tác / làm lại       |
 | Bấm vào công trình                    | Xem trạng thái và "Vì sao?"          |
+| M                                     | Bật/tắt bản đồ nhỏ                   |
 
 ## Chạy trên máy (Windows / macOS / Linux)
 

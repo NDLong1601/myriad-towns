@@ -15,6 +15,7 @@ import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
 import { mountEncyclopedia } from '@/ui/encyclopedia';
+import { mountMinimap } from '@/ui/minimap';
 import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
@@ -267,6 +268,7 @@ window.addEventListener('keydown', (e) => {
 });
 mountHeatmapControls(heatmap, document.body);
 mountPlanBar(plans, history, document.body);
+mountMinimap(document.body, seed, view.controller, city, view);
 
 /** Towns far from the camera sleep: a production summary instead of the full tick. */
 const DORMANT_DISTANCE = 96;
