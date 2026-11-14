@@ -12,6 +12,8 @@ export class PlaceCommand implements Command {
   readonly label: string;
   private uid: number | undefined;
   private cut: string[] = [];
+  /** What was actually paid (nothing with Sandbox free building), refunded exactly on undo. */
+  private paid: Record<string, number> = {};
 
   constructor(
     private readonly defId: string,
@@ -24,7 +26,8 @@ export class PlaceCommand implements Command {
   do(city: City): boolean {
     const def = city.catalog.get(this.defId);
     if (!checkPlacement(city, def, this.x, this.z).ok) return false;
-    city._addStock(def.cost, -1);
+    this.paid = city.freeBuild ? {} : { ...def.cost };
+    city._addStock(this.paid, -1);
     // Redo reuses the same uid so later commands that refer to it stay valid.
     const { building, cut } = city._add(def, this.x, this.z, this.uid);
     this.uid = building.uid;
@@ -34,9 +37,8 @@ export class PlaceCommand implements Command {
 
   undo(city: City): void {
     if (this.uid === undefined) return;
-    const def = city.catalog.get(this.defId);
     city._remove(this.uid, this.cut);
-    city._addStock(def.cost, 1);
+    city._addStock(this.paid, 1);
   }
 
   get placedUid(): number | undefined {

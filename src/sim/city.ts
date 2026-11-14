@@ -44,6 +44,8 @@ export class City {
   readonly fields = new FieldStore();
   readonly stock: Record<string, number> = { ...START_STOCK };
   readonly progress: Progress;
+  /** Sandbox option: placing costs nothing. */
+  freeBuild = false;
   private buildings = new Map<number, PlacedBuilding>();
   private inactive = new Set<number>();
   private perDef = new Map<string, number>();
@@ -139,6 +141,7 @@ export class City {
   }
 
   canAfford(cost: Amounts): boolean {
+    if (this.freeBuild) return true;
     return Object.entries(cost).every(([r, n]) => (this.stock[r] ?? 0) >= n);
   }
 

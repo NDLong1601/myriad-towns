@@ -8,5 +8,6 @@ export function describeCheck(c: CheckResult): string {
   if (typeof p.field === 'string') p.field = t(`field.${p.field}`);
   if (typeof p.terrain === 'string') p.terrain = t(`terrain.${p.terrain}`);
   if (typeof p.what === 'string') p.what = t(p.what);
+  if (typeof p.pack === 'string') p.pack = t(`pack.${p.pack}`);
   return t(c.key, p);
 }

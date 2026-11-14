@@ -13,6 +13,9 @@
     "iron",
     "clay",
     "fertile",
-    "ruins"
+    "ruins",
+    "steppe",
+    "cold",
+    "temperate"
   ]
 }

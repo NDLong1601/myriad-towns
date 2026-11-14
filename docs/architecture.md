@@ -68,4 +68,4 @@ slow GPU). Shadows use PCF, not PCFSoft. Measured 2026-11-14 on Iris Xe at DPR 1
 ## Milestones
 
 M0 setup ✔ · M1 infinite terrain ✔ · M2 placement and adjacency rules ✔ · M3 economy and simulation ✔ ·
-M4 progression and biomes · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.
+M4a progression and biomes ✔ (ADR-004) · M4b second town, dormant tier, tutorial · M5 save/load and settings · M6 polish, audio, art · M7 public deploy and PWA.

@@ -219,7 +219,8 @@
       "to": "cottage"
     },
     "unlock": {
-      "population": 200
+      "population": 200,
+      "revealAt": 100
     },
     "tags": ["residential"]
   },
@@ -291,7 +292,8 @@
       "graceTicks": 60
     },
     "unlock": {
-      "population": 150
+      "population": 150,
+      "revealAt": 80
     },
     "tags": ["residential"]
   },
@@ -797,7 +799,8 @@
       }
     ],
     "unlock": {
-      "population": 200
+      "population": 200,
+      "revealAt": 100
     }
   },
   {
@@ -849,7 +852,8 @@
       }
     ],
     "unlock": {
-      "population": 250
+      "population": 250,
+      "revealAt": 120
     }
   },
   {
