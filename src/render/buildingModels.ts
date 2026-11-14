@@ -37,6 +37,9 @@ function arms(mask: number): number {
   return (mask & 1) + ((mask >> 1) & 1) + ((mask >> 2) & 1) + ((mask >> 3) & 1);
 }
 
+/** A bridge deck rides this far above the water surface, level with the shore roads at each end. */
+export const BRIDGE_LIFT = 0.2;
+
 export function part(
   geo: THREE.BufferGeometry,
   color: string,
@@ -148,7 +151,7 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
     case 'bridge': {
       const bridge = v.shape === 'bridge';
       // Bridges ride a little above the water on piles, with rails on the open sides.
-      const lift = bridge ? 0.14 : 0;
+      const lift = bridge ? BRIDGE_LIFT : 0;
       const half = bridge ? 0.4 : 0.36; // the carriageway; roads leave a verge on each side
       const reach = 0.5 - half;
       const l = (0.5 + half) / 2; // arm centre offset: from the centre block to the tile edge

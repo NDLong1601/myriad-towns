@@ -5,7 +5,7 @@ import { ChunkManager } from '@/world/chunkManager';
 import type { ChunkGenerator } from '@/world/genPool';
 import type { ChunkData } from '@/world/chunk';
 import { sampleTile } from '@/world/terrain';
-import { buildTerrainMesh, LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
+import { buildTerrainMesh, landY, WATER_Y } from '@/world/terrainMesh';
 import { CameraController, type CameraState } from './cameraController';
 import { FloatingOrigin } from './floatingOrigin';
 import { AdaptiveResolution, qualitySettings, type QualitySettings } from './quality';
@@ -173,7 +173,7 @@ export class WorldView {
     const { lx, lz } = tileToLocal(tx, tz);
     const i = localIndex(lx, lz);
     if ((chunk.flags[i] as number) & TileFlag.Water) return WATER_Y;
-    return (chunk.level[i] as number) * LEVEL_HEIGHT;
+    return landY(chunk.level[i] as number);
   }
 
   /** Tile flags (water, trees…) at a world position, if its chunk is loaded. */

@@ -33,7 +33,10 @@ export class WorkerPoolGenerator implements ChunkGenerator {
   >();
   private nextId = 1;
 
-  constructor(size = defaultPoolSize()) {
+  constructor(
+    private readonly flat = true,
+    size = defaultPoolSize(),
+  ) {
     this.parallelism = size;
     for (let i = 0; i < size; i++) {
       const w = new Worker(new URL('../workers/gen.worker.ts', import.meta.url), {
@@ -54,7 +57,7 @@ export class WorkerPoolGenerator implements ChunkGenerator {
     if (!slot) return Promise.reject(new Error('worker pool disposed'));
     const id = this.nextId++;
     slot.busy++;
-    const msg: GenRequest = { id, seed, cx, cz };
+    const msg: GenRequest = { id, seed, cx, cz, flat: this.flat };
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject, worker: best });
       slot.w.postMessage(msg);

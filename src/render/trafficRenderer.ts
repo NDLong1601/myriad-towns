@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { type BuildingDef, isRoadDef } from '@/sim/catalog';
 import type { City } from '@/sim/city';
 import type { FloatingOrigin } from './floatingOrigin';
+import { BRIDGE_LIFT } from './buildingModels';
 import { agentGeometry } from './vehicleModels';
 import {
   type AgentKind,
@@ -149,7 +150,7 @@ export class TrafficRenderer {
   private surface(x: number, z: number): number {
     const b = this.city.at(x, z);
     const def: BuildingDef | undefined = b?.def;
-    const lift = def?.visual.shape === 'bridge' ? 0.14 : 0;
+    const lift = def?.visual.shape === 'bridge' ? BRIDGE_LIFT : 0;
     return this.heightAt(x, z) + lift + (def?.visual.height ?? 0.07);
   }
 

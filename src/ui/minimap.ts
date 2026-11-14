@@ -104,6 +104,7 @@ export function mountMinimap(
   camera: CameraController,
   city: City,
   view?: WorldView,
+  opts: { open?: boolean; onToggle?: (open: boolean) => void } = {},
 ): MinimapHandle {
   const size = MINIMAP_SIZE;
   const radius = size / 2;
@@ -118,7 +119,7 @@ export function mountMinimap(
 
   // Default hidden on narrow screens (<= 600px)
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth <= 600;
-  let isVisible = !isSmallScreen;
+  let isVisible = opts.open ?? !isSmallScreen;
   if (!isVisible) el.classList.add('hidden');
 
   const root = typeof el.attachShadow === 'function' ? el.attachShadow({ mode: 'closed' }) : el;
@@ -140,11 +141,12 @@ export function mountMinimap(
   btn.textContent = '🗺';
   btn.title = t('minimap.toggle');
   btn.setAttribute('aria-label', t('minimap.toggle'));
-  btn.hidden = isVisible;
+  btn.setAttribute('aria-pressed', String(isVisible));
+  btn.classList.toggle('closed', !isVisible);
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    show();
+    toggle();
   });
   parent.appendChild(btn);
 
@@ -421,7 +423,7 @@ export function mountMinimap(
   const show = (): void => {
     isVisible = true;
     el.classList.remove('hidden');
-    btn.hidden = true;
+    syncButton();
     needsBuildingRedraw = true;
     update();
   };
@@ -429,7 +431,13 @@ export function mountMinimap(
   const hide = (): void => {
     isVisible = false;
     el.classList.add('hidden');
-    btn.hidden = false;
+    syncButton();
+  };
+
+  const syncButton = (): void => {
+    btn.setAttribute('aria-pressed', String(isVisible));
+    btn.classList.toggle('closed', !isVisible);
+    opts.onToggle?.(isVisible);
   };
 
   // Register with view.onFrame if view is provided
