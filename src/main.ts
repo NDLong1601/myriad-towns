@@ -14,6 +14,7 @@ import { GeneratedTerrain } from '@/sim/terrainQuery';
 import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
+import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
@@ -39,6 +40,7 @@ interface DebugApi {
     geometries: number;
     drawCalls: number;
     triangles: number;
+    renderScale: number;
   };
   ready(radius?: number): boolean;
   place(defId: string, x: number, z: number): boolean;
@@ -86,6 +88,7 @@ const view = new WorldView(app, {
   seed,
   viewRadius,
   generator,
+  quality: qualitySettings(parsePreset(params.get('quality')) ?? 'medium', window.devicePixelRatio),
   start: { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
   // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
   patchChunk: (chunk) => {
@@ -134,6 +137,7 @@ const api: DebugApi = {
       geometries: info.memory.geometries,
       drawCalls: info.render.calls,
       triangles: info.render.triangles,
+      renderScale: view.renderScale,
     };
   },
   ready: (radius) => view.chunks.isReady(radius),
@@ -178,7 +182,7 @@ view.onFrame((dt) => {
   hud.innerHTML =
     `<strong>Myriad Towns</strong> · seed "${escapeHtml(seedText)}" · gen v${GEN_VERSION}<br>` +
     `Ô (${tx}, ${tz}) · chunk (${cx}, ${cz}) · ${BIOME_NAMES[tile.biome as Biome]} · cao ${tile.level}<br>` +
-    `${fps} fps · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call<br>` +
+    `${fps} fps · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call · ×${view.renderScale.toFixed(2)}<br>` +
     `<span class="hint">Kéo chuột trái: di chuyển · chuột phải: xoay · cuộn: zoom · Q/E: xoay 90°<br>Chọn công trình ở thanh dưới · Esc: huỷ · X: phá · Ctrl+Z: hoàn tác</span>`;
 });
 
