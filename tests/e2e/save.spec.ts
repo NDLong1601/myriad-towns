@@ -1,5 +1,11 @@
 import { type Page, expect, test } from '@playwright/test';
 
+// Saving and booting a saved game run alongside software WebGL on CI, where a frame can take
+// hundreds of ms: give URL changes the same budget as a page boot.
+const SLOW = { timeout: 30_000 };
+// Each test boots the game two or three times.
+test.describe.configure({ timeout: 120_000 });
+
 async function ready(page: Page): Promise<void> {
   await page.waitForFunction(() => window.__MYRIAD__?.ready(), null, { timeout: 30_000 });
 }
@@ -35,8 +41,8 @@ test('save, reload and continue with the same state; Ctrl+S saves', async ({ pag
   expect(count).toBeGreaterThan(10);
   const hash = await page.evaluate(() => window.__MYRIAD__!.hash());
   await page.keyboard.press('Control+s');
-  await expect(page).toHaveURL(/load=/);
-  await expect(page.locator('.mt-toast').first()).toContainText('e2e-save');
+  await expect(page).toHaveURL(/load=/, SLOW);
+  await expect(page.locator('.mt-toast').first()).toContainText('e2e-save', SLOW);
   await page.reload();
   await ready(page);
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBe(count);
@@ -53,7 +59,7 @@ test('export a save to a file and import it back as a new slot', async ({ page }
   await page.getByRole('button', { name: /💾/ }).click();
   const dialog = page.locator('.mt-saves');
   const row = dialog.locator('li.current');
-  await expect(row).toBeVisible();
+  await expect(row).toBeVisible(SLOW);
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     row.getByRole('button', { name: /Xuất|Export/ }).click(),
@@ -62,13 +68,13 @@ test('export a save to a file and import it back as a new slot', async ({ page }
   const path = await download.path();
   const before = page.url();
   await dialog.locator('input[type=file]').setInputFiles(path);
-  await expect.poll(() => page.url()).not.toBe(before);
+  await expect.poll(() => page.url(), SLOW).not.toBe(before);
   await ready(page);
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBe(count);
   expect(await page.evaluate(() => window.__MYRIAD__!.mode())).toBe('sandbox');
   // Both slots are listed now.
   await page.getByRole('button', { name: /💾/ }).click();
-  await expect(page.locator('.mt-saves li[data-id]')).toHaveCount(2);
+  await expect(page.locator('.mt-saves li[data-id]')).toHaveCount(2, SLOW);
 });
 
 test('the new-game screen offers to continue the latest save', async ({ page }) => {
@@ -81,7 +87,7 @@ test('the new-game screen offers to continue the latest save', async ({ page }) 
   await expect(cont).toBeVisible({ timeout: 30_000 });
   await expect(cont).toContainText('e2e-continue');
   await cont.click();
-  await expect(page).toHaveURL(/load=/);
+  await expect(page).toHaveURL(/load=/, SLOW);
   await ready(page);
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBeGreaterThan(10);
 });
@@ -97,9 +103,9 @@ test('settings: language and view distance apply after reload and keep the game'
   await form.locator('select[name=lang]').selectOption('en');
   await form.locator('input[name=radius]').fill('3');
   await form.getByRole('button', { name: /Lưu và áp dụng/ }).click();
-  await expect(page).toHaveURL(/load=/);
+  await expect(page).toHaveURL(/load=/, SLOW);
   await ready(page);
-  await expect(page.getByRole('button', { name: /Save/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Save/ })).toBeVisible(SLOW);
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBe(count);
   const s = await page.evaluate(() => JSON.parse(localStorage.getItem('mt.settings') ?? '{}'));
   expect(s).toMatchObject({ lang: 'en', radius: 3 });

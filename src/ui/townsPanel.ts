@@ -28,6 +28,8 @@ export function mountTownsPanel(
   const render = (): void => {
     const list = towns.all();
     el.hidden = list.length === 0;
+    // Phones hide the panel while there is only one town (the hint is not worth the space).
+    el.classList.toggle('single', list.length < 2);
     const html = `<h3>${t('towns.title')}</h3><ul>${list
       .map((tw) => {
         const asleep = sim.isDormant(tw.id);

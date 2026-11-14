@@ -678,3 +678,13 @@
     align-items: stretch;
   }
 }
+
+@media (max-width: 600px) {
+  /* Phones: keep the left column short and the toast stack below it. */
+  .mt-towns.single {
+    display: none;
+  }
+  .mt-toasts .mt-toast:nth-child(n + 3) {
+    display: none;
+  }
+}
