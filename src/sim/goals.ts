@@ -158,7 +158,7 @@ export class Goals {
       case 'stock':
         return Math.floor(this.city.stock[g.resource] ?? 0);
       case 'production':
-        return Math.round((this.sim.flows.produced[g.resource] ?? 0) * 10) / 10;
+        return this.sim.flows.produced[g.resource] ?? 0;
       case 'explore':
         return this.pois.exploredCount;
       case 'towns':

@@ -6,6 +6,7 @@ import { GEN_VERSION } from '@/core/version';
 import { WorldView } from '@/render/worldView';
 import { BuildingRenderer } from '@/render/buildingRenderer';
 import { TrafficRenderer } from '@/render/trafficRenderer';
+import { FacilityTraffic } from '@/render/facilityTraffic';
 import { trafficPlan } from '@/render/trafficPlan';
 import { PlacementPreview } from '@/render/placementPreview';
 import { isRoadDef, loadCatalog } from '@/sim/catalog';
@@ -240,6 +241,7 @@ const buildings = new BuildingRenderer(city, view.origin, surfaceY);
 buildings.animate = params.get('anim') !== '0';
 // People and vehicles on the roads (?traffic=0 or the settings toggle turns them off).
 const traffic = new TrafficRenderer(city, view.origin, surfaceY, small ? 60 : 160);
+const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16);
 traffic.enabled = params.has('traffic') ? params.get('traffic') !== '0' : settings.traffic;
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
@@ -249,6 +251,7 @@ const territory = new TerritoryRenderer(towns, view.origin, surfaceY);
 view.scene.add(
   buildings.group,
   traffic.group,
+  facilityTraffic.group,
   preview.group,
   heatmap.group,
   planView.group,
@@ -539,6 +542,7 @@ view.onFrame((dt) => {
     refreshTrafficPlan(s.x, s.z);
   }
   traffic.update(dt, s, Math.min(60, Math.max(24, s.distance * 0.9 + 16)), clock.speed === 0);
+  facilityTraffic.update(dt, s, traffic.enabled, clock.speed === 0);
   if (dayNightOn || fixedTime !== null) view.setTimeOfDay(fixedTime ?? timeOfDay(sim.tick));
   buildings.setNight(view.nightness);
   if (audio.started) {

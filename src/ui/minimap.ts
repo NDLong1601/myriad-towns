@@ -96,7 +96,7 @@ export interface MinimapHandle {
 }
 
 /**
- * Mounts the minimap in the bottom-right corner.
+ * Mounts the minimap above the corner controls.
  */
 export function mountMinimap(
   parent: HTMLElement,
@@ -111,6 +111,9 @@ export function mountMinimap(
   const cx = radius;
   const cy = radius;
 
+  const dock = document.createElement('div');
+  dock.className = 'mt-minimap-dock';
+  parent.appendChild(dock);
   const el = document.createElement('div');
   el.className = 'mt-minimap';
   el.title = t('minimap.toggle');
@@ -132,23 +135,23 @@ export function mountMinimap(
   canvas.style.height = '100%';
   canvas.style.borderRadius = '50%';
   root.appendChild(canvas);
-  parent.appendChild(el);
+  dock.appendChild(el);
 
   // Phones have no M key: a small button shows the map while it is hidden.
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'mt-minimap-btn';
-  btn.textContent = '🗺';
+  btn.innerHTML =
+    '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/></svg>';
   btn.title = t('minimap.toggle');
   btn.setAttribute('aria-label', t('minimap.toggle'));
   btn.setAttribute('aria-pressed', String(isVisible));
-  btn.classList.toggle('closed', !isVisible);
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     toggle();
   });
-  parent.appendChild(btn);
+  dock.appendChild(btn);
 
   const ctx = canvas.getContext('2d');
 
@@ -383,7 +386,7 @@ export function mountMinimap(
 
   const onClick = (e: MouseEvent): void => {
     e.stopPropagation();
-    const rect = el.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     const px = ((e.clientX - rect.left) / rect.width) * size;
     const py = ((e.clientY - rect.top) / rect.height) * size;
 
@@ -436,7 +439,6 @@ export function mountMinimap(
 
   const syncButton = (): void => {
     btn.setAttribute('aria-pressed', String(isVisible));
-    btn.classList.toggle('closed', !isVisible);
     opts.onToggle?.(isVisible);
   };
 
@@ -450,8 +452,7 @@ export function mountMinimap(
     el.removeEventListener('click', onClick);
     window.removeEventListener('keydown', onKeyDown);
     unsubscribeCity();
-    el.remove();
-    btn.remove();
+    dock.remove();
   };
 
   return {

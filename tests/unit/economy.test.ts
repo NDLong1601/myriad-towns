@@ -17,13 +17,17 @@ describe('roads upgrade with the neighbourhood', () => {
   const kinds = (ctx: ReturnType<typeof street>, len = 12): string[] =>
     Array.from({ length: len }, (_, x) => ctx.city.at(x, 5)?.def.id ?? '-');
 
-  it('a dirt road next to cottages becomes a stone road; far tiles stay dirt', () => {
+  it('ordinary housing keeps dirt roads until the neighbourhood has water infrastructure', () => {
     const c = street();
     c.city._add(c.city.catalog.get('cottage'), 1, 6);
+    c.city._add(c.city.catalog.get('cottage'), 2, 6);
+    c.sim.run(40);
+    expect(kinds(c)[1]).toBe('road');
+    c.city._add(c.city.catalog.get('well'), 1, 7);
     c.sim.run(40);
     const k = kinds(c);
     expect(k[1]).toBe('stone_road');
-    expect(k[0]).toBe('stone_road'); // within 2 tiles of the cottage
+    expect(k[0]).toBe('road'); // outside the combined coverage
     expect(k[11]).toBe('road');
   });
 
@@ -33,6 +37,8 @@ describe('roads upgrade with the neighbourhood', () => {
       c.city._add(c.city.catalog.get('cottage'), x, 6);
       c.city._add(c.city.catalog.get('cottage'), x, 4);
     }
+    c.city._add(c.city.catalog.get('well'), 1, 7);
+    c.city._add(c.city.catalog.get('trading_post'), 4, 6);
     c.sim.run(40);
     expect(c.city.at(2, 5)?.def.id).toBe('brick_road');
     expect(kinds(c)[11]).toBe('road');
@@ -42,8 +48,11 @@ describe('roads upgrade with the neighbourhood', () => {
     const c = street();
     const uid = c.city.at(1, 5)!.uid;
     c.city._add(c.city.catalog.get('cottage'), 1, 6);
+    c.city._add(c.city.catalog.get('cottage'), 2, 6);
+    c.city._add(c.city.catalog.get('well'), 1, 7);
     c.sim.run(40);
     expect(c.city.at(1, 5)!.uid).toBe(uid);
+    expect(c.city.at(1, 5)!.def.id).toBe('stone_road');
     expect(c.city.countTag('road')).toBe(12);
     // A hut needs a road within 1: a stone road satisfies it just like dirt.
     const hut = c.city.catalog.get('hut');
@@ -54,10 +63,30 @@ describe('roads upgrade with the neighbourhood', () => {
     const run = (): number => {
       const c = street();
       for (const x of [1, 2, 3, 4]) c.city._add(c.city.catalog.get('cottage'), x, 6);
+      c.city._add(c.city.catalog.get('well'), 1, 7);
       c.sim.run(300);
       return c.sim.hash();
     };
     expect(run()).toBe(run());
+  });
+
+  it('only base infrastructure can be placed directly, including in sandbox', () => {
+    const { city, terrain, history } = makeCity();
+    terrain.special.set('1,0', WATER);
+    expect(history.run(new PlaceCommand('road', 0, 0))).toBe(true);
+    for (const [id, x, z] of [
+      ['stone_road', 0, 1],
+      ['brick_road', 0, 2],
+      ['stone_bridge', 1, 0],
+    ] as const) {
+      expect(checkPlacement(city, city.catalog.get(id), x, z).site).toContainEqual({
+        ok: false,
+        key: 'req.upgradeOnly',
+        params: {},
+      });
+      expect(history.run(new PlaceCommand(id, x, z))).toBe(false);
+    }
+    expect(history.run(new PlaceCommand('bridge', 1, 0))).toBe(true);
   });
 });
 

@@ -23,6 +23,10 @@ export function setLang(l: string): void {
   if (l in DICTS) lang = l;
 }
 
+export function getLang(): string {
+  return lang;
+}
+
 /** Translate `key`, filling {param} placeholders. Missing keys show the key itself. */
 export function t(key: string, params: Record<string, string | number> = {}): string {
   const s = DICTS[lang]?.[key] ?? DICTS.vi?.[key] ?? key;

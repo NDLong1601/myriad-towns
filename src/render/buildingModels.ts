@@ -146,7 +146,81 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const cx = w / 2;
   const cz = d / 2;
   const parts: THREE.BufferGeometry[] = [];
-  switch (v.shape) {
+  switch (
+    def.id === 'airfield' || def.id === 'rail_track' || def.id === 'flower_garden'
+      ? def.id
+      : v.shape
+  ) {
+    case 'airfield': {
+      parts.push(box(w * 0.96, 0.06, d * 0.96, '#688257', cx, cz));
+      parts.push(box(w, 0.1, 1.15, color, cx, cz));
+      for (let i = 0; i < 4; i++) parts.push(box(0.45, 0.012, 0.04, '#ede5cd', i + 0.5, cz, 0.1));
+      parts.push(box(1.5, h * 0.65, 0.9, '#dcd1b9', cx, cz - 1.25));
+      parts.push(gable(1.6, 0.27, 1, roof, cx, cz - 1.25, h * 0.65));
+      parts.push(box(0.55, h, 0.6, '#d8d4c7', cx + 1.2, cz + 1.1));
+      parts.push(box(0.65, 0.22, 0.7, '#526676', cx + 1.2, cz + 1.1, h));
+      break;
+    }
+    case 'rail_track': {
+      parts.push(box(0.9, 0.04, 0.9, color, cx, cz));
+      const straight = variant || ROAD_E | ROAD_W;
+      for (const [mask, x, z] of [
+        [ROAD_E, 1, 0],
+        [ROAD_W, -1, 0],
+        [ROAD_S, 0, 1],
+        [ROAD_N, 0, -1],
+      ] as const) {
+        if (!(straight & mask)) continue;
+        for (const side of [-1, 1]) {
+          parts.push(
+            box(
+              x ? 0.64 : 0.045,
+              0.045,
+              z ? 0.64 : 0.045,
+              roof,
+              cx + x * 0.18 + z * side * 0.13,
+              cz + z * 0.18 + x * side * 0.13,
+              0.055,
+            ),
+          );
+        }
+        parts.push(
+          box(
+            x ? 0.09 : 0.41,
+            0.035,
+            z ? 0.09 : 0.41,
+            '#60452f',
+            cx + x * 0.31,
+            cz + z * 0.31,
+            0.025,
+          ),
+        );
+      }
+      break;
+    }
+    case 'flower_garden': {
+      parts.push(box(w * 0.97, h, d * 0.97, color, cx, cz));
+      parts.push(box(0.35, 0.03, d, '#d5b98a', cx, cz, h));
+      const blossoms = [roof, '#f1c149', '#e9e0ed'];
+      for (let row = 0; row < 5; row++) {
+        for (const x of [0.34, 0.65, 1.35, 1.65]) {
+          const z = 0.34 + row * 0.56;
+          parts.push(box(0.07, 0.15, 0.07, '#458551', x, z, h));
+          parts.push(
+            pyramid(
+              0.2,
+              0.08,
+              0.2,
+              blossoms[(row + Math.round(x * 3)) % blossoms.length]!,
+              x,
+              z,
+              h + 0.13,
+            ),
+          );
+        }
+      }
+      break;
+    }
     case 'road':
     case 'bridge': {
       const bridge = v.shape === 'bridge';

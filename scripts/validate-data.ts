@@ -25,6 +25,7 @@ interface Building {
   id: string;
   nameKey?: string;
   category: string;
+  footprint: { w: number; d: number };
   cost?: Record<string, number>;
   upkeep?: Record<string, number>;
   produces?: Record<string, number>;
@@ -33,7 +34,8 @@ interface Building {
   requires?: Requirement[];
   upgrades?: { to: string; when: Requirement[] }[];
   decline?: { to?: string };
-  unlock?: { buildings?: Record<string, number> };
+  unlock?: { population?: number; buildings?: Record<string, number> };
+  tags?: string[];
 }
 
 const readJson = (path: string): unknown => {
@@ -75,8 +77,12 @@ for (const file of readdirSync(buildingDir)
     all.push(item);
   });
 }
+const byId = new Map(all.map((building) => [building.id, building]));
 
-const resources = readJson(join(dataDir, 'resources.json')) as { stock: string[]; labor: string[] };
+const resources = readJson(join(dataDir, 'resources.json')) as {
+  stock: string[];
+  labor: string[];
+};
 const resourceIds = new Set([...resources.stock, ...resources.labor]);
 const fieldIds = new Set((readJson(join(dataDir, 'fields.json')) as { fields: string[] }).fields);
 const terrainTags = new Set(
@@ -89,9 +95,12 @@ for (const b of all) {
     ['upkeep', b.upkeep],
     ['produces', b.produces],
   ] as const) {
-    for (const r of Object.keys(amounts ?? {})) {
+    for (const [r, n] of Object.entries(amounts ?? {})) {
       if (!resourceIds.has(r))
         errors.push(`building "${b.id}": unknown resource "${r}" in ${what}`);
+      if (!Number.isFinite(n)) errors.push(`building "${b.id}": non-finite amount in ${what}.${r}`);
+      if (what === 'cost' && resources.labor.includes(r))
+        errors.push(`building "${b.id}": workforce cannot pay one-time costs (${r})`);
     }
   }
   for (const e of b.emits ?? []) {
@@ -124,6 +133,11 @@ for (const b of all) {
   for (const ref of refs) {
     if (!buildings.has(ref)) errors.push(`building "${b.id}": unknown building "${ref}"`);
   }
+  for (const id of [...(b.upgrades ?? []).map((u) => u.to), b.decline?.to]) {
+    const target = id && byId.get(id);
+    if (target && (target.footprint.w !== b.footprint.w || target.footprint.d !== b.footprint.d))
+      errors.push(`building "${b.id}": replacement "${id}" must have the same footprint`);
+  }
 }
 
 // Packs and chapters (M4): every referenced building/resource exists, ids unique.
@@ -152,12 +166,36 @@ for (const p of packs) {
 }
 const goalTypes = new Set(['population', 'count', 'stock', 'production', 'explore', 'towns']);
 for (const c of chapters) {
+  const population = c.goals.find((g) => g.type === 'population')?.min ?? 0;
   for (const g of c.goals) {
     if (!goalTypes.has(g.type)) errors.push(`chapter "${c.id}": unknown goal type "${g.type}"`);
+    if (!Number.isFinite(g.min) || g.min <= 0)
+      errors.push(`chapter "${c.id}": invalid threshold "${g.min}" for "${g.type}"`);
     if (g.building && !buildings.has(g.building))
       errors.push(`chapter "${c.id}": unknown building "${g.building}"`);
-    if (g.resource && !resourceIds.has(g.resource))
-      errors.push(`chapter "${c.id}": unknown resource "${g.resource}"`);
+    if (
+      (g.type === 'production' || g.type === 'stock') &&
+      !resources.stock.includes(g.resource ?? '')
+    )
+      errors.push(`chapter "${c.id}": invalid stock resource "${g.resource}"`);
+    if (g.type === 'production' && g.resource) {
+      const resource = g.resource;
+      if (
+        !all.some(
+          (b) =>
+            !packOf.has(b.id) &&
+            !b.tags?.includes('upgrade_only') &&
+            (b.unlock?.population ?? 0) <= population &&
+            (b.placeOn ?? []).every((tag) => ['land', 'flat', 'grass'].includes(tag)) &&
+            !(b.requires ?? []).some((rule) => rule.type === 'terrain') &&
+            (b.produces?.[resource] ?? 0) > (b.upkeep?.[resource] ?? 0),
+        )
+      ) {
+        errors.push(
+          `chapter "${c.id}": "${resource}" needs a producer available without a pack or rare terrain by population ${population}`,
+        );
+      }
+    }
   }
   for (const r of Object.keys(c.reward ?? {}))
     if (!resourceIds.has(r)) errors.push(`chapter "${c.id}": unknown reward resource "${r}"`);

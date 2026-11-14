@@ -21,6 +21,9 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
+.mt-resources > [data-res] {
+  pointer-events: auto;
+}
 .mt-resources b {
   font-weight: 600;
   margin-left: auto;
@@ -341,10 +344,15 @@
   background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725);
 }
 
+.mt-minimap-dock,
+.mt-planbar {
+  --mt-map-controls-bottom: 124px;
+}
+
 .mt-planbar {
   position: fixed;
-  left: 60px;
-  bottom: 292px;
+  left: calc(max(12px, env(safe-area-inset-left)) + 54px);
+  bottom: calc(var(--mt-map-controls-bottom) + 4px);
   display: flex;
   gap: 6px;
   align-items: center;
@@ -353,7 +361,7 @@
   border-radius: 999px;
   padding: 4px 6px;
   font-size: 12px;
-  max-width: calc(100vw - 24px);
+  max-width: calc(100vw - 132px);
   flex-wrap: wrap;
 }
 .mt-planbar.on {
@@ -364,6 +372,10 @@
 }
 
 @media (max-width: 600px) {
+  .mt-minimap-dock,
+  .mt-planbar {
+    --mt-map-controls-bottom: 208px;
+  }
   .mt-simbar {
     top: auto;
     bottom: 150px;
@@ -373,9 +385,6 @@
   }
   .mt-heat-btn {
     bottom: 222px;
-  }
-  .mt-planbar {
-    bottom: 268px;
   }
   .mt-toasts {
     bottom: 312px;
@@ -606,6 +615,7 @@
   /* Below the resource chips, which take the top row on phones. */
   .mt-left {
     top: 56px;
+    max-width: calc(100vw - 174px);
   }
 }
 @media (max-width: 480px) {
