@@ -104,5 +104,21 @@
   "building.clinic.name": "Trạm xá",
   "building.tavern.name": "Quán rượu",
   "building.chapel.name": "Nhà nguyện",
-  "building.park.name": "Công viên"
+  "building.park.name": "Công viên",
+  "encyclopedia.title": "Bách khoa công trình",
+  "encyclopedia.searchPlaceholder": "Tìm theo tên công trình...",
+  "encyclopedia.allCategories": "Tất cả",
+  "encyclopedia.close": "Đóng",
+  "encyclopedia.build": "Xây",
+  "encyclopedia.footprint": "Kích thước: {w}×{d}",
+  "encyclopedia.requires": "Yêu cầu:",
+  "encyclopedia.upgradesTo": "Nâng cấp thành:",
+  "encyclopedia.upgradedFrom": "Được nâng cấp từ:",
+  "encyclopedia.empty": "Không tìm thấy công trình nào phù hợp",
+  "encyclopedia.req.near": "Có {need} {building} trong bán kính {r}",
+  "encyclopedia.req.notNear": "Không có {building} trong bán kính {r}",
+  "encyclopedia.req.fieldMin": "{field} ≥ {min}",
+  "encyclopedia.req.fieldMax": "{field} ≤ {max}",
+  "encyclopedia.req.terrain": "Có {need} ô {terrain} trong bán kính {r}",
+  "encyclopedia.req.road": "Cách đường tối đa {d} ô"
 }

@@ -104,5 +104,21 @@
   "building.clinic.name": "Clinic",
   "building.tavern.name": "Tavern",
   "building.chapel.name": "Chapel",
-  "building.park.name": "Park"
+  "building.park.name": "Park",
+  "encyclopedia.title": "Building Encyclopedia",
+  "encyclopedia.searchPlaceholder": "Search by building name...",
+  "encyclopedia.allCategories": "All",
+  "encyclopedia.close": "Close",
+  "encyclopedia.build": "Build",
+  "encyclopedia.footprint": "Size: {w}×{d}",
+  "encyclopedia.requires": "Requires:",
+  "encyclopedia.upgradesTo": "Upgrades to:",
+  "encyclopedia.upgradedFrom": "Upgraded from:",
+  "encyclopedia.empty": "No matching buildings found",
+  "encyclopedia.req.near": "{need} {building} within {r} tiles",
+  "encyclopedia.req.notNear": "No {building} within {r} tiles",
+  "encyclopedia.req.fieldMin": "{field} ≥ {min}",
+  "encyclopedia.req.fieldMax": "{field} ≤ {max}",
+  "encyclopedia.req.terrain": "{need} {terrain} tiles within {r}",
+  "encyclopedia.req.road": "Within {d} tiles of a road"
 }

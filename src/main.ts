@@ -14,6 +14,7 @@ import { GeneratedTerrain } from '@/sim/terrainQuery';
 import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
+import { mountEncyclopedia } from '@/ui/encyclopedia';
 import { InfoPanel } from '@/ui/infoPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
@@ -118,6 +119,7 @@ city.on((e) => {
 
 mountResourceBar(city, document.body);
 const menu = mountBuildMenu(city, history, document.body);
+mountEncyclopedia(document.body, city.catalog, menu);
 new BuildTool(view, city, history, preview, new InfoPanel(document.body), menu);
 
 const api: DebugApi = {
