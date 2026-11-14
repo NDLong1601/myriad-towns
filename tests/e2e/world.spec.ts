@@ -31,9 +31,14 @@ test.describe('infinite world', () => {
 
     // Far from 0 the render origin follows, so GPU coordinates stay small.
     await page.evaluate(() => window.__MYRIAD__?.teleport(1_000_000, -1_000_000));
-    await page.waitForTimeout(300);
-    const origin = await page.evaluate(() => window.__MYRIAD__!.origin());
-    expect(Math.abs(origin.x - 1_000_000)).toBeLessThan(1100);
+    // The origin moves on the next rendered frame; software rendering can take a while.
+    await expect
+      .poll(
+        async () =>
+          Math.abs((await page.evaluate(() => window.__MYRIAD__!.origin())).x - 1_000_000),
+        { timeout: 10_000 },
+      )
+      .toBeLessThan(1100);
     expect(errors).toEqual([]);
   });
 

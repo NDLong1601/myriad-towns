@@ -8,6 +8,7 @@ import {
   START_STOCK,
 } from './catalog';
 import { FieldStore } from './fields';
+import { Progress } from './progress';
 import { type Rect, rectDistance } from './geometry';
 import { type TerrainQuery, tileKey } from './terrainQuery';
 
@@ -22,6 +23,9 @@ export type CityEvent =
   | { type: 'added'; building: PlacedBuilding }
   | { type: 'removed'; building: PlacedBuilding }
   | { type: 'stock' }
+  /** A building stopped (abandoned) or resumed working: its emits were removed or restored. */
+  | { type: 'status'; building: PlacedBuilding; active: boolean }
+  | { type: 'unlocked'; ids: readonly string[] }
   | { type: 'trees'; tiles: readonly { x: number; z: number }[] };
 
 /** Largest footprint edge in data; bounds spatial lookups. */
@@ -39,8 +43,12 @@ export function rectOf(def: BuildingDef, x: number, z: number): Rect {
 export class City {
   readonly fields = new FieldStore();
   readonly stock: Record<string, number> = { ...START_STOCK };
+  readonly progress: Progress;
   private buildings = new Map<number, PlacedBuilding>();
-  private occupancy = new Map<string, number>();
+  private inactive = new Set<number>();
+  private perDef = new Map<string, number>();
+  /** Numeric tile keys: string keys made the rule engine's road lookups the hot spot. */
+  private occupancy = new Map<number, number>();
   private spatial = new Map<ChunkKey, Set<number>>();
   private nextUid = 1;
   private listeners: ((e: CityEvent) => void)[] = [];
@@ -48,7 +56,19 @@ export class City {
   constructor(
     readonly catalog: Catalog,
     readonly terrain: TerrainQuery & { clearedTrees?: Set<string> },
-  ) {}
+  ) {
+    this.progress = new Progress((id) => this.countOf(id));
+  }
+
+  /** Number of placed buildings of one type. */
+  countOf(defId: string): number {
+    return this.perDef.get(defId) ?? 0;
+  }
+
+  /** False while a building is abandoned (it neither works nor spreads its fields). */
+  isActive(uid: number): boolean {
+    return this.buildings.has(uid) && !this.inactive.has(uid);
+  }
 
   on(fn: (e: CityEvent) => void): () => void {
     this.listeners.push(fn);
@@ -71,7 +91,7 @@ export class City {
 
   /** Building covering a tile, if any. */
   at(x: number, z: number): PlacedBuilding | undefined {
-    const uid = this.occupancy.get(tileKey(x, z));
+    const uid = this.occupancy.get(occKey(x, z));
     return uid === undefined ? undefined : this.buildings.get(uid);
   }
 
@@ -97,13 +117,21 @@ export class City {
 
   /** Distance from rect to the nearest road tile, or Infinity if none within maxDistance. */
   roadDistance(rect: Rect, maxDistance: number): number {
+    // Scan rings outward (most buildings touch a road), stopping once no closer ring is left.
     let best = Infinity;
-    for (let z = rect.z - maxDistance; z < rect.z + rect.d + maxDistance; z++) {
-      for (let x = rect.x - maxDistance; x < rect.x + rect.w + maxDistance; x++) {
-        const b = this.at(x, z);
-        if (b && b.def.id === 'road') {
-          const d = rectDistance(rect, { x, z, w: 1, d: 1 });
-          if (d < best) best = d;
+    for (let ring = 1; ring <= maxDistance && best > ring; ring++) {
+      const x0 = rect.x - ring;
+      const x1 = rect.x + rect.w - 1 + ring;
+      const z0 = rect.z - ring;
+      const z1 = rect.z + rect.d - 1 + ring;
+      for (let z = z0; z <= z1; z++) {
+        const edge = z === z0 || z === z1;
+        for (let x = x0; x <= x1; x += edge ? 1 : x1 - x0) {
+          const b = this.at(x, z);
+          if (b && b.def.id === 'road') {
+            const d = rectDistance(rect, { x, z, w: 1, d: 1 });
+            if (d < best) best = d;
+          }
         }
       }
     }
@@ -136,8 +164,8 @@ export class City {
     for (let tz = z; tz < z + def.footprint.d; tz++) {
       for (let tx = x; tx < x + def.footprint.w; tx++) {
         const key = tileKey(tx, tz);
-        if (this.occupancy.has(key)) throw new Error(`tile ${key} already occupied`);
-        this.occupancy.set(key, uid);
+        if (this.occupancy.has(occKey(tx, tz))) throw new Error(`tile ${key} already occupied`);
+        this.occupancy.set(occKey(tx, tz), uid);
         if (this.terrain.clearedTrees && this.terrain.tile(tx, tz).flags & TileFlag.Tree) {
           this.terrain.clearedTrees.add(key);
           cut.push(key);
@@ -145,6 +173,7 @@ export class City {
       }
     }
     this.buildings.set(uid, b);
+    this.perDef.set(def.id, this.countOf(def.id) + 1);
     this.spatialSet(b).add(uid);
     this.fields.apply(rect, def.emits, 1);
     this.emit({ type: 'added', building: b });
@@ -156,15 +185,55 @@ export class City {
     const b = this.buildings.get(uid);
     if (!b) throw new Error(`no building ${uid}`);
     for (let tz = b.z; tz < b.z + b.def.footprint.d; tz++) {
-      for (let tx = b.x; tx < b.x + b.def.footprint.w; tx++) this.occupancy.delete(tileKey(tx, tz));
+      for (let tx = b.x; tx < b.x + b.def.footprint.w; tx++) this.occupancy.delete(occKey(tx, tz));
     }
     this.spatialSet(b).delete(uid);
     this.buildings.delete(uid);
-    this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, -1);
+    this.perDef.set(b.def.id, this.countOf(b.def.id) - 1);
+    // An abandoned building's emits were already taken out.
+    if (!this.inactive.delete(uid)) this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, -1);
     for (const k of restoreTrees) this.terrain.clearedTrees?.delete(k);
     this.emit({ type: 'removed', building: b });
     if (restoreTrees.length) this.emit({ type: 'trees', tiles: restoreTrees.map(parseKey) });
     return b;
+  }
+
+  /**
+   * Turns a building into another type in place (upgrade or decline). Footprints must match.
+   * Emitted as removed + added with the same uid, so renderers need no extra case.
+   */
+  _replace(uid: number, def: BuildingDef): PlacedBuilding {
+    const old = this.buildings.get(uid);
+    if (!old) throw new Error(`no building ${uid}`);
+    if (old.def.footprint.w !== def.footprint.w || old.def.footprint.d !== def.footprint.d) {
+      throw new Error(`cannot replace ${old.def.id} with ${def.id}: footprints differ`);
+    }
+    const rect = rectOf(def, old.x, old.z);
+    const active = !this.inactive.has(uid);
+    if (active) this.fields.apply(rect, old.def.emits, -1);
+    const b: PlacedBuilding = { uid, def, x: old.x, z: old.z };
+    this.buildings.set(uid, b);
+    this.perDef.set(old.def.id, this.countOf(old.def.id) - 1);
+    this.perDef.set(def.id, this.countOf(def.id) + 1);
+    if (active) this.fields.apply(rect, def.emits, 1);
+    this.emit({ type: 'removed', building: old });
+    this.emit({ type: 'added', building: b });
+    return b;
+  }
+
+  /** Abandon (false) or reactivate (true) a building. */
+  _setActive(uid: number, active: boolean): void {
+    const b = this.buildings.get(uid);
+    if (!b || active === !this.inactive.has(uid)) return;
+    if (active) this.inactive.delete(uid);
+    else this.inactive.add(uid);
+    this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, active ? 1 : -1);
+    this.emit({ type: 'status', building: b, active });
+  }
+
+  /** Announces buildings that just became available. */
+  _unlocked(ids: readonly string[]): void {
+    if (ids.length) this.emit({ type: 'unlocked', ids });
   }
 
   _addStock(amounts: Amounts, sign: 1 | -1): void {
@@ -186,6 +255,11 @@ export class City {
   private emit(e: CityEvent): void {
     for (const l of this.listeners) l(e);
   }
+}
+
+/** Exact for |x|, |z| < 2^25 (far beyond the floating-origin range). */
+function occKey(x: number, z: number): number {
+  return (x + 0x2000000) * 0x4000000 + (z + 0x2000000);
 }
 
 function parseKey(k: string): { x: number; z: number } {

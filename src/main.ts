@@ -17,6 +17,16 @@ import { mountDebugOverlay } from '@/ui/debugOverlay';
 import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
 import { mountResourceBar } from '@/ui/resourceBar';
+import { HeatmapOverlay } from '@/render/heatmap';
+import { PlanRenderer } from '@/render/planRenderer';
+import { WARNING_TINT } from '@/render/buildingRenderer';
+import { SimClock, SPEEDS, type Speed } from '@/sim/clock';
+import { PlanStore } from '@/sim/plan';
+import { Simulation } from '@/sim/simulation';
+import { mountHeatmapControls } from '@/ui/heatmapControls';
+import { mountNotifications } from '@/ui/notifications';
+import { mountPlanBar } from '@/ui/planBar';
+import { mountSimBar } from '@/ui/simBar';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
 import { LEVEL_HEIGHT, WATER_Y } from '@/world/terrainMesh';
@@ -41,6 +51,8 @@ interface DebugApi {
     drawCalls: number;
     triangles: number;
     renderScale: number;
+    tickMs: number;
+    tick: number;
   };
   ready(radius?: number): boolean;
   place(defId: string, x: number, z: number): boolean;
@@ -53,6 +65,17 @@ interface DebugApi {
   stock(): Record<string, number>;
   /** Testing only: add resources. */
   grant(amounts: Record<string, number>): void;
+  /** Run n simulation ticks now (tests). */
+  tick(n?: number): number;
+  speed(s?: Speed): Speed;
+  population(): number;
+  /** Status of the building on a tile: active, problems, ticks to a pending decline. */
+  statusAt(
+    x: number,
+    z: number,
+  ): { active: boolean; problems: string[]; declineIn: number | null } | null;
+  plan(defId: string, x: number, z: number): boolean;
+  buildPlan(): number;
 }
 
 declare global {
@@ -81,7 +104,14 @@ const viewRadius = Math.max(2, Math.min(10, Math.round(num('r', small ? 4 : 6)))
 
 const terrain = new GeneratedTerrain(seed);
 const city = new City(loadCatalog(), terrain);
+// ?sandbox=1 unlocks every building (testing; a real Sandbox mode comes in M4).
+city.progress.sandbox = params.get('sandbox') === '1';
 const history = new History(city);
+const sim = new Simulation(city);
+const clock = new SimClock();
+const startSpeed = num('speed', 1);
+clock.setSpeed((SPEEDS as readonly number[]).includes(startSpeed) ? (startSpeed as Speed) : 1);
+const plans = new PlanStore(city);
 
 const generator = typeof Worker !== 'undefined' ? new WorkerPoolGenerator() : new InlineGenerator();
 const view = new WorldView(app, {
@@ -114,14 +144,40 @@ const surfaceY = (x: number, z: number): number => {
 };
 const buildings = new BuildingRenderer(city, view.origin, surfaceY);
 const preview = new PlacementPreview(view.origin, surfaceY);
-view.scene.add(buildings.group, preview.group);
+const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
+const planView = new PlanRenderer(plans, city.catalog, view.origin, surfaceY);
+view.scene.add(buildings.group, preview.group, heatmap.group, planView.group);
+// Warn visibly on the building itself, not only in a toast.
+sim.on((e) => {
+  if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
+  else if (e.type === 'resolved' || (e.type === 'declined' && e.to)) buildings.setTint(e.uid, null);
+});
 city.on((e) => {
   if (e.type === 'trees') view.refreshTiles(e.tiles);
 });
 
-mountResourceBar(city, document.body);
+mountResourceBar(city, document.body, sim);
 const menu = mountBuildMenu(city, history, document.body);
-new BuildTool(view, city, history, preview, new InfoPanel(document.body), menu);
+new BuildTool(view, city, history, preview, new InfoPanel(document.body), menu, sim, plans);
+const renderSimBar = mountSimBar(sim, clock, document.body);
+mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z));
+mountHeatmapControls(heatmap, document.body);
+mountPlanBar(plans, history, document.body);
+
+let simHud = 0;
+view.onFrame((dt) => {
+  const n = clock.advance(dt);
+  if (n > 0) {
+    sim.run(n, () => performance.now());
+    simHud += n;
+    if (simHud >= 2) {
+      simHud = 0;
+      renderSimBar();
+    }
+  }
+  const s = view.controller.state;
+  heatmap.update(s.x, s.z);
+});
 
 const api: DebugApi = {
   seed,
@@ -138,6 +194,8 @@ const api: DebugApi = {
       drawCalls: info.render.calls,
       triangles: info.render.triangles,
       renderScale: view.renderScale,
+      tickMs: sim.lastTickMs,
+      tick: sim.tick,
     };
   },
   ready: (radius) => view.chunks.isReady(radius),
@@ -153,6 +211,26 @@ const api: DebugApi = {
   buildingAt: (x, z) => city.at(x, z)?.def.id ?? null,
   stock: () => ({ ...city.stock }),
   grant: (amounts) => city._addStock(amounts, 1),
+  tick: (n = 1) => {
+    sim.run(n);
+    return sim.tick;
+  },
+  speed: (s) => {
+    if (s !== undefined) clock.setSpeed(s);
+    return clock.speed;
+  },
+  population: () => sim.population,
+  statusAt: (x, z) => {
+    const b = city.at(x, z);
+    if (!b) return null;
+    return {
+      active: city.isActive(b.uid),
+      problems: sim.problemsOf(b.uid).map((p) => (p.kind === 'requirement' ? p.check.key : p.kind)),
+      declineIn: sim.declineIn(b.uid) ?? null,
+    };
+  },
+  plan: (defId, x, z) => plans.add(defId, x, z) !== undefined,
+  buildPlan: () => plans.build(history),
 };
 window.__MYRIAD__ = api;
 mountDebugOverlay(view.renderer, document.body);
@@ -182,7 +260,7 @@ view.onFrame((dt) => {
   hud.innerHTML =
     `<strong>Myriad Towns</strong> · seed "${escapeHtml(seedText)}" · gen v${GEN_VERSION}<br>` +
     `Ô (${tx}, ${tz}) · chunk (${cx}, ${cz}) · ${BIOME_NAMES[tile.biome as Biome]} · cao ${tile.level}<br>` +
-    `${fps} fps · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call · ×${view.renderScale.toFixed(2)}<br>` +
+    `${fps} fps · tick ${sim.lastTickMs.toFixed(2)} ms · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call · ×${view.renderScale.toFixed(2)}<br>` +
     `<span class="hint">Kéo chuột trái: di chuyển · chuột phải: xoay · cuộn: zoom · Q/E: xoay 90°<br>Chọn công trình ở thanh dưới · Esc: huỷ · X: phá · Ctrl+Z: hoàn tác</span>`;
 });
 

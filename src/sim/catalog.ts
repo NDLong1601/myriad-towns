@@ -61,6 +61,8 @@ export interface BuildingDef {
 
 export const FIELDS: readonly string[] = fieldsJson.fields;
 export const STOCK_RESOURCES: readonly string[] = resourcesJson.stock;
+/** Workforce tiers: produced by housing, used by workplaces every tick, never stored. */
+export const LABOR_TIERS: readonly string[] = resourcesJson.labor;
 export const START_STOCK: Amounts = resourcesJson.start;
 export const DEMOLISH_REFUND: number = resourcesJson.demolishRefund;
 

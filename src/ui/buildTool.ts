@@ -10,6 +10,8 @@ import type { BuildMenu, Tool } from './buildMenu';
 import { describeCheck } from './describe';
 import { buildingName, formatAmounts, t } from './i18n';
 import type { InfoPanel, PanelContent, PanelLine } from './infoPanel';
+import type { Problem, Simulation } from '@/sim/simulation';
+import type { PlanStore } from '@/sim/plan';
 
 const CLICK_SLOP_PX = 6;
 const MAX_ROAD = 64;
@@ -32,6 +34,8 @@ export class BuildTool {
     private readonly preview: PlacementPreview,
     private readonly panel: InfoPanel,
     private readonly menu: BuildMenu,
+    private readonly sim?: Simulation,
+    private readonly plans?: PlanStore,
   ) {
     const canvas = view.renderer.domElement;
     const signal = this.ac.signal;
@@ -55,6 +59,7 @@ export class BuildTool {
     });
     city.on(() => this.refresh());
     history.onChange(() => this.refresh());
+    plans?.on(() => this.refresh());
   }
 
   private get tool(): Tool {
@@ -101,8 +106,27 @@ export class BuildTool {
     this.refresh();
   }
 
+  private get planning(): boolean {
+    return !!this.plans?.mode;
+  }
+
   private click(tile: { x: number; z: number }): void {
     const tool = this.tool;
+    if (this.planning && this.plans) {
+      if (tool.kind === 'build') {
+        const def = this.city.catalog.get(tool.defId);
+        const c = this.corner(def, tile);
+        this.plans.add(def.id, c.x, c.z);
+        return;
+      }
+      if (tool.kind === 'demolish') {
+        const p = this.plans.at(tile.x, tile.z);
+        if (p) {
+          this.plans.remove(p.id);
+          return;
+        }
+      }
+    }
     if (tool.kind === 'build') {
       const def = this.city.catalog.get(tool.defId);
       const c = this.corner(def, tile);
@@ -117,6 +141,10 @@ export class BuildTool {
   }
 
   private layRoad(a: { x: number; z: number }, b: { x: number; z: number }): void {
+    if (this.planning && this.plans) {
+      for (const p of roadPath(a, b)) this.plans.add('road', p.x, p.z);
+      return;
+    }
     const parts = roadPath(a, b).map((p) => new PlaceCommand('road', p.x, p.z));
     this.history.run(new BatchCommand('road', parts));
   }
@@ -134,6 +162,8 @@ export class BuildTool {
     } else if (e.code === 'Escape') {
       this.inspected = null;
       this.menu.setTool({ kind: 'none' });
+    } else if (e.code === 'KeyP' && !mod && this.plans) {
+      this.plans.setMode(!this.plans.mode);
     } else if (e.code === 'KeyX' && !mod) {
       this.menu.setTool(this.tool.kind === 'demolish' ? { kind: 'none' } : { kind: 'demolish' });
     }
@@ -188,6 +218,7 @@ export class BuildTool {
         {
           title: buildingName(b.def.id),
           sections: [
+            { title: t('ui.status'), lines: this.statusLines(b.uid) },
             { title: t('ui.produces'), lines: info(b.def) },
             { lines: sustain.map(line) },
             ...upgrades.map((u) => ({
@@ -287,13 +318,55 @@ export class BuildTool {
           lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
         })),
       ],
-      verdict: { ok: check.ok, text: check.ok ? t('ui.canPlace') : t('ui.cannotPlace') },
+      verdict: this.planning
+        ? {
+            ok: check.site.every((x) => x.ok || x.key === 'req.locked'),
+            text: t('ui.addToPlan'),
+          }
+        : { ok: check.ok, text: check.ok ? t('ui.canPlace') : t('ui.cannotPlace') },
     };
     this.panel.show(content, this.screen);
   }
 
+  /** The "Why?" lines: is it working, what is missing, and what happens next. */
+  private statusLines(uid: number): PanelLine[] {
+    const sim = this.sim;
+    const b = this.city.get(uid);
+    if (!sim || !b) return [];
+    const out: PanelLine[] = [];
+    const active = this.city.isActive(uid);
+    const s = sim.stateOf(uid);
+    if (!active) out.push({ ok: false, text: t('status.abandoned') });
+    for (const p of s?.shortages ?? []) out.push({ ok: false, text: problemText(p) });
+    const left = sim.declineIn(uid);
+    if (left !== undefined) {
+      const secs = Math.ceil(left / 4);
+      out.push({
+        ok: false,
+        text: b.def.decline?.to
+          ? t('status.declineTo', { to: buildingName(b.def.decline.to), s: secs })
+          : t('status.abandonIn', { s: secs }),
+      });
+    }
+    if (active && out.length === 0) out.push({ ok: true, text: t('status.working') });
+    return out;
+  }
+
   dispose(): void {
     this.ac.abort();
+  }
+}
+
+function problemText(p: Problem): string {
+  switch (p.kind) {
+    case 'labor':
+      return t('status.noLabor', { what: t(`resource.${p.tier}`) });
+    case 'input':
+      return t('status.noInput', { what: t(`resource.${p.resource}`) });
+    case 'hungry':
+      return t('status.hungry', { what: t(`resource.${p.resource}`) });
+    case 'requirement':
+      return describeCheck(p.check);
   }
 }
 

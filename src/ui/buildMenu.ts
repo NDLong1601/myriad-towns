@@ -47,6 +47,11 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
       .map((d) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const poor = city.canAfford(d.cost) ? '' : ' poor';
+        if (!city.progress.isUnlocked(d)) {
+          // Locked buildings stay visible (greyed) with what unlocks them.
+          const need = t('ui.unlockAt', { n: d.unlock?.population ?? 0 });
+          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}"><span>🔒 ${buildingName(d.id)}</span><small>${need}</small></button>`;
+        }
         return `<button class="mt-item${active}${poor}" data-def="${d.id}"><span>${buildingName(d.id)}</span><small>${formatAmounts(d.cost) || '—'}</small></button>`;
       })
       .join('');
@@ -83,7 +88,7 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
 
   city.on((e) => {
-    if (e.type === 'stock') renderItems();
+    if (e.type === 'stock' || e.type === 'unlocked') renderItems();
   });
   history.onChange(renderItems);
   renderTabs();
