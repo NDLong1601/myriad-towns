@@ -80,3 +80,27 @@ test('colourblind palette applies from the URL and toasts carry symbols', async 
   await expect(page.locator('.mt-toast.good').first()).toContainText('✔', { timeout: 30_000 });
   expect(errors).toEqual([]);
 });
+
+test('menu shows pictures and icons; the right panel shows the chosen building and what is next', async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('./?mode=sandbox&seed=e2e-detail&speed=0&autosave=0');
+  await ready(page);
+  await expect(page.locator('.mt-resources svg.mt-ico').first()).toBeVisible();
+  await page.locator('.mt-tabs button', { hasText: 'Nhà ở' }).click();
+  await expect(page.locator('.mt-item img.mt-thumb').first()).toBeVisible();
+  const src = await page.locator('.mt-item img.mt-thumb').first().getAttribute('src');
+  expect(src).toMatch(/^data:image\/png/);
+  await page.locator('.mt-item[data-def=hut]').click();
+  const panel = page.locator('.mt-detail');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('Lều tranh');
+  await expect(panel.locator('img.mt-detail-img')).toBeVisible();
+  await expect(panel).toContainText('Cấp tiếp theo');
+  await expect(panel.locator('.mt-next img')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
+  expect(errors).toEqual([]);
+});

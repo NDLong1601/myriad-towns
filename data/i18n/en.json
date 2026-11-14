@@ -276,5 +276,9 @@
   "audio.muteShort": "Mute or unmute",
   "settings.cvd": "Colourblind palette (blue / orange)",
   "settings.apply": "Save and apply",
+  "ui.nextLevel": "Next level",
+  "ui.topLevel": "Already at the top level",
+  "ui.requirements": "Requirements",
+  "ui.details": "Building details",
   "ui.close": "Close"
 }
