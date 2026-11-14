@@ -1,6 +1,7 @@
 import type { AmbientMix } from './ambientMix';
 
-export type Sfx = 'place' | 'road' | 'demolish' | 'upgrade' | 'decline' | 'error' | 'chapter' | 'click';
+export type Sfx =
+  'place' | 'road' | 'demolish' | 'upgrade' | 'decline' | 'error' | 'chapter' | 'click';
 
 /** Shortest gap between two plays of the same sound, seconds (a road drag places dozens). */
 const MIN_GAP: Record<Sfx, number> = {
@@ -79,7 +80,9 @@ export class AudioEngine {
 
   start(): void {
     if (this.ctx) return;
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     const ctx = (this.ctx = new Ctx());
     this.master = ctx.createGain();
@@ -128,7 +131,11 @@ export class AudioEngine {
     lfo.connect(depth).connect(breath.gain);
     const gain = ctx.createGain();
     gain.gain.value = 0;
-    src.connect(f).connect(breath).connect(gain).connect(this.master as GainNode);
+    src
+      .connect(f)
+      .connect(breath)
+      .connect(gain)
+      .connect(this.master as GainNode);
     src.start();
     lfo.start();
     this.beds.set(name, { gain, level });

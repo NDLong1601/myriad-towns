@@ -15,8 +15,7 @@ test('placing a building pops it in, then it settles', async ({ page }) => {
     const A = window.__MYRIAD__!;
     A.grant({ wood: 500, stone: 500 });
     for (let r = 0; r < 40; r++)
-      for (let dx = -r; dx <= r; dx++)
-        if (A.canPlace('road', dx, r)) return A.place('road', dx, r);
+      for (let dx = -r; dx <= r; dx++) if (A.canPlace('road', dx, r)) return A.place('road', dx, r);
     return false;
   });
   expect(placed).toBe(true);

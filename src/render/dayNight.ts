@@ -29,15 +29,96 @@ interface Key {
 
 // t = 0 midnight, 0.25 sunrise, 0.5 noon, 0.75 sunset. Nights stay readable (ambient never too low).
 const KEYS: Key[] = [
-  { t: 0.0, sky: '#1b2a45', sun: '#9fb4ff', sunI: 0.45, hemiSky: '#6d84b8', hemiGround: '#2b3242', hemiI: 0.75, night: 1 },
-  { t: 0.2, sky: '#2c3d5e', sun: '#a9b8f0', sunI: 0.5, hemiSky: '#7488b8', hemiGround: '#323a44', hemiI: 0.8, night: 0.9 },
-  { t: 0.27, sky: '#f0b48a', sun: '#ff9c5a', sunI: 1.5, hemiSky: '#ecbea4', hemiGround: '#524840', hemiI: 0.85, night: 0.35 },
-  { t: 0.35, sky: '#a9d2e3', sun: '#ffe9c8', sunI: 1.8, hemiSky: '#dceeff', hemiGround: '#5a6b48', hemiI: 1.05, night: 0 },
-  { t: 0.5, sky: '#9cc9dc', sun: '#fff1d6', sunI: 2.0, hemiSky: '#dceeff', hemiGround: '#5a6b48', hemiI: 1.1, night: 0 },
-  { t: 0.65, sky: '#a3cadb', sun: '#ffe6c2', sunI: 1.85, hemiSky: '#dceeff', hemiGround: '#5a6b48', hemiI: 1.05, night: 0 },
-  { t: 0.74, sky: '#e99a74', sun: '#ff8040', sunI: 1.6, hemiSky: '#e8a888', hemiGround: '#4a3c3a', hemiI: 0.8, night: 0.4 },
-  { t: 0.82, sky: '#2f3a5c', sun: '#a9b8f0', sunI: 0.5, hemiSky: '#7488b8', hemiGround: '#323a44', hemiI: 0.8, night: 0.9 },
-  { t: 1.0, sky: '#1b2a45', sun: '#9fb4ff', sunI: 0.45, hemiSky: '#6d84b8', hemiGround: '#2b3242', hemiI: 0.75, night: 1 },
+  {
+    t: 0.0,
+    sky: '#1b2a45',
+    sun: '#9fb4ff',
+    sunI: 0.45,
+    hemiSky: '#6d84b8',
+    hemiGround: '#2b3242',
+    hemiI: 0.75,
+    night: 1,
+  },
+  {
+    t: 0.2,
+    sky: '#2c3d5e',
+    sun: '#a9b8f0',
+    sunI: 0.5,
+    hemiSky: '#7488b8',
+    hemiGround: '#323a44',
+    hemiI: 0.8,
+    night: 0.9,
+  },
+  {
+    t: 0.27,
+    sky: '#f0b48a',
+    sun: '#ff9c5a',
+    sunI: 1.5,
+    hemiSky: '#ecbea4',
+    hemiGround: '#524840',
+    hemiI: 0.85,
+    night: 0.35,
+  },
+  {
+    t: 0.35,
+    sky: '#a9d2e3',
+    sun: '#ffe9c8',
+    sunI: 1.8,
+    hemiSky: '#dceeff',
+    hemiGround: '#5a6b48',
+    hemiI: 1.05,
+    night: 0,
+  },
+  {
+    t: 0.5,
+    sky: '#9cc9dc',
+    sun: '#fff1d6',
+    sunI: 2.0,
+    hemiSky: '#dceeff',
+    hemiGround: '#5a6b48',
+    hemiI: 1.1,
+    night: 0,
+  },
+  {
+    t: 0.65,
+    sky: '#a3cadb',
+    sun: '#ffe6c2',
+    sunI: 1.85,
+    hemiSky: '#dceeff',
+    hemiGround: '#5a6b48',
+    hemiI: 1.05,
+    night: 0,
+  },
+  {
+    t: 0.74,
+    sky: '#e99a74',
+    sun: '#ff8040',
+    sunI: 1.6,
+    hemiSky: '#e8a888',
+    hemiGround: '#4a3c3a',
+    hemiI: 0.8,
+    night: 0.4,
+  },
+  {
+    t: 0.82,
+    sky: '#2f3a5c',
+    sun: '#a9b8f0',
+    sunI: 0.5,
+    hemiSky: '#7488b8',
+    hemiGround: '#323a44',
+    hemiI: 0.8,
+    night: 0.9,
+  },
+  {
+    t: 1.0,
+    sky: '#1b2a45',
+    sun: '#9fb4ff',
+    sunI: 0.45,
+    hemiSky: '#6d84b8',
+    hemiGround: '#2b3242',
+    hemiI: 0.75,
+    night: 1,
+  },
 ];
 
 const ca = new THREE.Color();
@@ -80,7 +161,7 @@ export function lightingAt(time: number, out?: Lighting): Lighting {
   o.night = a.night + (b.night - a.night) * f;
   // By day the sun crosses from east to west; by night the moon does the same half a day later.
   const day = t >= 0.25 && t < 0.75;
-  const arc = day ? (t - 0.25) / 0.5 : (((t + 0.25) % 1) / 0.5);
+  const arc = day ? (t - 0.25) / 0.5 : ((t + 0.25) % 1) / 0.5;
   const azimuth = Math.PI * arc; // 0 east … π west
   // Stay at least ~25° up so shadows never stretch across the whole map.
   const elevation = 0.45 + 0.75 * Math.sin(Math.PI * arc);
