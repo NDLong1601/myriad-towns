@@ -1,0 +1,303 @@
+[
+  {
+    "id": "stockpile",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 10
+    },
+    "storage": {
+      "stone": 800,
+      "ore": 800,
+      "coal": 800
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "visual": {
+      "shape": "field",
+      "color": "#8d6e63",
+      "height": 0.1
+    },
+    "tags": ["storage"],
+    "unlock": {
+      "population": 10,
+      "revealAt": 0
+    }
+  },
+  {
+    "id": "granary",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 20,
+      "stone": 10
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "storage": {
+      "food": 1500
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "visual": {
+      "shape": "tower",
+      "color": "#d7ccc8",
+      "roof": "#bcaaa4",
+      "height": 1.4
+    },
+    "tags": ["storage"],
+    "unlock": {
+      "population": 30,
+      "revealAt": 15
+    }
+  },
+  {
+    "id": "warehouse",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 25,
+      "stone": 20
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "storage": {
+      "wood": 1000,
+      "stone": 1000,
+      "ore": 1000,
+      "coal": 1000,
+      "metal": 1000,
+      "goods": 1000
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "visual": {
+      "shape": "hall",
+      "color": "#6d4c41",
+      "roof": "#455a64",
+      "height": 1.2
+    },
+    "tags": ["storage", "logistics"],
+    "unlock": {
+      "population": 50,
+      "revealAt": 25
+    }
+  },
+  {
+    "id": "coal_mine",
+    "category": "production",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 30,
+      "stone": 15
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "coal": 2
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "terrain",
+        "terrain": "coal",
+        "radius": 2,
+        "min": 1
+      },
+      {
+        "type": "road",
+        "maxDistance": 3
+      }
+    ],
+    "visual": {
+      "shape": "mine",
+      "color": "#37474f",
+      "roof": "#212121",
+      "height": 1.0
+    },
+    "tags": ["mine", "industry"],
+    "unlock": {
+      "population": 60,
+      "revealAt": 30
+    }
+  },
+  {
+    "id": "steelworks",
+    "category": "production",
+    "footprint": {
+      "w": 3,
+      "d": 2
+    },
+    "cost": {
+      "stone": 40,
+      "wood": 20
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1,
+      "ore": 2,
+      "coal": 1
+    },
+    "produces": {
+      "metal": 2
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 3,
+        "radius": 5,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "visual": {
+      "shape": "block",
+      "color": "#455a64",
+      "roof": "#bf360c",
+      "height": 1.6
+    },
+    "tags": ["industry"],
+    "unlock": {
+      "population": 120,
+      "revealAt": 70
+    }
+  },
+  {
+    "id": "cargo_port",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 3,
+      "d": 2
+    },
+    "cost": {
+      "wood": 50,
+      "stone": 40,
+      "metal": 10
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1
+    },
+    "storage": {
+      "wood": 1000,
+      "ore": 1000,
+      "metal": 1000,
+      "goods": 1000
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 2,
+        "min": 2
+      },
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "visual": {
+      "shape": "dock",
+      "color": "#546e7a",
+      "roof": "#37474f",
+      "height": 1.1
+    },
+    "tags": ["port", "storage", "industry"],
+    "unlock": {
+      "population": 200,
+      "revealAt": 120
+    }
+  },
+  {
+    "id": "ferry_pier",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 1
+    },
+    "cost": {
+      "wood": 20,
+      "stone": 10
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "emits": [
+      {
+        "field": "urban",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 1,
+        "min": 1
+      },
+      {
+        "type": "road",
+        "maxDistance": 1
+      }
+    ],
+    "visual": {
+      "shape": "dock",
+      "color": "#8d6e63",
+      "roof": "#eceff1",
+      "height": 0.6
+    },
+    "tags": ["pier"],
+    "unlock": {
+      "population": 80,
+      "revealAt": 40
+    }
+  }
+]
