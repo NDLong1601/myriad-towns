@@ -4,6 +4,7 @@ import {
   type Amounts,
   type BuildingDef,
   type Catalog,
+  BASE_CAPACITY,
   DEMOLISH_REFUND,
   START_STOCK,
   isRoadDef,
@@ -45,6 +46,7 @@ export function rectOf(def: BuildingDef, x: number, z: number): Rect {
 export class City {
   readonly fields = new FieldStore();
   readonly stock: Record<string, number> = { ...START_STOCK };
+  readonly capacities: Record<string, number> = { ...BASE_CAPACITY };
   readonly progress: Progress;
   /** Sandbox option: placing costs nothing. */
   freeBuild = false;
@@ -78,6 +80,10 @@ export class City {
 
   countOf(defId: string): number {
     return this.perDef.get(defId) ?? 0;
+  }
+
+  capacityOf(resource: string): number {
+    return this.capacities[resource] ?? BASE_CAPACITY[resource] ?? 1000;
   }
 
   /** False while a building is abandoned (it neither works nor spreads its fields). */
@@ -201,6 +207,11 @@ export class City {
     this.perDef.set(def.id, this.countOf(def.id) + 1);
     this.spatialSet(b).add(uid);
     this.fields.apply(rect, def.emits, 1);
+    if (def.storage) {
+      for (const [r, n] of Object.entries(def.storage)) {
+        this.capacities[r] = (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) + n;
+      }
+    }
     this.emit({ type: 'added', building: b });
     if (cut.length) this.emit({ type: 'trees', tiles: cut.map(parseKey) });
     return { building: b, cut };
@@ -215,6 +226,14 @@ export class City {
     this.spatialSet(b).delete(uid);
     this.buildings.delete(uid);
     this.perDef.set(b.def.id, this.countOf(b.def.id) - 1);
+    if (b.def.storage && !this.inactive.has(uid)) {
+      for (const [r, n] of Object.entries(b.def.storage)) {
+        this.capacities[r] = Math.max(
+          BASE_CAPACITY[r] ?? 0,
+          (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) - n,
+        );
+      }
+    }
     // An abandoned building's emits were already taken out.
     if (!this.inactive.delete(uid)) this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, -1);
     for (const k of restoreTrees) this.terrain.clearedTrees?.delete(k);
@@ -240,7 +259,22 @@ export class City {
     this.buildings.set(uid, b);
     this.perDef.set(old.def.id, this.countOf(old.def.id) - 1);
     this.perDef.set(def.id, this.countOf(def.id) + 1);
-    if (active) this.fields.apply(rect, def.emits, 1);
+    if (active) {
+      if (old.def.storage) {
+        for (const [r, n] of Object.entries(old.def.storage)) {
+          this.capacities[r] = Math.max(
+            BASE_CAPACITY[r] ?? 0,
+            (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) - n,
+          );
+        }
+      }
+      if (def.storage) {
+        for (const [r, n] of Object.entries(def.storage)) {
+          this.capacities[r] = (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) + n;
+        }
+      }
+      this.fields.apply(rect, def.emits, 1);
+    }
     this.emit({ type: 'removed', building: old });
     this.emit({ type: 'added', building: b });
     return b;
@@ -252,6 +286,18 @@ export class City {
     if (!b || active === !this.inactive.has(uid)) return;
     if (active) this.inactive.delete(uid);
     else this.inactive.add(uid);
+    if (b.def.storage) {
+      for (const [r, n] of Object.entries(b.def.storage)) {
+        if (active) {
+          this.capacities[r] = (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) + n;
+        } else {
+          this.capacities[r] = Math.max(
+            BASE_CAPACITY[r] ?? 0,
+            (this.capacities[r] ?? BASE_CAPACITY[r] ?? 1000) - n,
+          );
+        }
+      }
+    }
     this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, active ? 1 : -1);
     this.emit({ type: 'status', building: b, active });
   }

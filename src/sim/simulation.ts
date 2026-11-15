@@ -366,8 +366,11 @@ export class Simulation {
         flows.consumed[r] = (flows.consumed[r] ?? 0) + n;
       }
       for (const [r, n] of c.outputs) {
-        stock[r] = (stock[r] ?? 0) + n * TICK_DT;
-        flows.produced[r] = (flows.produced[r] ?? 0) + n;
+        const cap = city.capacityOf(r);
+        const cur = stock[r] ?? 0;
+        const add = Math.min(Math.max(0, cap - cur), n * TICK_DT);
+        stock[r] = cur + add;
+        flows.produced[r] = (flows.produced[r] ?? 0) + add / TICK_DT;
       }
     }
     for (const tier of LABOR_TIERS) {
@@ -387,8 +390,11 @@ export class Simulation {
         flows.consumed[r] = (flows.consumed[r] ?? 0) + take / TICK_DT;
       }
       for (const [r, n] of sum.produced) {
-        stock[r] = (stock[r] ?? 0) + n * TICK_DT;
-        flows.produced[r] = (flows.produced[r] ?? 0) + n;
+        const cap = city.capacityOf(r);
+        const cur = stock[r] ?? 0;
+        const add = Math.min(Math.max(0, cap - cur), n * TICK_DT);
+        stock[r] = cur + add;
+        flows.produced[r] = (flows.produced[r] ?? 0) + add / TICK_DT;
       }
     }
     this.flows = flows;

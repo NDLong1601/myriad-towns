@@ -56,6 +56,10 @@
       "$ref": "#/$defs/amounts",
       "description": "Produced per sim second."
     },
+    "storage": {
+      "$ref": "#/$defs/amounts",
+      "description": "Additional storage capacity provided by this building."
+    },
     "housing": {
       "type": "integer",
       "minimum": 0,

@@ -66,6 +66,8 @@ export function hasTag(q: TerrainQuery, x: number, z: number, tag: string): bool
       return s.resource === Resource.Stone || s.biome === Biome.Mountain;
     case 'iron':
       return s.resource === Resource.Iron;
+    case 'coal':
+      return s.resource === Resource.Coal;
     case 'clay':
       return s.resource === Resource.Clay;
     case 'fertile':
