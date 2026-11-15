@@ -1,5 +1,3 @@
-import './style.css';
-import './ui/ui.css';
 import { tileToChunk } from '@/core/coords';
 import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
@@ -39,9 +37,11 @@ import { Goals } from '@/sim/goals';
 import { PoiStore } from '@/sim/poi';
 import { applySandbox, mountGoalsPanel, mountSandboxPanel } from '@/ui/goalsPanel';
 import { type GameSetup, markTutorialDone, readSetup, showNewGame } from '@/ui/newGame';
+import { initialStockMultiplier, startingTile } from '@/ui/gameStart';
+import { mountLighting, showSessionMenu, type LightingMode } from '@/ui/sessionControls';
 import { decodeSave } from '@/io/codec';
 import { type SaveData, applySave } from '@/io/save';
-import { getSlot, listSlots, storageAvailable } from '@/io/store';
+import { getSlot, storageAvailable } from '@/io/store';
 import { SaveSession, showSaveMenu, urlForSlot } from '@/ui/saveMenu';
 import { showSettings } from '@/ui/settingsMenu';
 import { loadSettings, saveSettings } from '@/ui/settingsStore';
@@ -163,6 +163,7 @@ if (loadId && storageAvailable()) {
   }
 }
 const seedText = loaded?.meta.seed ?? params.get('seed') ?? 'myriad';
+const cityName = loaded?.meta.name ?? (params.get('city')?.trim().slice(0, 40) || seedText);
 const seed = seedFromString(seedText);
 const num = (name: string, fallback: number): number => {
   const v = Number(params.get(name));
@@ -177,6 +178,20 @@ const viewRadius = Math.max(
 
 const terrain = new GeneratedTerrain(seed);
 const city = new City(loadCatalog(), terrain);
+if (!loaded) {
+  const multiplier = initialStockMultiplier(params.get('supplies'));
+  if (multiplier !== 1) {
+    city._addStock(
+      Object.fromEntries(
+        Object.entries(city.stock).map(([resource, n]) => [
+          resource,
+          Math.round(n * multiplier) - n,
+        ]),
+      ),
+      1,
+    );
+  }
+}
 const setup: GameSetup = loaded
   ? { mode: loaded.meta.mode, sandbox: loaded.meta.sandbox, undecided: false, tutorial: false }
   : readSetup(params);
@@ -206,6 +221,10 @@ const flatTerrain = params.has('terrain')
 setFlatTerrain(flatTerrain);
 const generator =
   typeof Worker !== 'undefined' ? new WorkerPoolGenerator(flatTerrain) : new InlineGenerator();
+const originTile =
+  loaded || params.has('x') || params.has('z')
+    ? { x: 0, z: 0 }
+    : startingTile(seed, params.get('area'));
 const view = new WorldView(app, {
   seed,
   viewRadius,
@@ -214,7 +233,11 @@ const view = new WorldView(app, {
     parsePreset(params.get('quality')) ?? settings.quality ?? 'medium',
     window.devicePixelRatio,
   ),
-  start: loaded?.camera ?? { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
+  start: loaded?.camera ?? {
+    x: num('x', originTile.x) + 0.5,
+    z: num('z', originTile.z) + 0.5,
+    ...(params.has('area') ? { distance: 38 } : {}),
+  },
   // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
   patchChunk: (chunk) => {
     let changed = false;
@@ -295,7 +318,7 @@ towns.on((e) => {
 pois.on(() => audio.play('upgrade'));
 
 // Day and night follow game time (?daynight=0 turns it off, ?time=0..1 fixes the hour).
-const dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
+let dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
 let fixedTime: number | null = params.has('time') ? num('time', 0.5) : null;
 
 const interfaceLayer = document.createElement('div');
@@ -304,24 +327,9 @@ document.body.appendChild(interfaceLayer);
 const bottom = document.createElement('div');
 bottom.className = 'mt-bottom';
 interfaceLayer.appendChild(bottom);
-const menu = mountBuildMenu(city, history, bottom);
+const menu = mountBuildMenu(city, history, bottom, params.get('tray') !== '0');
 mountEncyclopedia(document.body, city.catalog, menu);
 mountPolicyMenu(city, document.body, menu.tools);
-new BuildTool(
-  view,
-  city,
-  history,
-  preview,
-  new InfoPanel(document.body),
-  menu,
-  sim,
-  plans,
-  (x, z) => {
-    const poi = poiView.at(x, z);
-    return poi ? { poi, explored: pois.isExplored(poi.key) } : undefined;
-  },
-  new DetailPanel(document.body),
-);
 const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
@@ -334,8 +342,10 @@ interfaceLayer.prepend(top);
 const left = document.createElement('div');
 left.className = 'mt-left';
 top.appendChild(left);
-const renderSimBar = mountSimBar(sim, clock, top);
-mountResourceBar(city, top, sim);
+const readouts = document.createElement('div');
+readouts.className = 'mt-readouts';
+top.appendChild(readouts);
+mountResourceBar(city, readouts, sim);
 left.appendChild(hud);
 const leftPanels = document.createElement('div');
 leftPanels.className = 'mt-left-panels';
@@ -362,22 +372,27 @@ const tutorial = setup.tutorial
       },
     )
   : undefined;
-const newGameBtn = document.createElement('button');
-newGameBtn.type = 'button';
-newGameBtn.className = 'mt-newgame-btn';
-newGameBtn.textContent = t('ui.newGameButton');
-newGameBtn.addEventListener('click', () => {
-  // Keep the current game before starting another.
-  void session.save(true);
-  showNewGame(document.body, { seed: seedText });
-});
-newGameBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+new BuildTool(
+  view,
+  city,
+  history,
+  preview,
+  new InfoPanel(document.body),
+  menu,
+  sim,
+  plans,
+  (x, z) => {
+    const poi = poiView.at(x, z);
+    return poi ? { poi, explored: pois.isExplored(poi.key) } : undefined;
+  },
+  new DetailPanel(leftPanels),
+);
 
 // Saves: this game's slot (the loaded one, or a new one on first save).
 const session = new SaveSession(
   { city, sim, towns, pois, goals },
   loaded?.meta ?? {
-    name: seedText,
+    name: cityName,
     mode: setup.mode,
     seed: seedText,
     sandbox: { ...setup.sandbox },
@@ -413,7 +428,24 @@ const button = (
   bar.appendChild(b);
   return b;
 };
-bar.appendChild(newGameBtn);
+button(
+  '☰',
+  t('launch.mainMenu'),
+  () => {
+    showSessionMenu(
+      () => {
+        void session.save(true);
+        showNewGame(document.body, { seed: seedText });
+      },
+      async () => {
+        if (!(await session.save(true))) return false;
+        window.location.assign(window.location.pathname);
+        return true;
+      },
+    );
+  },
+  true,
+);
 const saveButton = button(
   '💾',
   `${t('save.title')} (Ctrl+S)`,
@@ -446,11 +478,15 @@ button(
       document.body,
       () => {
         // Reload into this game's slot; if saving is impossible, reload as it is.
-        void session
-          .save(true)
-          .then((ok) =>
-            window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href),
+        void session.save(true).then((ok) => {
+          const url = new URL(
+            ok ? urlForSlot(session.slotId) : window.location.href,
+            window.location.href,
           );
+          for (const key of ['lang', 'r', 'quality', 'terrain', 'daynight', 'traffic'])
+            url.searchParams.delete(key);
+          window.location.assign(url);
+        });
       },
       (v) => {
         audio.volume = v;
@@ -465,22 +501,15 @@ window.addEventListener('keydown', (e) => {
     void session.save();
   }
 });
-if (setup.undecided) {
-  // Offer to continue the most recent game, if this browser has one.
-  const latest = storageAvailable() ? await listSlots().catch(() => []) : [];
-  showNewGame(document.body, {
-    seed: seedText,
-    continueSlot: latest[0] ? { name: latest[0].name, url: urlForSlot(latest[0].id) } : undefined,
-  });
-}
 hud.removeAttribute('aria-live');
-hud.innerHTML = `<div class="mt-hud-heading"><strong>Myriad Towns</strong>
+hud.innerHTML = `<div class="mt-hud-heading"><strong></strong>
   <button type="button" class="mt-help" aria-label="${t('ui.help')} (H)" aria-controls="mt-help-details" title="${t('ui.help')} (H)">
     <span>${t('ui.help')}</span> <kbd>H</kbd>
   </button></div>
   <div class="mt-hud-meta"><span class="mt-game-mode">${t(`mode.${setup.mode}`)}</span>
     <span class="mt-game-seed"></span></div>
   <div class="mt-help-details" id="mt-help-details"></div>`;
+hud.querySelector('strong')!.textContent = params.has('city') || loaded ? cityName : 'Myriad Towns';
 const seedLabel = hud.querySelector<HTMLElement>('.mt-game-seed')!;
 seedLabel.textContent = seedText;
 seedLabel.title = `${t('ui.seed')}: ${seedText}`;
@@ -508,11 +537,27 @@ const map = mountMinimap(bottom, seed, view.controller, city, view, {
   open: params.has('minimap') ? params.get('minimap') !== '0' : settings.showMinimap && !small,
   onToggle: savePanel('showMinimap'),
 });
+const renderSimBar = mountSimBar(sim, clock, map.toolbar.parentElement!, readouts);
 mountPlanBar(plans, history, map.panels, map.toolbar);
 mountHeatmapControls(heatmap, map.panels, map.toolbar, {
   open: settings.showHeatmap,
   onToggle: savePanel('showHeatmap'),
 });
+const lightingMode: LightingMode =
+  fixedTime === null
+    ? dayNightOn
+      ? 'cycle'
+      : 'day'
+    : fixedTime >= 0.25 && fixedTime < 0.75
+      ? 'day'
+      : 'night';
+const renderLight = mountLighting(left, lightingMode, (mode) => {
+  dayNightOn = mode === 'cycle';
+  fixedTime = mode === 'day' ? 0.5 : mode === 'night' ? 0 : null;
+  renderLight(fixedTime ?? timeOfDay(sim.tick));
+});
+left.insertBefore(left.lastElementChild!, leftPanels);
+renderLight(fixedTime ?? (dayNightOn ? timeOfDay(sim.tick) : 0.5));
 
 /** Towns far from the camera sleep: a production summary instead of the full tick. */
 const DORMANT_DISTANCE = 96;
@@ -741,6 +786,7 @@ view.onFrame((dt) => {
   const fps = Math.round(frames / acc);
   acc = 0;
   frames = 0;
+  renderLight(fixedTime ?? (dayNightOn ? timeOfDay(sim.tick) : 0.5));
   if (!hudOpen) return;
   const s = view.controller.state;
   const tx = Math.floor(s.x);

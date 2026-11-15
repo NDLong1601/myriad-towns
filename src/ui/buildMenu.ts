@@ -13,8 +13,27 @@ export interface BuildMenu {
   onToolChange(fn: (tool: Tool) => void): void;
 }
 
+const CATEGORY_PATHS: Record<string, string> = {
+  infrastructure: 'M3 21 8 3m8 0 5 18M12 3v4m0 3v4m0 3v4',
+  housing: 'm3 11 9-8 9 8M5 10v11h14V10M10 21v-7h4v7',
+  food: 'M12 21v-9m0 3c-6 0-8-3-8-8 4 0 8 2 8 8Zm0-3c0-6 3-9 8-9 0 5-3 9-8 9Z',
+  production: 'M3 21V10l6 4V9l6 4V3h4l2 18H3Zm4-3h2m3 0h2m3 0h2',
+  service: 'M4 21h16M5 9v10m7-10v10m7-10v10M3 7l9-4 9 4H3Z',
+  nature: 'M12 21v-4m0-14 7 11h-4l2 3H7l2-3H5z',
+  culture: 'M3 5h18v14H3zM8 19v-3m8 3v-3M7 10h2m6 0h2m-7 3h4',
+};
+
+function categoryIcon(category: string): string {
+  return `<svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="${CATEGORY_PATHS[category] ?? 'M5 5h14v14H5z'}"/></svg>`;
+}
+
 /** Bottom bar: category tabs, buildings of the current category, and tool buttons. */
-export function mountBuildMenu(city: City, history: History, parent: HTMLElement): BuildMenu {
+export function mountBuildMenu(
+  city: City,
+  history: History,
+  parent: HTMLElement,
+  open = true,
+): BuildMenu {
   const el = document.createElement('div');
   el.className = 'mt-menu';
   el.innerHTML = `<div class="mt-row"><div class="mt-tabs"></div><div class="mt-tools">
@@ -25,6 +44,7 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   parent.appendChild(el);
   const tabs = el.querySelector('.mt-tabs') as HTMLElement;
   const items = el.querySelector('.mt-items') as HTMLElement;
+  items.hidden = !open;
   const tools = el.querySelector('.mt-tools') as HTMLElement;
   const undoBtn = el.querySelector('[data-tool=undo]') as HTMLButtonElement;
   const redoBtn = el.querySelector('[data-tool=redo]') as HTMLButtonElement;
@@ -41,9 +61,10 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   const listeners: ((t: Tool) => void)[] = [];
 
   tabs.innerHTML = cats
-    .map(
-      (c) => `<button data-cat="${c}" aria-controls="${items.id}">${t(`category.${c}`)}</button>`,
-    )
+    .map((c) => {
+      const label = t(`category.${c}`);
+      return `<button data-cat="${c}" aria-label="${label}" title="${label}" aria-controls="${items.id}">${categoryIcon(c)}<span>${label}</span></button>`;
+    })
     .join('');
   const tabButtons = tabs.querySelectorAll<HTMLButtonElement>('button');
   const renderTabs = (): void => {

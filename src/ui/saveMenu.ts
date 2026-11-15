@@ -12,7 +12,20 @@ import {
 import { fmt, t } from './i18n';
 
 /** URL params that describe a fresh game; dropped once the game lives in a save slot. */
-const GAME_PARAMS = ['seed', 'mode', 'unlock', 'free', 'nodecline', 'sandbox', 'tut', 'x', 'z'];
+const GAME_PARAMS = [
+  'seed',
+  'mode',
+  'unlock',
+  'free',
+  'nodecline',
+  'sandbox',
+  'tut',
+  'x',
+  'z',
+  'city',
+  'area',
+  'supplies',
+];
 
 export function urlForSlot(id: string): string {
   const q = new URLSearchParams(window.location.search);
@@ -105,33 +118,47 @@ export async function importFile(file: File): Promise<string> {
 }
 
 /** The save / load dialog. */
-export function showSaveMenu(parent: HTMLElement, session: SaveSession): void {
+export function showSaveMenu(
+  parent: HTMLElement,
+  session?: SaveSession,
+  onClose?: () => void,
+): void {
   const el = document.createElement('div');
+  const previous = document.activeElement;
   el.className = 'mt-newgame mt-saves';
-  el.innerHTML = `<div class="mt-newgame-card" role="dialog" aria-modal="true" aria-labelledby="mt-sv-title">
-    <h2 id="mt-sv-title">${t('save.title')}</h2>
-    <form class="mt-save-row">
+  el.innerHTML = `<div class="mt-newgame-card" ${onClose ? '' : 'role="dialog" aria-modal="true"'} aria-labelledby="mt-sv-title">
+    <h2 id="mt-sv-title" tabindex="-1">${t(session ? 'save.title' : 'launch.load')}</h2>
+    ${
+      session
+        ? `<form class="mt-save-row">
       <input name="name" maxlength="40" value="" aria-label="${t('save.name')}">
       <button type="submit" class="mt-primary">💾 ${t('save.now')}</button>
-    </form>
+    </form>`
+        : ''
+    }
     <ul class="mt-slots"><li>…</li></ul>
     <div class="mt-save-row">
-      <label class="mt-file">📂 ${t('save.import')}<input type="file" accept="${SAVE_EXTENSION},application/gzip,application/json" hidden></label>
-      <button type="button" data-act="close">${t('ui.close')}</button>
+      <label class="mt-file">${t('save.import')}<input type="file" accept="${SAVE_EXTENSION},application/gzip,application/json"></label>
+      <button type="button" data-act="close">${t(onClose ? 'launch.back' : 'ui.close')}</button>
     </div>
   </div>`;
   parent.appendChild(el);
-  const nameInput = el.querySelector('input[name=name]') as HTMLInputElement;
-  nameInput.value = session.meta.name;
+  const nameInput = el.querySelector<HTMLInputElement>('input[name=name]');
+  if (nameInput && session) nameInput.value = session.meta.name;
   const list = el.querySelector('.mt-slots') as HTMLUListElement;
+  const close = (): void => {
+    el.remove();
+    if (onClose) onClose();
+    else if (previous instanceof HTMLElement) previous.focus();
+  };
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
   el.addEventListener('keydown', (e) => {
     e.stopPropagation();
-    if (e.key === 'Escape') el.remove();
+    if (e.key === 'Escape') close();
   });
 
   const row = (s: SlotSummary): string => {
-    const current = s.id === session.slotId;
+    const current = s.id === session?.slotId;
     const when = new Date(s.updatedAt).toLocaleString();
     return `<li data-id="${s.id}" class="${current ? 'current' : ''}">
       <div><b>${escapeHtml(s.name)}</b>${current ? ` <em>${t('save.current')}</em>` : ''}
@@ -150,8 +177,9 @@ export function showSaveMenu(parent: HTMLElement, session: SaveSession): void {
   };
   void refresh();
 
-  (el.querySelector('form') as HTMLFormElement).addEventListener('submit', (e) => {
+  el.querySelector('form')?.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!session || !nameInput) return;
     session.meta.name = nameInput.value.trim() || session.meta.seed;
     void session.save().then(refresh);
   });
@@ -160,14 +188,15 @@ export function showSaveMenu(parent: HTMLElement, session: SaveSession): void {
     if (!btn) return;
     const act = btn.dataset.act;
     if (act === 'close') {
-      el.remove();
+      close();
       return;
     }
     const id = btn.closest<HTMLElement>('[data-id]')?.dataset.id;
     if (!id) return;
     if (act === 'load') {
       // Keep the current game first, then open the other one.
-      void session.save(true).then(() => window.location.assign(urlForSlot(id)));
+      if (session) void session.save(true).then(() => window.location.assign(urlForSlot(id)));
+      else window.location.assign(urlForSlot(id));
     } else if (act === 'export') {
       void getSlot(id).then((rec) => rec && download(rec.bytes, rec.name));
     } else if (act === 'delete') {
@@ -191,7 +220,7 @@ export function showSaveMenu(parent: HTMLElement, session: SaveSession): void {
         list.insertAdjacentHTML('afterbegin', `<li class="bad">${t('save.importFailed')}</li>`);
       });
   });
-  nameInput.focus();
+  (nameInput ?? el.querySelector<HTMLElement>('h2'))?.focus();
 }
 
 function escapeHtml(s: string): string {
