@@ -7,6 +7,7 @@ import { amountsHtml } from './icons';
 export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
 
 export interface BuildMenu {
+  readonly tools: HTMLElement;
   setTool(tool: Tool): void;
   readonly tool: Tool;
   onToolChange(fn: (tool: Tool) => void): void;
@@ -17,13 +18,14 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   const el = document.createElement('div');
   el.className = 'mt-menu';
   el.innerHTML = `<div class="mt-row"><div class="mt-tabs"></div><div class="mt-tools">
-    <button data-tool="demolish" title="${t('ui.demolish')}">⛏ ${t('ui.demolish').replace(/ \(.*\)/, '')}</button>
+    <button data-tool="demolish" title="${t('ui.demolish')}" aria-label="${t('ui.demolish')}">⛏ <span>${t('ui.demolish').replace(/ \(.*\)/, '')}</span></button>
     <button data-tool="undo" title="${t('ui.undo')}">↶</button>
     <button data-tool="redo" title="${t('ui.redo')}">↷</button>
-  </div></div><div class="mt-items"></div>`;
+  </div></div><div id="mt-build-items" class="mt-items"></div>`;
   parent.appendChild(el);
   const tabs = el.querySelector('.mt-tabs') as HTMLElement;
   const items = el.querySelector('.mt-items') as HTMLElement;
+  const tools = el.querySelector('.mt-tools') as HTMLElement;
   const undoBtn = el.querySelector('[data-tool=undo]') as HTMLButtonElement;
   const redoBtn = el.querySelector('[data-tool=redo]') as HTMLButtonElement;
   const demolishBtn = el.querySelector('[data-tool=demolish]') as HTMLButtonElement;
@@ -31,20 +33,29 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   const cats = [...city.catalog.categories].sort((a, b) =>
     a === 'infrastructure' ? -1 : b === 'infrastructure' ? 1 : 0,
   );
+  const defs = [...city.catalog.defs];
+  const road = defs.findIndex((def) => def.id === 'road');
+  if (road > 0) defs.unshift(...defs.splice(road, 1));
   let category = cats[0] ?? 'housing';
   let tool: Tool = { kind: 'none' };
   const listeners: ((t: Tool) => void)[] = [];
 
+  tabs.innerHTML = cats
+    .map(
+      (c) => `<button data-cat="${c}" aria-controls="${items.id}">${t(`category.${c}`)}</button>`,
+    )
+    .join('');
+  const tabButtons = tabs.querySelectorAll<HTMLButtonElement>('button');
   const renderTabs = (): void => {
-    tabs.innerHTML = cats
-      .map(
-        (c) =>
-          `<button data-cat="${c}" class="${c === category ? 'active' : ''}">${t(`category.${c}`)}</button>`,
-      )
-      .join('');
+    for (const button of tabButtons) {
+      const expanded = !items.hidden && button.dataset.cat === category;
+      button.classList.toggle('active', expanded);
+      button.setAttribute('aria-expanded', String(expanded));
+    }
   };
+  let itemMarkup = '';
   const renderItems = (): void => {
-    items.innerHTML = city.catalog.defs
+    const html = defs
       .filter(
         (d) =>
           d.category === category &&
@@ -69,13 +80,31 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
         return `<button class="mt-item${active}${poor}" data-def="${d.id}">${img}<span class="mt-item-text"><span>${buildingName(d.id)}</span><small>${size} · ${amountsHtml(d.cost) || '—'}</small></span></button>`;
       })
       .join('');
+    if (html !== itemMarkup) {
+      const focused = document.activeElement;
+      items.innerHTML = html;
+      if (focused instanceof HTMLButtonElement && focused.dataset.def) {
+        items.querySelector<HTMLButtonElement>(`[data-def="${focused.dataset.def}"]`)?.focus({
+          preventScroll: true,
+        });
+      }
+      itemMarkup = html;
+    }
     demolishBtn.classList.toggle('active', tool.kind === 'demolish');
+    demolishBtn.setAttribute('aria-pressed', String(tool.kind === 'demolish'));
     undoBtn.disabled = !history.canUndo;
     redoBtn.disabled = !history.canRedo;
   };
 
   const setTool = (next: Tool): void => {
     tool = next;
+    if (next.kind === 'build') {
+      const nextCategory = city.catalog.get(next.defId).category;
+      if (nextCategory !== category) items.scrollLeft = 0;
+      category = nextCategory;
+      items.hidden = false;
+      renderTabs();
+    }
     renderItems();
     for (const l of listeners) l(tool);
   };
@@ -84,9 +113,13 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
     const b = (e.target as HTMLElement).closest('button');
     if (!b) return;
     if (b.dataset.cat) {
+      const reopen = items.hidden || b.dataset.cat !== category;
+      if (b.dataset.cat !== category) items.scrollLeft = 0;
       category = b.dataset.cat;
+      items.hidden = !reopen;
       renderTabs();
-      renderItems();
+      if (!reopen && tool.kind === 'build') setTool({ kind: 'none' });
+      else renderItems();
     } else if (b.dataset.def) {
       const same = tool.kind === 'build' && tool.defId === b.dataset.def;
       setTool(same ? { kind: 'none' } : { kind: 'build', defId: b.dataset.def });
@@ -100,6 +133,35 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   });
   // Keep the canvas from treating menu clicks as map clicks.
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
+  window.addEventListener('keydown', (e) => {
+    if (e.code !== 'Escape' || e.defaultPrevented || items.hidden) return;
+    if (document.querySelector('[aria-modal="true"]:not([hidden], [hidden] *)')) return;
+    if (items.contains(document.activeElement)) {
+      Array.from(tabButtons)
+        .find((button) => button.dataset.cat === category)
+        ?.focus();
+    }
+    items.hidden = true;
+    renderTabs();
+  });
+  for (const row of [tabs, items]) {
+    row.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.ctrlKey || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+        if (row.scrollWidth <= row.clientWidth) return;
+        e.preventDefault();
+        const unit =
+          e.deltaMode === WheelEvent.DOM_DELTA_LINE
+            ? 16
+            : e.deltaMode === WheelEvent.DOM_DELTA_PAGE
+              ? row.clientWidth
+              : 1;
+        row.scrollLeft += e.deltaY * unit;
+      },
+      { passive: false },
+    );
+  }
 
   city.on((e) => {
     if (e.type === 'stock' || e.type === 'unlocked') renderItems();
@@ -109,6 +171,7 @@ export function mountBuildMenu(city: City, history: History, parent: HTMLElement
   renderItems();
 
   return {
+    tools,
     setTool,
     get tool() {
       return tool;

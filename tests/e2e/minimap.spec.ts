@@ -147,7 +147,7 @@ test.describe('minimap', () => {
     await button.click();
     await expect(map).toBeVisible();
     const open = (await button.boundingBox())!;
-    const plan = (await page.locator('.mt-planbar').boundingBox())!;
+    const plan = (await page.locator('.mt-plan-btn').boundingBox())!;
     const bounds = (await map.boundingBox())!;
     expect(open).toEqual(closed);
     expect(bounds.y + bounds.height).toBeLessThan(open.y);

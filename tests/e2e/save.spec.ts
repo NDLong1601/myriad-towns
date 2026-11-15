@@ -56,7 +56,7 @@ test('export a save to a file and import it back as a new slot', async ({ page }
   await ready(page);
   const count = await buildSomething(page);
   await page.evaluate(() => window.__MYRIAD__!.save());
-  await page.getByRole('button', { name: /💾/ }).click();
+  await page.getByRole('button', { name: /Lưu và tải ván/ }).click();
   const dialog = page.locator('.mt-saves');
   const row = dialog.locator('li.current');
   await expect(row).toBeVisible(SLOW);
@@ -73,7 +73,7 @@ test('export a save to a file and import it back as a new slot', async ({ page }
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBe(count);
   expect(await page.evaluate(() => window.__MYRIAD__!.mode())).toBe('sandbox');
   // Both slots are listed now.
-  await page.getByRole('button', { name: /💾/ }).click();
+  await page.getByRole('button', { name: /Lưu và tải ván/ }).click();
   await expect(page.locator('.mt-saves li[data-id]')).toHaveCount(2, SLOW);
 });
 
@@ -98,7 +98,7 @@ test('settings: language and view distance apply after reload and keep the game'
   await page.goto('./?seed=e2e-settings&mode=goals&speed=0&autosave=0');
   await ready(page);
   const count = await buildSomething(page);
-  await page.getByRole('button', { name: '⚙' }).click();
+  await page.getByRole('button', { name: 'Cài đặt', exact: true }).click();
   const form = page.locator('.mt-settings');
   await form.locator('select[name=lang]').selectOption('en');
   await form.locator('input[name=radius]').fill('3');

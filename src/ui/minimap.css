@@ -1,22 +1,46 @@
 .mt-minimap-dock {
-  position: fixed;
-  left: max(12px, env(safe-area-inset-left));
-  bottom: var(--mt-map-controls-bottom);
+  grid-column: 1;
+  grid-row: 1;
   display: grid;
   justify-items: start;
-  gap: 8px;
-  z-index: 25;
+  gap: 6px;
+  width: min(168px, 100%);
   pointer-events: none;
 }
 
+.mt-map-upper,
+.mt-map-panels {
+  display: grid;
+  align-items: end;
+  gap: 6px;
+}
+.mt-map-upper {
+  width: 100%;
+}
+.mt-map-panels {
+  min-width: 0;
+}
+.mt-map-panels:not(:has(> :not([hidden]))),
+.mt-map-upper:not(:has(.mt-minimap:not(.hidden), .mt-map-panels > :not([hidden]))) {
+  display: none;
+}
+.mt-map-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--hud-bg);
+  pointer-events: auto;
+}
+
 .mt-minimap {
-  width: clamp(88px, 23dvh, 160px);
+  width: clamp(88px, 23dvh, 158px);
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.28);
-  border: 2px solid var(--hud-bg, rgb(255 255 255 / 0.82));
-  background: var(--hud-bg, #1a2327);
+  border: 2px solid var(--hud-border);
+  background: var(--hud-bg);
   cursor: crosshair;
   pointer-events: auto;
   user-select: none;
@@ -27,25 +51,48 @@
   display: none;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 881px) {
+  .mt-map-panels {
+    grid-row: 1;
+  }
+  .mt-minimap {
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 880px) {
+  .mt-minimap-dock {
+    width: 100%;
+  }
+  .mt-map-upper {
+    grid-template-columns: auto minmax(0, min(200px, 55vw));
+    justify-content: start;
+  }
+  .mt-map-panels {
+    grid-column: 2;
+  }
   .mt-minimap {
     width: clamp(88px, 20dvh, 120px);
   }
 }
 
-.mt-minimap-btn {
+.mt-map-toolbar button {
   display: grid;
   place-items: center;
   width: var(--mt-map-toggle-size);
   height: var(--mt-map-toggle-size);
-  border-radius: 50%;
-  border: none;
-  background: var(--hud-bg, rgb(255 255 255 / 0.82));
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--hud-fg);
   cursor: pointer;
   pointer-events: auto;
 }
-.mt-minimap-btn[aria-pressed='true'] {
-  outline: 2px solid #2f80ed;
+.mt-map-toolbar button:hover {
+  background: var(--hud-hover);
+}
+.mt-map-toolbar button[aria-pressed='true'] {
+  color: var(--hud-accent);
+  border-color: var(--hud-accent);
+  background: var(--hud-accent-bg);
 }

@@ -298,10 +298,15 @@ pois.on(() => audio.play('upgrade'));
 const dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
 let fixedTime: number | null = params.has('time') ? num('time', 0.5) : null;
 
-mountResourceBar(city, document.body, sim);
-const menu = mountBuildMenu(city, history, document.body);
+const interfaceLayer = document.createElement('div');
+interfaceLayer.className = 'mt-interface';
+document.body.appendChild(interfaceLayer);
+const bottom = document.createElement('div');
+bottom.className = 'mt-bottom';
+interfaceLayer.appendChild(bottom);
+const menu = mountBuildMenu(city, history, bottom);
 mountEncyclopedia(document.body, city.catalog, menu);
-mountPolicyMenu(city, document.body);
+mountPolicyMenu(city, document.body, menu.tools);
 new BuildTool(
   view,
   city,
@@ -317,28 +322,36 @@ new BuildTool(
   },
   new DetailPanel(document.body),
 );
-const renderSimBar = mountSimBar(sim, clock, document.body);
 const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
   towns,
 });
 
-// Left column: the HUD, then the chapter goals (or the Sandbox options).
+const top = document.createElement('div');
+top.className = 'mt-top';
+interfaceLayer.prepend(top);
 const left = document.createElement('div');
 left.className = 'mt-left';
-document.body.appendChild(left);
+top.appendChild(left);
+const renderSimBar = mountSimBar(sim, clock, top);
+mountResourceBar(city, top, sim);
 left.appendChild(hud);
-if (goals) mountGoalsPanel(goals, left);
-else mountSandboxPanel(setup.sandbox, city, sim, left);
-const renderTowns = mountTownsPanel(towns, sim, left, (x, z) => view.controller.teleport(x, z));
+const leftPanels = document.createElement('div');
+leftPanels.className = 'mt-left-panels';
+left.appendChild(leftPanels);
+if (goals) mountGoalsPanel(goals, leftPanels);
+else mountSandboxPanel(setup.sandbox, city, sim, leftPanels);
+const renderTowns = mountTownsPanel(towns, sim, leftPanels, (x, z) =>
+  view.controller.teleport(x, z),
+);
 towns.on((e) => {
   if (e.type === 'removed') sim.setDormant(e.town.id, false);
 });
 const tutorial = setup.tutorial
   ? mountTutorial(
-      left,
-      left.children[1] ?? null,
+      leftPanels,
+      leftPanels.firstElementChild,
       city,
       () => view.controller.state,
       () => {
@@ -384,46 +397,68 @@ if (loaded && loaded.genVersion !== GEN_VERSION) say(t('save.genVersion'), 'bad'
 const bar = document.createElement('div');
 bar.className = 'mt-left-buttons';
 bar.addEventListener('pointerdown', (e) => e.stopPropagation());
-const button = (label: string, title: string, onClick: () => void): void => {
+const button = (
+  label: string,
+  title: string,
+  onClick: () => void,
+  iconOnly = false,
+): HTMLButtonElement => {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'mt-newgame-btn';
   b.textContent = label;
   b.title = title;
+  if (iconOnly) b.setAttribute('aria-label', title);
   b.addEventListener('click', onClick);
   bar.appendChild(b);
+  return b;
 };
 bar.appendChild(newGameBtn);
-button(`💾 ${t('save.button')}`, `${t('save.title')} (Ctrl+S)`, () =>
-  showSaveMenu(document.body, session),
+const saveButton = button(
+  '💾',
+  `${t('save.title')} (Ctrl+S)`,
+  () => showSaveMenu(document.body, session),
+  true,
 );
+const saveLabel = document.createElement('span');
+saveLabel.className = 'mt-save-label';
+saveLabel.textContent = ` ${t('save.button')}`;
+saveButton.appendChild(saveLabel);
 const muteLabel = (): string => (audio.muted ? '🔇' : '🔊');
-button(muteLabel(), t('audio.muteShort'), () => {
-  audio.muted = !audio.muted;
-  muteBtn.textContent = muteLabel();
-  muteBtn.setAttribute('aria-pressed', String(audio.muted));
-  saveSettings({ ...loadSettings(), muted: audio.muted });
-});
-const muteBtn = bar.lastElementChild as HTMLButtonElement;
+const muteBtn = button(
+  muteLabel(),
+  t('audio.muteShort'),
+  () => {
+    audio.muted = !audio.muted;
+    muteBtn.textContent = muteLabel();
+    muteBtn.setAttribute('aria-pressed', String(audio.muted));
+    saveSettings({ ...loadSettings(), muted: audio.muted });
+  },
+  true,
+);
 muteBtn.classList.add('mt-mute');
 muteBtn.setAttribute('aria-pressed', String(audio.muted));
-button('⚙', t('settings.title'), () =>
-  showSettings(
-    document.body,
-    () => {
-      // Reload into this game's slot; if saving is impossible, reload as it is.
-      void session
-        .save(true)
-        .then((ok) =>
-          window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href),
-        );
-    },
-    (v) => {
-      audio.volume = v;
-    },
-  ),
+button(
+  '⚙',
+  t('settings.title'),
+  () =>
+    showSettings(
+      document.body,
+      () => {
+        // Reload into this game's slot; if saving is impossible, reload as it is.
+        void session
+          .save(true)
+          .then((ok) =>
+            window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href),
+          );
+      },
+      (v) => {
+        audio.volume = v;
+      },
+    ),
+  true,
 );
-left.appendChild(bar);
+left.insertBefore(bar, leftPanels);
 window.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
     e.preventDefault();
@@ -438,20 +473,45 @@ if (setup.undecided) {
     continueSlot: latest[0] ? { name: latest[0].name, url: urlForSlot(latest[0].id) } : undefined,
   });
 }
+hud.removeAttribute('aria-live');
+hud.innerHTML = `<div class="mt-hud-heading"><strong>Myriad Towns</strong>
+  <button type="button" class="mt-help" aria-label="${t('ui.help')} (H)" aria-controls="mt-help-details" title="${t('ui.help')} (H)">
+    <span>${t('ui.help')}</span> <kbd>H</kbd>
+  </button></div>
+  <div class="mt-hud-meta"><span class="mt-game-mode">${t(`mode.${setup.mode}`)}</span>
+    <span class="mt-game-seed"></span></div>
+  <div class="mt-help-details" id="mt-help-details"></div>`;
+const seedLabel = hud.querySelector<HTMLElement>('.mt-game-seed')!;
+seedLabel.textContent = seedText;
+seedLabel.title = `${t('ui.seed')}: ${seedText}`;
+const helpButton = hud.querySelector<HTMLButtonElement>('.mt-help')!;
+const helpDetails = hud.querySelector<HTMLElement>('.mt-help-details')!;
 let hudOpen = params.get('debug') === '1';
+const setHelp = (open: boolean): void => {
+  hudOpen = open;
+  helpDetails.hidden = !open;
+  helpButton.setAttribute('aria-expanded', String(open));
+  if (open) helpDetails.textContent = t('ui.helpControls');
+};
+setHelp(hudOpen);
+hud.addEventListener('pointerdown', (e) => e.stopPropagation());
+helpButton.addEventListener('click', () => setHelp(!hudOpen));
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'KeyH' && !(e.target instanceof HTMLInputElement)) hudOpen = !hudOpen;
+  if (e.code !== 'KeyH' || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+  if (e.target instanceof Element && e.target.closest('input, select, textarea, [contenteditable]'))
+    return;
+  setHelp(!hudOpen);
 });
 const savePanel = (key: 'showMinimap' | 'showHeatmap') => (open: boolean) =>
   saveSettings({ ...loadSettings(), [key]: open });
-mountHeatmapControls(heatmap, document.body, {
-  open: settings.showHeatmap,
-  onToggle: savePanel('showHeatmap'),
-});
-mountPlanBar(plans, history, document.body);
-mountMinimap(document.body, seed, view.controller, city, view, {
+const map = mountMinimap(bottom, seed, view.controller, city, view, {
   open: params.has('minimap') ? params.get('minimap') !== '0' : settings.showMinimap && !small,
   onToggle: savePanel('showMinimap'),
+});
+mountPlanBar(plans, history, map.panels, map.toolbar);
+mountHeatmapControls(heatmap, map.panels, map.toolbar, {
+  open: settings.showHeatmap,
+  onToggle: savePanel('showHeatmap'),
 });
 
 /** Towns far from the camera sleep: a production summary instead of the full tick. */
@@ -681,27 +741,32 @@ view.onFrame((dt) => {
   const fps = Math.round(frames / acc);
   acc = 0;
   frames = 0;
+  if (!hudOpen) return;
   const s = view.controller.state;
   const tx = Math.floor(s.x);
   const tz = Math.floor(s.z);
   const { cx, cz } = tileToChunk(tx, tz);
   const tile = sampleTile(seed, tx, tz);
   const st = view.chunks.stats();
-  const head = `<strong>Myriad Towns</strong> · seed "${escapeHtml(seedText)}" · ${t(`mode.${setup.mode}`)} · <span class="hint">H: ${t('ui.help')}</span>`;
-  if (!hudOpen) {
-    hud.innerHTML = head;
-    return;
-  }
-  hud.innerHTML =
-    `${head}<br>` +
-    `Ô (${tx}, ${tz}) · chunk (${cx}, ${cz}) · ${BIOME_NAMES[tile.biome as Biome]} · cao ${tile.level}<br>` +
-    `${fps} fps · tick ${sim.lastTickMs.toFixed(2)} ms · ${st.visible}/${st.loaded} chunk · ${view.renderer.info.render.calls} draw call · ×${view.renderScale.toFixed(2)}<br>` +
-    `<span class="hint">Kéo chuột trái: di chuyển · chuột phải: xoay · cuộn: zoom · Q/E: xoay 90°<br>Chọn công trình ở thanh dưới · Esc: huỷ · X: phá · Ctrl+Z: hoàn tác<br>Space: tạm dừng · 1–0: bản đồ nhiệt · P: quy hoạch · B: bách khoa</span>`;
+  helpDetails.textContent = [
+    t('ui.helpLocation', {
+      tx,
+      tz,
+      cx,
+      cz,
+      biome: BIOME_NAMES[tile.biome as Biome],
+      level: tile.level,
+    }),
+    t('ui.helpPerformance', {
+      fps,
+      tick: sim.lastTickMs.toFixed(2),
+      chunks: `${st.visible}/${st.loaded}`,
+      draws: view.renderer.info.render.calls,
+      scale: view.renderScale.toFixed(2),
+    }),
+    t('ui.helpControls'),
+  ].join('\n');
 });
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-}
 
 function history_replace(q: URLSearchParams): void {
   const qs = q.toString();
