@@ -9,6 +9,7 @@ const SHAPES: Record<string, string> = {
     '<circle cx="12" cy="7" r="3.6" fill="#3f9f6a"/><path d="M4.5 21c0-5 3-8 7.5-8s7.5 3 7.5 8z" fill="#3f9f6a"/><path d="M9.5 15.5 12 18l2.5-2.5" fill="none" stroke="#fff" stroke-width="1.4"/>',
   expert:
     '<circle cx="12" cy="7" r="3.6" fill="#d9a21b"/><path d="M4.5 21c0-5 3-8 7.5-8s7.5 3 7.5 8z" fill="#d9a21b"/><path d="m12 14.2.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z" fill="#fff"/>',
+  coal: '<path d="m4 14 3-7 7-3 6 5-2 8-8 3z" fill="#2b2d30"/><path d="m7 7 4 3-1 6-4-2z" fill="#44474d"/>',
 };
 
 /** Fallback glyph for a resource without a drawn icon. */

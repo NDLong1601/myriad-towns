@@ -29,6 +29,7 @@ interface Building {
   cost?: Record<string, number>;
   upkeep?: Record<string, number>;
   produces?: Record<string, number>;
+  storage?: Record<string, number>;
   emits?: { field: string }[];
   placeOn?: string[];
   requires?: Requirement[];
@@ -94,6 +95,7 @@ for (const b of all) {
     ['cost', b.cost],
     ['upkeep', b.upkeep],
     ['produces', b.produces],
+    ['storage', b.storage],
   ] as const) {
     for (const [r, n] of Object.entries(amounts ?? {})) {
       if (!resourceIds.has(r))

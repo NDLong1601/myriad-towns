@@ -48,6 +48,7 @@ export interface BuildingDef {
   cost: Amounts;
   upkeep?: Amounts;
   produces?: Amounts;
+  storage?: Amounts;
   housing?: number;
   emits?: Emit[];
   placeOn?: string[];
@@ -65,6 +66,8 @@ export const STOCK_RESOURCES: readonly string[] = resourcesJson.stock;
 /** Workforce tiers: produced by housing, used by workplaces every tick, never stored. */
 export const LABOR_TIERS: readonly string[] = resourcesJson.labor;
 export const START_STOCK: Amounts = resourcesJson.start;
+export const BASE_CAPACITY: Amounts =
+  (resourcesJson as { baseCapacity?: Amounts }).baseCapacity ?? {};
 export const DEMOLISH_REFUND: number = resourcesJson.demolishRefund;
 
 const DEFAULT_PLACE_ON = ['land', 'flat'];

@@ -1,16 +1,40 @@
 {
-  "stock": ["food", "wood", "stone", "ore", "metal", "goods", "energy", "knowledge", "charter"],
+  "stock": [
+    "food",
+    "wood",
+    "stone",
+    "ore",
+    "coal",
+    "metal",
+    "goods",
+    "energy",
+    "knowledge",
+    "charter"
+  ],
   "labor": ["labor", "skilled", "expert"],
   "start": {
     "food": 150,
     "wood": 300,
     "stone": 200,
     "ore": 0,
+    "coal": 0,
     "metal": 0,
     "goods": 0,
     "energy": 0,
     "knowledge": 0,
     "charter": 0
+  },
+  "baseCapacity": {
+    "food": 500,
+    "wood": 600,
+    "stone": 500,
+    "ore": 300,
+    "coal": 300,
+    "metal": 200,
+    "goods": 200,
+    "energy": 1000,
+    "knowledge": 1000,
+    "charter": 50
   },
   "demolishRefund": 0.75
 }

@@ -8,6 +8,13 @@ export function townName(id: number): string {
   return id > 8 ? `${base} ${Math.ceil(id / 8)}` : base;
 }
 
+function happinessIcon(h: number): string {
+  if (h >= 80) return '😄';
+  if (h >= 60) return '🙂';
+  if (h >= 40) return '😐';
+  return '😟';
+}
+
 /** Left-column list of towns: population, asleep or not; click to fly there. */
 export function mountTownsPanel(
   towns: TownStore,
@@ -33,7 +40,8 @@ export function mountTownsPanel(
     const html = `<h3>${t('towns.title')}</h3><ul>${list
       .map((tw) => {
         const asleep = sim.isDormant(tw.id);
-        return `<li><button type="button" data-town="${tw.id}" title="${t('towns.goTo')}">${townName(tw.id)} · ${t('towns.pop', { pop: fmt(tw.population) })}${
+        const icon = happinessIcon(tw.happiness);
+        return `<li><button type="button" data-town="${tw.id}" title="${t('towns.goTo')}">${townName(tw.id)} · ${t('towns.pop', { pop: fmt(tw.population) })} · <span title="${t('towns.happiness')} ${tw.happiness}%">${icon} ${tw.happiness}%</span>${
           asleep ? ` <em title="${t('towns.dormantHint')}">💤 ${t('towns.dormant')}</em>` : ''
         }</button></li>`;
       })

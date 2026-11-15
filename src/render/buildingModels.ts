@@ -147,10 +147,41 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const cz = d / 2;
   const parts: THREE.BufferGeometry[] = [];
   switch (
-    def.id === 'airfield' || def.id === 'rail_track' || def.id === 'flower_garden'
+    def.id === 'airfield' ||
+    def.id === 'rail_track' ||
+    def.id === 'flower_garden' ||
+    def.id === 'bus_stop' ||
+    def.id === 'metro_station' ||
+    def.id === 'skyscraper'
       ? def.id
       : v.shape
   ) {
+    case 'bus_stop': {
+      parts.push(box(w * 0.85, 0.04, d * 0.85, '#7f8c8d', cx, cz));
+      parts.push(box(w * 0.7, 0.45, 0.04, '#34495e', cx, cz - 0.28, 0.04));
+      parts.push(box(w * 0.75, 0.04, 0.5, '#2980b9', cx, cz, 0.49));
+      parts.push(box(0.4, 0.12, 0.15, '#d35400', cx, cz - 0.1, 0.04));
+      parts.push(box(0.04, 0.6, 0.04, '#f1c40f', cx + 0.3, cz + 0.25, 0.04));
+      parts.push(box(0.12, 0.12, 0.02, '#e74c3c', cx + 0.3, cz + 0.25, 0.54));
+      break;
+    }
+    case 'metro_station': {
+      parts.push(box(w * 0.95, 0.06, d * 0.95, '#5d6d7e', cx, cz));
+      parts.push(box(1.0, 0.08, 1.2, '#1b2631', cx, cz, 0.06));
+      parts.push(box(1.1, 0.45, 1.3, '#2471a3', cx, cz, 0.1));
+      parts.push(box(0.08, 1.0, 0.08, '#2c3e50', cx + 0.65, cz + 0.65, 0.06));
+      parts.push(box(0.2, 0.2, 0.05, '#e74c3c', cx + 0.65, cz + 0.65, 0.9));
+      break;
+    }
+    case 'skyscraper': {
+      parts.push(box(w * 0.88, h * 0.45, d * 0.88, color, cx, cz));
+      windows(w * 0.88, d * 0.88, cx, cz, 0, h * 0.45, parts);
+      parts.push(box(w * 0.72, h * 0.35, d * 0.72, shade(color, 0.95), cx, cz, h * 0.45));
+      windows(w * 0.72, d * 0.72, cx, cz, h * 0.45, h * 0.35, parts);
+      parts.push(box(w * 0.52, h * 0.2, d * 0.52, roof, cx, cz, h * 0.8));
+      parts.push(box(0.08, 0.8, 0.08, '#f1c40f', cx, cz, h));
+      break;
+    }
     case 'airfield': {
       parts.push(box(w * 0.96, 0.06, d * 0.96, '#688257', cx, cz));
       parts.push(box(w, 0.1, 1.15, color, cx, cz));

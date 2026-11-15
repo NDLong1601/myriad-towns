@@ -13,6 +13,7 @@ export function mountHeatmapControls(
   el.id = 'mt-heat-controls';
   el.innerHTML = `<label>${t('ui.heatmap')} <select>
       <option value="">${t('ui.heatmapOff')}</option>
+      <option value="resources">⛏️ ${t('ui.resources')}</option>
       ${FIELDS.map((f, i) => `<option value="${f}">${(i + 1) % 10}: ${t(`field.${f}`)}</option>`).join('')}
     </select></label><div class="mt-heat-legend" hidden><span class="lo">0</span><i></i><span class="hi"></span></div>`;
   parent.appendChild(el);

@@ -32,8 +32,12 @@ export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulati
             ? ''
             : `<i class="${n > 0 ? 'up' : 'down'}">${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}${t('ui.perSecond')}</i>`;
         const stock = Math.floor(city.stock[r] ?? 0);
-        const full = stockNumber.format(stock);
-        return `<span data-res="${r}" title="${t(`resource.${r}`)} · ${full}">${icon(r)}<b aria-label="${full}">${stock >= 10000 ? compactStock.format(stock) : full}</b>${rate}</span>`;
+        const cap = city.capacityOf(r);
+        const isFull = stock >= cap;
+        const full = `${stockNumber.format(stock)} / ${stockNumber.format(cap)}`;
+        const label =
+          stock >= 10000 ? `${compactStock.format(stock)}/${compactStock.format(cap)}` : full;
+        return `<span data-res="${r}" class="${isFull ? 'full' : ''}" title="${t(`resource.${r}`)} · ${full}">${icon(r)}<b aria-label="${full}">${label}</b>${rate}</span>`;
       })
       .join('');
   };

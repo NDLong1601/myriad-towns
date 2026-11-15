@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { City } from '@/sim/city';
 import { FIELD_SCALE, fieldIndex } from '@/sim/fields';
+import { Resource } from '@/world/biomes';
 import type { FloatingOrigin } from './floatingOrigin';
 
 /** Tiles drawn around the camera target in each direction. */
@@ -86,6 +87,34 @@ export class HeatmapOverlay {
   }
 
   private rebuild(cx: number, cz: number): void {
+    if (this.field === 'resources') {
+      let n = 0;
+      for (let z = cz - RADIUS; z <= cz + RADIUS; z++) {
+        for (let x = cx - RADIUS; x <= cx + RADIUS; x++) {
+          const s = this.city.terrain.tile(x, z);
+          if (!s.resource) continue;
+          const p = this.origin.toLocal(x + 0.5, z + 0.5);
+          this.m.makeTranslation(p.x, this.heightAt(x, z) + 0.05, p.z);
+          this.mesh.setMatrixAt(n, this.m);
+          let col = '#ffffff';
+          if (s.resource === Resource.Iron) col = '#ff5722';
+          else if (s.resource === Resource.Coal) col = '#263238';
+          else if (s.resource === Resource.Clay) col = '#ffa000';
+          else if (s.resource === Resource.Stone) col = '#78909c';
+          else if (s.resource === Resource.FertileSoil) col = '#689f38';
+          this.c.set(col);
+          this.mesh.setColorAt(n, this.c);
+          n++;
+        }
+      }
+      this.maxValue = 1;
+      this.mesh.count = n;
+      this.mesh.instanceMatrix.needsUpdate = true;
+      if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
+      for (const l of this.listeners) l();
+      return;
+    }
+
     const fi = fieldIndex(this.field as string);
     const fields = this.city.fields;
     let max = 0;

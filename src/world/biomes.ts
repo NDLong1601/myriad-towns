@@ -41,5 +41,6 @@ export const Resource = {
   Iron: 2,
   Clay: 3,
   FertileSoil: 4,
+  Coal: 5,
 } as const;
 export type Resource = (typeof Resource)[keyof typeof Resource];

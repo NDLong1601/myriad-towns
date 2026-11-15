@@ -18,6 +18,7 @@ import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
 import { mountEncyclopedia } from '@/ui/encyclopedia';
+import { mountPolicyMenu } from '@/ui/policyMenu';
 import { mountMinimap } from '@/ui/minimap';
 import { parsePreset, qualitySettings } from '@/render/quality';
 import { InfoPanel } from '@/ui/infoPanel';
@@ -300,6 +301,7 @@ let fixedTime: number | null = params.has('time') ? num('time', 0.5) : null;
 mountResourceBar(city, document.body, sim);
 const menu = mountBuildMenu(city, history, document.body);
 mountEncyclopedia(document.body, city.catalog, menu);
+mountPolicyMenu(city, document.body);
 new BuildTool(
   view,
   city,
@@ -508,7 +510,8 @@ function localPopulation(x: number, z: number): number {
 function refreshTrafficPlan(x: number, z: number): void {
   const roads = city.countTag('road');
   const paved = roads > 0 ? (city.countOf('stone_road') + city.countOf('brick_road')) / roads : 0;
-  traffic.setPlan(trafficPlan(localPopulation(x, z), paved, small ? 60 : 160));
+  const hasTransit = city.countTag('transit') > 0 || city.isPolicyActive('public_transit_subsidy');
+  traffic.setPlan(trafficPlan(localPopulation(x, z), paved, small ? 60 : 160, hasTransit));
 }
 
 let simHud = 0;

@@ -25,6 +25,7 @@ export interface Town {
   /** Building that founded it (first building or a town hall). */
   readonly hallUid: number;
   population: number;
+  happiness: number;
 }
 
 export type TownEvent =
@@ -101,20 +102,57 @@ export class TownStore {
     return best;
   }
 
-  /** Counts housing per town (called once a game second). */
+  /** Counts housing per town and calculates town happiness (called once a game second). */
   updatePopulation(): void {
     if (!this.towns.length) return;
     const pop = new Map<number, number>();
+    const hapSum = new Map<number, number>();
+    const hapCount = new Map<number, number>();
+
     for (const b of this.city.all()) {
       if (!b.def.housing || !this.city.isActive(b.uid)) continue;
       const id = this.townOfBuilding(b);
       pop.set(id, (pop.get(id) ?? 0) + b.def.housing);
+
+      // Amenities vs disamenities
+      const greenery = this.city.fields.get(b.x, b.z, 'greenery');
+      const leisure = this.city.fields.get(b.x, b.z, 'leisure');
+      const health = this.city.fields.get(b.x, b.z, 'health');
+      const faith = this.city.fields.get(b.x, b.z, 'faith');
+      const education = this.city.fields.get(b.x, b.z, 'education');
+      const commerce = this.city.fields.get(b.x, b.z, 'commerce');
+      const connectivity = this.city.fields.get(b.x, b.z, 'connectivity');
+      const pollution = this.city.fields.get(b.x, b.z, 'pollution');
+      const noise = this.city.fields.get(b.x, b.z, 'noise');
+
+      const pos =
+        greenery * 3 +
+        leisure * 4 +
+        health * 5 +
+        faith * 3 +
+        education * 3 +
+        commerce * 2 +
+        connectivity * 2;
+      const pollFactor = this.city.isPolicyActive('green_city') ? 3 : 6;
+      const neg = pollution * pollFactor + noise * 3;
+      const score = Math.max(0, Math.min(100, Math.round(50 + pos - neg)));
+      hapSum.set(id, (hapSum.get(id) ?? 0) + score);
+      hapCount.set(id, (hapCount.get(id) ?? 0) + 1);
     }
     let changed = false;
     for (const t of this.towns) {
       const p = pop.get(t.id) ?? 0;
       if (p !== t.population) {
         t.population = p;
+        changed = true;
+      }
+      const count = hapCount.get(t.id) ?? 0;
+      let h = count > 0 ? Math.round((hapSum.get(t.id) ?? 0) / count) : 75;
+      if (this.city.isPolicyActive('healthcare_focus')) h = Math.min(100, h + 10);
+      if (this.city.isPolicyActive('green_city')) h = Math.min(100, h + 5);
+      if (this.city.isPolicyActive('industrial_drive')) h = Math.max(0, h - 5);
+      if (h !== t.happiness) {
+        t.happiness = h;
         changed = true;
       }
     }
@@ -138,16 +176,25 @@ export class TownStore {
     return out <= 0 ? null : { ok: false, key: 'req.territory', params: { d: Math.ceil(out) } };
   }
 
-  snapshot(): { towns: { id: number; x: number; z: number; hallUid: number }[]; nextId: number } {
+  snapshot(): {
+    towns: { id: number; x: number; z: number; hallUid: number; happiness?: number }[];
+    nextId: number;
+  } {
     return {
-      towns: this.towns.map((t) => ({ id: t.id, x: t.x, z: t.z, hallUid: t.hallUid })),
+      towns: this.towns.map((t) => ({
+        id: t.id,
+        x: t.x,
+        z: t.z,
+        hallUid: t.hallUid,
+        happiness: t.happiness,
+      })),
       nextId: this.nextId,
     };
   }
 
   /** Call before re-adding the saved buildings; `done()` afterwards recounts populations. */
   restore(s: ReturnType<TownStore['snapshot']>): { done: () => void } {
-    this.towns = s.towns.map((t) => ({ ...t, population: 0 }));
+    this.towns = s.towns.map((t) => ({ ...t, population: 0, happiness: t.happiness ?? 75 }));
     this.nextId = s.nextId;
     this.version++;
     this.restoring = true;
@@ -166,7 +213,14 @@ export class TownStore {
     if (this.towns.some((t) => t.hallUid === b.uid)) return;
     if (this.towns.length && b.def.id !== TOWN_HALL) return;
     const c = centre(b.def, b.x, b.z);
-    const town: Town = { id: this.nextId++, x: c.x, z: c.z, hallUid: b.uid, population: 0 };
+    const town: Town = {
+      id: this.nextId++,
+      x: c.x,
+      z: c.z,
+      hallUid: b.uid,
+      population: 0,
+      happiness: 75,
+    };
     this.towns.push(town);
     this.version++;
     this.emit({ type: 'founded', town });

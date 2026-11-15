@@ -69,6 +69,14 @@ function build(kind: AgentKind): THREE.BufferGeometry {
       p.push(box(0.7, 0.025, 0.2, '#d9d9d9', 0, 0, 0.22)); // roof
       wheels(p, [-0.22, 0.22], 0.105, 0.05);
       break;
+    case 'truck':
+      p.push(box(0.18, 0.16, 0.18, '#f0f0f0', 0.18, 0, 0.08)); // cab (tinted)
+      p.push(box(0.1, 0.06, 0.182, '#2c3e50', 0.17, 0, 0.15)); // windshield
+      p.push(box(0.36, 0.19, 0.2, '#c8ccd0', -0.1, 0, 0.1)); // container box
+      wheels(p, [-0.2, -0.05, 0.18], 0.1, 0.05);
+      p.push(box(0.02, 0.025, 0.04, '#ffe9a8', 0.27, 0.06, 0.07)); // lights
+      p.push(box(0.02, 0.025, 0.04, '#ffe9a8', 0.27, -0.06, 0.07));
+      break;
   }
   const merged = mergeGeometries(p, false);
   if (!merged) throw new Error(`no model for ${kind}`);
