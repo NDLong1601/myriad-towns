@@ -29,7 +29,6 @@ export function showSettings(
     <label class="mt-check"><input type="checkbox" name="cvd" ${s.palette === 'cvd' ? 'checked' : ''}> ${t('settings.cvd')}</label>
     <label class="mt-check"><input type="checkbox" name="dayNight" ${s.dayNight ? 'checked' : ''}> ${t('settings.dayNight')}</label>
     <label class="mt-check"><input type="checkbox" name="traffic" ${s.traffic ? 'checked' : ''}> ${t('settings.traffic')}</label>
-    <label class="mt-check"><input type="checkbox" name="flat" ${s.flatTerrain ? 'checked' : ''}> ${t('settings.flat')}</label>
     <label class="mt-check"><input type="checkbox" name="autosave" ${s.autosave ? 'checked' : ''}> ${t('settings.autosave')}</label>
     <small>${t('settings.reloadHint')}</small>
     <div class="mt-save-row">
@@ -74,7 +73,7 @@ export function showSettings(
       muted: s.muted,
       dayNight: fd.get('dayNight') !== null,
       traffic: fd.get('traffic') !== null,
-      flatTerrain: fd.get('flat') !== null,
+      flatTerrain: true,
       showMinimap: loadSettings().showMinimap,
       showHeatmap: loadSettings().showHeatmap,
       palette: fd.get('cvd') !== null ? 'cvd' : 'default',

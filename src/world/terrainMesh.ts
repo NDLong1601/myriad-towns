@@ -9,7 +9,7 @@
  */
 import { CHUNK_SIZE, localIndex, localToTile } from '@/core/coords';
 import { hash32, hashFloat, Purpose } from '@/core/prng';
-import { Biome, TileFlag } from './biomes';
+import { Biome, Resource, TileFlag } from './biomes';
 import type { ChunkData } from './chunk';
 import { SEA_LEVEL, SNOW_LEVEL, sampleTile } from './terrain';
 
@@ -60,6 +60,18 @@ const RIVER: RGB = [86, 160, 200];
 const DIRT: RGB = [138, 112, 82];
 const ROCK: RGB = [120, 118, 112];
 const TRUNK: RGB = [110, 80, 52];
+const RESOURCE_COLOR: Partial<Record<number, RGB>> = {
+  [Resource.Iron]: [170, 85, 60],
+  [Resource.Coal]: [45, 45, 50],
+  [Resource.Clay]: [185, 120, 75],
+  [Resource.Stone]: [135, 134, 128],
+  [Resource.FertileSoil]: [115, 150, 78],
+};
+const ORE_ROCK_COLOR: Partial<Record<number, RGB>> = {
+  [Resource.Iron]: [145, 68, 48],
+  [Resource.Coal]: [32, 32, 35],
+  [Resource.Stone]: [120, 118, 112],
+};
 const LEAF: Record<number, RGB> = {
   [Biome.Forest]: [58, 116, 62],
   [Biome.Temperate]: [76, 136, 70],
@@ -220,7 +232,8 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
       const { x, z } = localToTile(chunk.cx, chunk.cz, lx, lz);
       const y = yAt(lx, lz);
 
-      // Top colour: biome, snow on peaks, deeper water darker, small per-tile variation.
+      const res = chunk.resource[i] as number;
+      // Top colour: resource tint, biome, snow on peaks, deeper water darker, small per-tile variation.
       let top: RGB;
       if (water) {
         top =
@@ -229,6 +242,8 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
             : shade(BIOME_COLOR[Biome.Ocean] as RGB, 0.75 + level * 0.06);
       } else if (level >= SNOW_LEVEL) {
         top = SNOW;
+      } else if (res && RESOURCE_COLOR[res]) {
+        top = shade(RESOURCE_COLOR[res] as RGB, 0.94 + (hash32(seed, x, z) % 13) / 100);
       } else {
         top = shade(BIOME_COLOR[biome] as RGB, 0.94 + (hash32(seed, x, z) % 13) / 100);
       }
@@ -330,7 +345,8 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
         }
       } else if (flags & TileFlag.Rock) {
         const r = 0.15 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.15;
-        b.box(jx - r, y, jz - r * 0.8, jx + r, y + r * 1.1, jz + r * 0.8, shade(ROCK, 1.1));
+        const rockCol = (res && ORE_ROCK_COLOR[res]) || ROCK;
+        b.box(jx - r, y, jz - r * 0.8, jx + r, y + r * 1.1, jz + r * 0.8, shade(rockCol, 1.1));
       }
     }
   }

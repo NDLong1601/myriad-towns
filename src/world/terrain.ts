@@ -62,15 +62,20 @@ export function sampleLevel(seed: number, x: number, z: number): number {
 
 export function sampleTile(seed: number, x: number, z: number): TileSample {
   const [wx, wz] = warp(seed, x, z);
-  let level = Math.min(MAX_LEVEL, Math.floor(rawElevation(seed, wx, wz, x, z) * (MAX_LEVEL + 1)));
+  const raw = rawElevation(seed, wx, wz, x, z);
+  const rawLevel = Math.min(MAX_LEVEL, Math.floor(raw * (MAX_LEVEL + 1)));
   let flags = 0;
 
-  const river = isRiver(seed, wx, wz, level);
+  const river = isRiver(seed, wx, wz, rawLevel);
+  let level: number;
   if (river) {
     level = SEA_LEVEL - 1;
     flags |= TileFlag.Water | TileFlag.River;
-  } else if (level < SEA_LEVEL) {
+  } else if (rawLevel < SEA_LEVEL) {
+    level = SEA_LEVEL - 1;
     flags |= TileFlag.Water;
+  } else {
+    level = SEA_LEVEL;
   }
 
   const moisture =
@@ -78,13 +83,13 @@ export function sampleTile(seed: number, x: number, z: number): TileSample {
   const temperature =
     0.55 +
     0.5 * fbm2(sub(seed, Purpose.Temperature), x, z, { frequency: 0.0009, octaves: 3 }) -
-    Math.max(0, level - SEA_LEVEL) * 0.035;
+    Math.max(0, rawLevel - SEA_LEVEL) * 0.035;
 
   let biome: Biome;
   if (flags & TileFlag.Water) biome = river ? Biome.Temperate : Biome.Ocean;
-  else if (level >= MOUNTAIN_LEVEL) biome = Biome.Mountain;
+  else if (rawLevel >= MOUNTAIN_LEVEL) biome = Biome.Mountain;
   else if (temperature < 0.28) biome = Biome.Cold;
-  else if (level === SEA_LEVEL && moisture < 0.75) biome = Biome.Beach;
+  else if (rawLevel === SEA_LEVEL && moisture < 0.75) biome = Biome.Beach;
   else if (moisture < 0.36 && temperature > 0.5) biome = Biome.Steppe;
   else if (moisture > 0.58) biome = Biome.Forest;
   else biome = Biome.Temperate;
@@ -101,9 +106,10 @@ export function sampleTile(seed: number, x: number, z: number): TileSample {
   if (!(flags & TileFlag.Water)) {
     const deposit = fbm2(sub(seed, Purpose.Resources), x, z, { frequency: 0.035, octaves: 2 });
     if (deposit > 0.42) {
-      if (level >= MOUNTAIN_LEVEL - 2) resource = Resource.Iron;
-      else if (level >= SEA_LEVEL + 3) resource = Resource.Stone;
+      if (rawLevel >= MOUNTAIN_LEVEL - 2) resource = Resource.Iron;
+      else if (moisture >= 0.42 && moisture <= 0.55) resource = Resource.Coal;
       else if (moisture > 0.55) resource = Resource.Clay;
+      else resource = Resource.Stone;
     } else if (deposit < -0.45 && (biome === Biome.Temperate || biome === Biome.Steppe)) {
       resource = Resource.FertileSoil;
     }
@@ -126,7 +132,10 @@ export function sampleTile(seed: number, x: number, z: number): TileSample {
     if (treeChance > 0 && hashFloat(seed, Purpose.Trees, x, z) < treeChance * clump) {
       flags |= TileFlag.Tree;
     } else if (
-      (resource === Resource.Stone || resource === Resource.Iron || biome === Biome.Mountain) &&
+      (resource === Resource.Stone ||
+        resource === Resource.Iron ||
+        resource === Resource.Coal ||
+        biome === Biome.Mountain) &&
       hashFloat(seed, Purpose.Decoration, x, z) < 0.12
     ) {
       flags |= TileFlag.Rock;
