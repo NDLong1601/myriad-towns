@@ -29,7 +29,12 @@ const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.m
  * (`paved` is the share of roads that are stone or brick, 0..1). `max` caps the agents drawn.
  * Pure, so it is unit tested.
  */
-export function trafficPlan(population: number, paved: number, max: number): TrafficPlan {
+export function trafficPlan(
+  population: number,
+  paved: number,
+  max: number,
+  hasTransit = false,
+): TrafficPlan {
   const pop = Math.max(0, population);
   const w: Record<VehicleKind, number> = { handcart: 0, horsecart: 0, car: 0, bus: 0, truck: 0 };
   if (pop >= 40) w.handcart = clamp(1 - (pop - 40) / 400, 0.1, 1);
@@ -37,6 +42,7 @@ export function trafficPlan(population: number, paved: number, max: number): Tra
   if (pop >= 300 && paved >= 0.05) w.car = clamp((pop - 300) / 400, 0.15, 1);
   if (pop >= 500 && paved >= 0.1) w.truck = clamp((pop - 500) / 800, 0.1, 0.6);
   if (pop >= 700 && paved >= 0.15) w.bus = clamp((pop - 700) / 1600, 0.1, 0.5);
+  if (hasTransit && paved >= 0.05) w.bus = Math.max(w.bus, 0.35);
   const hasVehicles = Object.values(w).some((x) => x > 0);
   return {
     pedestrians: clamp(Math.round(pop / 5), 0, Math.floor(max * 0.65)),

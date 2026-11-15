@@ -366,12 +366,42 @@ export class Simulation {
         flows.consumed[r] = (flows.consumed[r] ?? 0) + n;
       }
       for (const [r, n] of c.outputs) {
+        let mult = 1;
+        if (
+          city.isPolicyActive('industrial_drive') &&
+          (r === 'ore' || r === 'coal' || r === 'metal' || r === 'wood' || r === 'goods')
+        ) {
+          mult = 1.25;
+        }
         const cap = city.capacityOf(r);
         const cur = stock[r] ?? 0;
-        const add = Math.min(Math.max(0, cap - cur), n * TICK_DT);
+        const add = Math.min(Math.max(0, cap - cur), n * mult * TICK_DT);
         stock[r] = cur + add;
         flows.produced[r] = (flows.produced[r] ?? 0) + add / TICK_DT;
       }
+    }
+    // Policy maintenance costs and benefits
+    if (city.isPolicyActive('green_city')) {
+      const take = Math.min(stock.goods ?? 0, 0.2 * TICK_DT);
+      stock.goods = (stock.goods ?? 0) - take;
+      flows.consumed.goods = (flows.consumed.goods ?? 0) + take / TICK_DT;
+    }
+    if (city.isPolicyActive('public_transit_subsidy')) {
+      const take = Math.min(stock.goods ?? 0, 0.3 * TICK_DT);
+      stock.goods = (stock.goods ?? 0) - take;
+      flows.consumed.goods = (flows.consumed.goods ?? 0) + take / TICK_DT;
+    }
+    if (city.isPolicyActive('healthcare_focus')) {
+      const take = Math.min(stock.food ?? 0, 0.4 * TICK_DT);
+      stock.food = (stock.food ?? 0) - take;
+      flows.consumed.food = (flows.consumed.food ?? 0) + take / TICK_DT;
+    }
+    if (city.isPolicyActive('night_economy')) {
+      const cap = city.capacityOf('goods');
+      const cur = stock.goods ?? 0;
+      const add = Math.min(Math.max(0, cap - cur), 0.2 * TICK_DT);
+      stock.goods = cur + add;
+      flows.produced.goods = (flows.produced.goods ?? 0) + add / TICK_DT;
     }
     for (const tier of LABOR_TIERS) {
       flows.laborUsed[tier] = (flows.laborTotal[tier] ?? 0) - (free[tier] ?? 0);

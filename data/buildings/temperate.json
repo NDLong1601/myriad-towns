@@ -84,6 +84,98 @@
             "max": 0
           }
         ]
+      },
+      {
+        "to": "miner_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "coal_mine",
+            "radius": 4,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "miner_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "iron_mine",
+            "radius": 4,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "fisher_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "fishing_dock",
+            "radius": 5,
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "fisher_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "cargo_port",
+            "radius": 5,
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "fisher_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "ferry_pier",
+            "radius": 5,
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "lumberjack_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "woodcutter",
+            "radius": 4,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "lumberjack_cottage",
+        "when": [
+          {
+            "type": "near",
+            "building": "sawmill",
+            "radius": 4,
+            "min": 1
+          }
+        ]
       }
     ],
     "decline": {
@@ -240,6 +332,23 @@
         "max": 0
       }
     ],
+    "upgrades": [
+      {
+        "to": "tenement",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          }
+        ]
+      }
+    ],
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
@@ -317,6 +426,23 @@
         "type": "field",
         "field": "noise",
         "max": 0
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "apartment_tower",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "decline": {

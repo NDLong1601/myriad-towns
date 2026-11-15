@@ -29,7 +29,8 @@ export type CityEvent =
   /** A building stopped (abandoned) or resumed working: its emits were removed or restored. */
   | { type: 'status'; building: PlacedBuilding; active: boolean }
   | { type: 'unlocked'; ids: readonly string[] }
-  | { type: 'trees'; tiles: readonly { x: number; z: number }[] };
+  | { type: 'trees'; tiles: readonly { x: number; z: number }[] }
+  | { type: 'policy'; policy: string; active: boolean };
 
 /** Largest footprint edge in data; bounds spatial lookups. */
 const MAX_FOOTPRINT = 8;
@@ -60,6 +61,7 @@ export class City {
   private spatial = new Map<ChunkKey, Set<number>>();
   private nextUid = 1;
   private listeners: ((e: CityEvent) => void)[] = [];
+  private activePolicies = new Set<string>();
 
   constructor(
     readonly catalog: Catalog,
@@ -84,6 +86,26 @@ export class City {
 
   capacityOf(resource: string): number {
     return this.capacities[resource] ?? BASE_CAPACITY[resource] ?? 1000;
+  }
+
+  get policies(): ReadonlySet<string> {
+    return this.activePolicies;
+  }
+
+  isPolicyActive(id: string): boolean {
+    return this.activePolicies.has(id);
+  }
+
+  setPolicy(id: string, active: boolean): void {
+    if (active) this.activePolicies.add(id);
+    else this.activePolicies.delete(id);
+    for (const l of this.listeners) l({ type: 'policy', policy: id, active });
+  }
+
+  setPolicies(policies: Iterable<string>): void {
+    this.activePolicies.clear();
+    for (const p of policies) this.activePolicies.add(p);
+    for (const l of this.listeners) l({ type: 'policy', policy: '', active: false });
   }
 
   /** False while a building is abandoned (it neither works nor spreads its fields). */

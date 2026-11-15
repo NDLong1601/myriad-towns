@@ -1,0 +1,464 @@
+[
+  {
+    "id": "miner_cottage",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 4
+    },
+    "visual": {
+      "shape": "mine",
+      "color": "#757575",
+      "roof": "#37474f",
+      "height": 0.65
+    },
+    "housing": 6,
+    "upkeep": {
+      "food": 0.3
+    },
+    "produces": {
+      "labor": 4
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 2,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 6
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "hut"
+    },
+    "tags": ["residential", "occupational"],
+    "unlock": {
+      "revealAt": 0
+    }
+  },
+  {
+    "id": "fisher_cottage",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#90a4ae",
+      "roof": "#37474f",
+      "height": 0.6
+    },
+    "housing": 6,
+    "upkeep": {
+      "food": 0.2
+    },
+    "produces": {
+      "labor": 3,
+      "food": 0.3
+    },
+    "emits": [
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "hut"
+    },
+    "tags": ["residential", "occupational"],
+    "unlock": {
+      "revealAt": 0
+    }
+  },
+  {
+    "id": "lumberjack_cottage",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 8
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#8d6e63",
+      "roof": "#4e342e",
+      "height": 0.6
+    },
+    "housing": 6,
+    "upkeep": {
+      "food": 0.2
+    },
+    "produces": {
+      "labor": 3,
+      "wood": 0.3
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "hut"
+    },
+    "tags": ["residential", "occupational"],
+    "unlock": {
+      "revealAt": 0
+    }
+  },
+  {
+    "id": "tenement",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 10,
+      "stone": 14,
+      "goods": 2
+    },
+    "visual": {
+      "shape": "tall",
+      "color": "#cfd8dc",
+      "roof": "#455a64",
+      "height": 1.8
+    },
+    "housing": 24,
+    "upkeep": {
+      "food": 1.0,
+      "goods": 0.2
+    },
+    "produces": {
+      "labor": 6,
+      "skilled": 3
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 4,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 3,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "connectivity",
+        "min": 1
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "townhouse"
+    },
+    "tags": ["residential"],
+    "unlock": {
+      "population": 250,
+      "revealAt": 150
+    }
+  },
+  {
+    "id": "bus_stop",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 4
+    },
+    "visual": {
+      "shape": "dock",
+      "color": "#2c3e50",
+      "roof": "#3498db",
+      "height": 0.45
+    },
+    "emits": [
+      {
+        "field": "connectivity",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1
+      }
+    ],
+    "tags": ["transit"],
+    "unlock": {
+      "population": 40,
+      "revealAt": 20
+    }
+  },
+  {
+    "id": "metro_station",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "stone": 40,
+      "metal": 20,
+      "goods": 10
+    },
+    "upkeep": {
+      "labor": 2,
+      "goods": 0.2
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#34495e",
+      "roof": "#e74c3c",
+      "height": 0.85
+    },
+    "emits": [
+      {
+        "field": "connectivity",
+        "amount": 4,
+        "radius": 8,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      }
+    ],
+    "tags": ["transit"],
+    "unlock": {
+      "population": 250,
+      "revealAt": 150
+    }
+  },
+  {
+    "id": "apartment_tower",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 20,
+      "stone": 30,
+      "metal": 15
+    },
+    "visual": {
+      "shape": "tall",
+      "color": "#eceff1",
+      "roof": "#2980b9",
+      "height": 2.2
+    },
+    "housing": 36,
+    "upkeep": {
+      "food": 1.4,
+      "goods": 0.3
+    },
+    "produces": {
+      "labor": 8,
+      "skilled": 4
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 4,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 4,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "connectivity",
+        "min": 1
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "skyscraper",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "villa"
+    },
+    "tags": ["residential", "highrise"],
+    "unlock": {
+      "population": 300,
+      "revealAt": 200
+    }
+  },
+  {
+    "id": "skyscraper",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "stone": 60,
+      "metal": 30,
+      "goods": 25
+    },
+    "visual": {
+      "shape": "block",
+      "color": "#cfd8dc",
+      "roof": "#1565c0",
+      "height": 3.6
+    },
+    "housing": 72,
+    "upkeep": {
+      "food": 2.5,
+      "goods": 0.8
+    },
+    "produces": {
+      "labor": 16,
+      "skilled": 8,
+      "expert": 4
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 6,
+        "radius": 4
+      },
+      {
+        "field": "urban",
+        "amount": 6,
+        "radius": 4
+      },
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "connectivity",
+        "min": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "apartment_tower"
+    },
+    "tags": ["residential", "highrise"],
+    "unlock": {
+      "population": 600,
+      "revealAt": 400
+    }
+  }
+]

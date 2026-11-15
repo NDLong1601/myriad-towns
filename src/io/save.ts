@@ -60,6 +60,7 @@ export interface SaveData {
   pois: string[];
   goals: { index: number; pending: string[] | null } | null;
   towns: ReturnType<TownStore['snapshot']>;
+  policies?: string[];
 }
 
 /** The live objects a save is taken from and loaded into. */
@@ -116,6 +117,7 @@ export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null):
       ? { index: game.goals.index, pending: game.goals.pending ? [...game.goals.pending] : null }
       : null,
     towns: game.towns.snapshot(),
+    policies: [...city.policies],
   };
 }
 
@@ -132,6 +134,7 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   game.pois.restoreExplored(data.pois);
   const towns = game.towns.restore(data.towns);
   city.progress.restore(data.progress);
+  city.setPolicies(data.policies ?? []);
   const cleared = city.terrain.clearedTrees;
   const pending: number[][] = [];
   for (const rec of data.chunks) {
