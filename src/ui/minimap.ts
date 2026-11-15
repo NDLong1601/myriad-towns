@@ -79,6 +79,8 @@ export function worldToPixel(
 }
 
 export interface MinimapHandle {
+  readonly toolbar: HTMLElement;
+  readonly panels: HTMLElement;
   readonly el: HTMLElement;
   readonly canvas: HTMLCanvasElement;
   toggle(): void;
@@ -114,8 +116,16 @@ export function mountMinimap(
   const dock = document.createElement('div');
   dock.className = 'mt-minimap-dock';
   parent.appendChild(dock);
+  const upper = document.createElement('div');
+  upper.className = 'mt-map-upper';
+  const panels = document.createElement('div');
+  panels.className = 'mt-map-panels';
+  const toolbar = document.createElement('div');
+  toolbar.className = 'mt-map-toolbar';
+  dock.append(upper, toolbar);
   const el = document.createElement('div');
   el.className = 'mt-minimap';
+  el.id = 'mt-minimap';
   el.title = t('minimap.toggle');
   el.setAttribute('role', 'region');
   el.setAttribute('aria-label', t('minimap.label'));
@@ -135,7 +145,7 @@ export function mountMinimap(
   canvas.style.height = '100%';
   canvas.style.borderRadius = '50%';
   root.appendChild(canvas);
-  dock.appendChild(el);
+  upper.append(el, panels);
 
   // Phones have no M key: a small button shows the map while it is hidden.
   const btn = document.createElement('button');
@@ -145,13 +155,14 @@ export function mountMinimap(
     '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15m6-12v15"/></svg>';
   btn.title = t('minimap.toggle');
   btn.setAttribute('aria-label', t('minimap.toggle'));
+  btn.setAttribute('aria-controls', el.id);
   btn.setAttribute('aria-pressed', String(isVisible));
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     toggle();
   });
-  dock.appendChild(btn);
+  toolbar.appendChild(btn);
 
   const ctx = canvas.getContext('2d');
 
@@ -456,6 +467,8 @@ export function mountMinimap(
   };
 
   return {
+    toolbar,
+    panels,
     el,
     canvas,
     toggle,

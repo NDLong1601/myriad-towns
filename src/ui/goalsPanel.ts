@@ -19,18 +19,35 @@ const CHAPTER_PRODUCER: Readonly<Record<string, string>> = {
 
 /** Goals mode: the current chapter's checklist, and the pack choice when a chapter ends. */
 export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
-  const el = document.createElement('section');
+  const el = document.createElement('details');
   el.className = 'mt-goals';
   el.setAttribute('aria-label', t('ui.goals'));
   parent.appendChild(el);
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
+  const summary = document.createElement('summary');
+  const contents = document.createElement('div');
+  el.append(summary, contents);
+  summary.textContent = t('ui.goals');
+  el.open = Boolean(goals.current);
+  let completed = false;
+  let last = '';
 
   const render = (): void => {
     const ch = goals.current;
     if (!ch) {
-      el.innerHTML = `<h3>${t('ui.goals')}</h3><p>${t('chapter.done')}</p>`;
+      if (completed) return;
+      el.open = false;
+      el.classList.add('is-complete');
+      completed = true;
+      summary.textContent = `🏆 ${t('ui.chaptersComplete')}`;
+      contents.textContent = t('chapter.done');
       return;
     }
+    if (completed) {
+      el.classList.remove('is-complete');
+      summary.textContent = t('ui.goals');
+    }
+    completed = false;
     const rows = goals
       .status()
       .map((s) => {
@@ -46,7 +63,11 @@ export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
     const reward = ch.reward
       ? `<small>${t('ui.reward', { what: formatAmounts(ch.reward) })}</small>`
       : '';
-    el.innerHTML = `<h3>${t(`chapter.${ch.id}`)}</h3><ul>${rows}</ul>${reward}`;
+    const html = `<h3>${t(`chapter.${ch.id}`)}</h3><ul>${rows}</ul>${reward}`;
+    if (html !== last) {
+      contents.innerHTML = html;
+      last = html;
+    }
   };
 
   // Pack choice dialog.

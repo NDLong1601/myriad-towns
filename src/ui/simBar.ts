@@ -2,6 +2,7 @@ import { LABOR_TIERS } from '@/sim/catalog';
 import { type SimClock, SPEEDS, type Speed } from '@/sim/clock';
 import type { Simulation } from '@/sim/simulation';
 import { fmt, t } from './i18n';
+import { icon } from './icons';
 
 /** Top-centre bar: pause / speed buttons, population and labour use. Space toggles pause. */
 export function mountSimBar(sim: Simulation, clock: SimClock, parent: HTMLElement): () => void {
@@ -16,7 +17,9 @@ export function mountSimBar(sim: Simulation, clock: SimClock, parent: HTMLElemen
 
   const renderSpeed = (): void => {
     for (const b of el.querySelectorAll<HTMLButtonElement>('[data-speed]')) {
-      b.classList.toggle('active', Number(b.dataset.speed) === clock.speed);
+      const active = Number(b.dataset.speed) === clock.speed;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
     }
   };
   el.addEventListener('click', (e) => {
@@ -27,7 +30,12 @@ export function mountSimBar(sim: Simulation, clock: SimClock, parent: HTMLElemen
   });
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
   window.addEventListener('keydown', (e) => {
-    if (e.code !== 'Space' || e.target instanceof HTMLInputElement) return;
+    if (
+      e.code !== 'Space' ||
+      (e.target instanceof Element &&
+        e.target.closest('button, input, select, textarea, [contenteditable], .mt-resources'))
+    )
+      return;
     e.preventDefault();
     clock.togglePause();
     renderSpeed();
@@ -41,10 +49,11 @@ export function mountSimBar(sim: Simulation, clock: SimClock, parent: HTMLElemen
       .map((tier) => {
         const used = f.laborUsed[tier] ?? 0;
         const total = f.laborTotal[tier] ?? 0;
-        return `<span class="${used >= total && total > 0 ? 'full' : ''}" title="${t(`resource.${tier}`)}">${t(`resource.${tier}`)} <b>${fmt(used)}/${fmt(total)}</b></span>`;
+        const warning = (used === 0 && total > 0) || (used > 0 && used >= total);
+        return `<span class="mt-labor${warning ? ' warning' : ''}" title="${t(`resource.${tier}`)}">${icon(tier)}<b>${fmt(used)}/${fmt(total)}</b></span>`;
       })
       .join('');
-    pop.innerHTML = `<span>${t('ui.population')} <b>${fmt(f.population)}</b></span>${labor}`;
+    pop.innerHTML = `<span class="mt-population">${t('ui.population')} <b>${fmt(f.population)}</b></span>${labor}`;
   };
   renderSpeed();
   render();

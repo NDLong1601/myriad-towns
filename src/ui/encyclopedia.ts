@@ -184,8 +184,9 @@ export function mountEncyclopedia(
   openBtn.className = 'mt-encyclopedia-btn';
   openBtn.title = `${t('encyclopedia.title')} (B)`;
   openBtn.setAttribute('aria-label', t('encyclopedia.title'));
-  openBtn.textContent = '📖';
-  parent.appendChild(openBtn);
+  openBtn.innerHTML =
+    '<svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-2-5-3-9-2v14c4-1 7 0 9 2 2-2 5-3 9-2V4c-4-1-7 0-9 2Zm0 0v14"/></svg>';
+  buildMenu.tools.appendChild(openBtn);
 
   let active = false;
 
@@ -361,15 +362,6 @@ export function mountEncyclopedia(
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-build]');
     if (!btn || !btn.dataset.build) return;
     const defId = btn.dataset.build;
-    try {
-      const def = catalog.get(defId);
-      const catBtn = parent.querySelector<HTMLButtonElement>(
-        `.mt-tabs button[data-cat="${def.category}"]`,
-      );
-      catBtn?.click();
-    } catch {
-      // Ignore if def is not found
-    }
     buildMenu.setTool({ kind: 'build', defId });
     close();
   });

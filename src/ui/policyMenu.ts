@@ -9,7 +9,7 @@ export interface PolicyMenu {
   toggle: () => void;
 }
 
-export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
+export function mountPolicyMenu(city: City, parent: HTMLElement, tools: HTMLElement): PolicyMenu {
   const backdrop = document.createElement('div');
   backdrop.className = 'mt-policy-backdrop';
   backdrop.hidden = true;
@@ -50,9 +50,11 @@ export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
   openBtn.className = 'mt-policy-btn';
   openBtn.title = t('policy.title');
   openBtn.setAttribute('aria-label', t('policy.title'));
-  openBtn.textContent = '📜';
+  openBtn.setAttribute('aria-pressed', 'false');
+  openBtn.innerHTML =
+    '<svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6m-6 4h6"/></svg>';
   openBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-  parent.appendChild(openBtn);
+  tools.appendChild(openBtn);
 
   let isOpen = false;
 
@@ -101,7 +103,12 @@ export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
     isOpen = v;
     backdrop.hidden = !isOpen;
     openBtn.setAttribute('aria-pressed', String(isOpen));
-    if (isOpen) render();
+    if (isOpen) {
+      render();
+      closeBtn.focus();
+    } else {
+      openBtn.focus();
+    }
   };
 
   openBtn.addEventListener('click', () => setOpen(!isOpen));
@@ -110,12 +117,17 @@ export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
     if (e.target === backdrop) setOpen(false);
   });
 
-  window.addEventListener('keydown', (e) => {
-    if (e.code === 'Escape' && isOpen) {
-      e.preventDefault();
-      setOpen(false);
-    }
-  });
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.code === 'Escape' && isOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(false);
+      }
+    },
+    { capture: true },
+  );
 
   city.on((e) => {
     if (e.type === 'policy' && isOpen) render();

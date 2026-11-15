@@ -62,7 +62,10 @@ test('place from the menu, undo with Ctrl+Z, demolish with X', async ({ page }) 
 test('drag lays a road in one undo step', async ({ page }) => {
   await setup(page);
   const base = await page.evaluate(() => window.__MYRIAD__!.buildingCount());
-  await page.getByRole('button', { name: 'Hạ tầng' }).click();
+  await expect(page.getByRole('button', { name: 'Hạ tầng' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
   await page.locator('.mt-items button', { hasText: 'Đường đất' }).click();
   const box = (await page.locator('canvas').boundingBox())!;
   const cx = box.x + box.width / 2;

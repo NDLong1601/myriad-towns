@@ -18,7 +18,7 @@
 }
 
 .mt-encyclopedia-modal {
-  background: var(--hud-bg);
+  background: var(--hud-bg-elevated);
   color: var(--hud-fg);
   border-radius: 12px;
   width: min(880px, calc(100vw - 32px));
@@ -230,36 +230,6 @@
   background: #256ecc;
 }
 
-/* Launcher button beside build menu */
-.mt-encyclopedia-btn {
-  position: fixed;
-  bottom: 12px;
-  left: calc(50% + min(460px, calc(50vw - 12px)) + 8px);
-  z-index: 40;
-  font: inherit;
-  font-size: 18px;
-  line-height: 1;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: var(--hud-bg);
-  color: var(--hud-fg);
-  border: 1px solid rgb(127 127 127 / 0.25);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
-  cursor: pointer;
-}
-
-.mt-encyclopedia-btn:hover {
-  background: rgb(127 127 127 / 0.22);
-}
-
-@media (max-width: 1040px) {
-  .mt-encyclopedia-btn {
-    left: auto;
-    right: 12px;
-    bottom: 84px;
-  }
-}
-
 @media (max-width: 480px) {
   .mt-encyclopedia-backdrop {
     padding: 8px;
@@ -271,14 +241,5 @@
   .mt-encyclopedia-list {
     grid-template-columns: 1fr;
     padding: 8px 12px;
-  }
-}
-
-/* Narrow screens: the build menu spans the width, so sit above it on the right. */
-@media (max-width: 1000px) {
-  .mt-encyclopedia-btn {
-    left: auto;
-    right: 12px;
-    bottom: 132px;
   }
 }

@@ -1,7 +1,7 @@
 import { STOCK_RESOURCES } from '@/sim/catalog';
 import type { City } from '@/sim/city';
 import { netFlows, type Simulation } from '@/sim/simulation';
-import { fmt, getLang, t } from './i18n';
+import { getLang, t } from './i18n';
 import { icon } from './icons';
 
 /**
@@ -11,12 +11,14 @@ import { icon } from './icons';
 export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulation): void {
   const el = document.createElement('div');
   el.className = 'mt-resources';
+  el.setAttribute('role', 'region');
   el.setAttribute('aria-label', t('ui.resources'));
+  el.tabIndex = 0;
   const locale = getLang();
   const stockNumber = new Intl.NumberFormat(locale);
-  const compactStock = new Intl.NumberFormat(locale, {
-    notation: 'compact',
-    maximumFractionDigits: 1,
+  const rateNumber = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 2,
+    signDisplay: 'always',
   });
   parent.appendChild(el);
   const always = new Set(['food', 'wood', 'stone']);
@@ -30,14 +32,13 @@ export function mountResourceBar(city: City, parent: HTMLElement, sim?: Simulati
         const rate =
           Math.abs(n) < 0.05
             ? ''
-            : `<i class="${n > 0 ? 'up' : 'down'}">${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}${t('ui.perSecond')}</i>`;
+            : `<i class="${n > 0 ? 'up' : 'down'}">${rateNumber.format(n)}${t('ui.perSecond')}</i>`;
         const stock = Math.floor(city.stock[r] ?? 0);
         const cap = city.capacityOf(r);
         const isFull = stock >= cap;
         const full = `${stockNumber.format(stock)} / ${stockNumber.format(cap)}`;
-        const label =
-          stock >= 10000 ? `${compactStock.format(stock)}/${compactStock.format(cap)}` : full;
-        return `<span data-res="${r}" class="${isFull ? 'full' : ''}" title="${t(`resource.${r}`)} · ${full}">${icon(r)}<b aria-label="${full}">${label}</b>${rate}</span>`;
+        const status = isFull ? ` · ${t('ui.stockFull')}` : '';
+        return `<span data-res="${r}" class="${isFull ? 'full' : ''}" title="${t(`resource.${r}`)} · ${full}${status}">${icon(r)}<b>${full}</b>${rate}</span>`;
       })
       .join('');
   };

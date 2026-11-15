@@ -6,6 +6,7 @@ import { fmt, t } from './i18n';
 export function mountHeatmapControls(
   overlay: HeatmapOverlay,
   parent: HTMLElement,
+  toolbar: HTMLElement,
   opts: { open?: boolean; onToggle?: (open: boolean) => void } = {},
 ): void {
   const el = document.createElement('div');
@@ -21,12 +22,13 @@ export function mountHeatmapControls(
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'mt-heat-btn';
-  btn.textContent = '🔥';
+  btn.innerHTML =
+    '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-3-2-5-3-6 0 2-1 3-2 3 1-5-2-8-4-10 1 5-2 6-4 9a7 7 0 0 0 6 11Z"/><path d="M9 19c0-2 2-3 3-5 2 2 3 3 3 5a3 3 0 0 1-6 0Z"/></svg>';
   btn.title = t('ui.heatmap');
   btn.setAttribute('aria-label', t('ui.heatmap'));
   btn.setAttribute('aria-controls', el.id);
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
-  parent.appendChild(btn);
+  toolbar.appendChild(btn);
   let open = opts.open ?? true;
   const setOpen = (v: boolean): void => {
     open = v;

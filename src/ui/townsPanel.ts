@@ -22,8 +22,13 @@ export function mountTownsPanel(
   parent: HTMLElement,
   goTo: (x: number, z: number) => void,
 ): () => void {
-  const el = document.createElement('section');
+  const el = document.createElement('details');
   el.className = 'mt-goals mt-towns';
+  el.open = true;
+  const summary = document.createElement('summary');
+  summary.textContent = t('towns.title');
+  const contents = document.createElement('div');
+  el.append(summary, contents);
   parent.appendChild(el);
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
   el.addEventListener('click', (e) => {
@@ -37,7 +42,7 @@ export function mountTownsPanel(
     el.hidden = list.length === 0;
     // Phones hide the panel while there is only one town (the hint is not worth the space).
     el.classList.toggle('single', list.length < 2);
-    const html = `<h3>${t('towns.title')}</h3><ul>${list
+    const html = `<ul>${list
       .map((tw) => {
         const asleep = sim.isDormant(tw.id);
         const icon = happinessIcon(tw.happiness);
@@ -49,7 +54,7 @@ export function mountTownsPanel(
         '',
       )}</ul>${list.length < 2 ? `<small>${t('towns.hint', { gap: MIN_TOWN_GAP })}</small>` : ''}`;
     if (html !== last) {
-      el.innerHTML = html;
+      contents.innerHTML = html;
       last = html;
     }
   };
