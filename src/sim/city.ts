@@ -140,10 +140,11 @@ export class City {
 
   /** Buildings whose footprint is within r of rect (optionally only of one type). */
   near(rect: Rect, r: number, defId?: string, excludeUid?: number): PlacedBuilding[] {
+    const out: PlacedBuilding[] = [];
+    if (defId !== undefined && (this.perDef.get(defId) ?? 0) <= 0) return out;
     const reach = r + MAX_FOOTPRINT;
     const c0 = tileToChunk(rect.x - reach, rect.z - reach);
     const c1 = tileToChunk(rect.x + rect.w + reach, rect.z + rect.d + reach);
-    const out: PlacedBuilding[] = [];
     for (let cz = c0.cz; cz <= c1.cz; cz++) {
       for (let cx = c0.cx; cx <= c1.cx; cx++) {
         const set = this.spatial.get(chunkKey(cx, cz));

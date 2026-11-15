@@ -48,7 +48,7 @@ export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
   const openBtn = document.createElement('button');
   openBtn.type = 'button';
   openBtn.className = 'mt-policy-btn';
-  openBtn.title = `${t('policy.title')} (P)`;
+  openBtn.title = t('policy.title');
   openBtn.setAttribute('aria-label', t('policy.title'));
   openBtn.textContent = '📜';
   openBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -111,13 +111,7 @@ export function mountPolicyMenu(city: City, parent: HTMLElement): PolicyMenu {
   });
 
   window.addEventListener('keydown', (e) => {
-    const target = e.target as HTMLElement | null;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.code === 'KeyP') {
-      e.preventDefault();
-      setOpen(!isOpen);
-    } else if (e.code === 'Escape' && isOpen) {
+    if (e.code === 'Escape' && isOpen) {
       e.preventDefault();
       setOpen(false);
     }

@@ -44,9 +44,9 @@
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
-      "to": "hut"
+      "to": "cottage"
     },
-    "tags": ["residential", "occupational"],
+    "tags": ["residential", "occupational", "upgrade_only"],
     "unlock": {
       "revealAt": 0
     }
@@ -97,9 +97,9 @@
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
-      "to": "hut"
+      "to": "cottage"
     },
-    "tags": ["residential", "occupational"],
+    "tags": ["residential", "occupational", "upgrade_only"],
     "unlock": {
       "revealAt": 0
     }
@@ -144,9 +144,9 @@
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
-      "to": "hut"
+      "to": "cottage"
     },
-    "tags": ["residential", "occupational"],
+    "tags": ["residential", "occupational", "upgrade_only"],
     "unlock": {
       "revealAt": 0
     }
@@ -211,7 +211,7 @@
       "graceTicks": 60,
       "to": "townhouse"
     },
-    "tags": ["residential"],
+    "tags": ["residential", "upgrade_only"],
     "unlock": {
       "population": 250,
       "revealAt": 150
@@ -378,7 +378,7 @@
       "graceTicks": 60,
       "to": "villa"
     },
-    "tags": ["residential", "highrise"],
+    "tags": ["residential", "highrise", "upgrade_only"],
     "unlock": {
       "population": 300,
       "revealAt": 200
@@ -455,7 +455,7 @@
       "graceTicks": 60,
       "to": "apartment_tower"
     },
-    "tags": ["residential", "highrise"],
+    "tags": ["residential", "highrise", "upgrade_only"],
     "unlock": {
       "population": 600,
       "revealAt": 400

@@ -84,7 +84,62 @@
             "max": 0
           }
         ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60
+    },
+    "tags": ["starter", "residential"]
+  },
+  {
+    "id": "cottage",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {
+      "wood": 6,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "house",
+      "color": "#efe6d2",
+      "roof": "#b5533c",
+      "height": 0.75
+    },
+    "housing": 8,
+    "upkeep": {
+      "food": 0.4
+    },
+    "produces": {
+      "labor": 3
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 2,
+        "radius": 2
       },
+      {
+        "field": "urban",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      }
+    ],
+    "upgrades": [
       {
         "to": "miner_cottage",
         "when": [
@@ -176,62 +231,7 @@
             "min": 1
           }
         ]
-      }
-    ],
-    "decline": {
-      "warnAtTicks": 20,
-      "graceTicks": 60
-    },
-    "tags": ["starter", "residential"]
-  },
-  {
-    "id": "cottage",
-    "category": "housing",
-    "footprint": {
-      "w": 1,
-      "d": 1
-    },
-    "cost": {
-      "wood": 6,
-      "stone": 2
-    },
-    "visual": {
-      "shape": "house",
-      "color": "#efe6d2",
-      "roof": "#b5533c",
-      "height": 0.75
-    },
-    "housing": 8,
-    "upkeep": {
-      "food": 0.4
-    },
-    "produces": {
-      "labor": 3
-    },
-    "emits": [
-      {
-        "field": "density",
-        "amount": 2,
-        "radius": 2
       },
-      {
-        "field": "urban",
-        "amount": 1,
-        "radius": 2
-      }
-    ],
-    "requires": [
-      {
-        "type": "road",
-        "maxDistance": 2
-      },
-      {
-        "type": "field",
-        "field": "water_access",
-        "min": 1
-      }
-    ],
-    "upgrades": [
       {
         "to": "townhouse",
         "when": [

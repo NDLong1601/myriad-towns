@@ -19,29 +19,31 @@ describe('Advanced Urbek-inspired Features', () => {
       expect(city.catalog.has('skyscraper')).toBe(true);
     });
 
-    it('hut upgrades to lumberjack_cottage when near woodcutter without water', () => {
+    it('cottage upgrades to lumberjack_cottage when near woodcutter', () => {
       const { city, history } = makeCity();
       const sim = new Simulation(city);
       city.stock.wood = 500;
+      city.stock.stone = 500;
       city.stock.food = 500;
 
-      // Road, woodcutter, and hut
+      // Road, well, woodcutter, and cottage
       history.run(new PlaceCommand('road', 0, 0));
       history.run(new PlaceCommand('road', 1, 0));
       history.run(new PlaceCommand('road', 2, 0));
+      city._add(city.catalog.get('well'), 1, 1);
       city._add(city.catalog.get('woodcutter'), 0, 1);
-      history.run(new PlaceCommand('hut', 2, 1));
+      city._add(city.catalog.get('cottage'), 2, 1);
 
-      const hutUid = city.at(2, 1)?.uid as number;
-      expect(hutUid).toBeDefined();
+      const cottageUid = city.at(2, 1)?.uid as number;
+      expect(cottageUid).toBeDefined();
 
       // Run simulation ticks
       sim.run(24);
-      const upgraded = city.get(hutUid);
+      const upgraded = city.get(cottageUid);
       expect(upgraded?.def.id).toBe('lumberjack_cottage');
     });
 
-    it('hut upgrades to miner_cottage when near coal_mine', () => {
+    it('cottage upgrades to miner_cottage when near coal_mine', () => {
       const { city, history } = makeCity();
       const sim = new Simulation(city);
       city.stock.wood = 500;
@@ -49,14 +51,15 @@ describe('Advanced Urbek-inspired Features', () => {
       city.stock.food = 500;
 
       for (let x = 0; x < 5; x++) history.run(new PlaceCommand('road', x, 0));
+      city._add(city.catalog.get('well'), 2, 1);
       city._add(city.catalog.get('coal_mine'), 0, 1);
-      history.run(new PlaceCommand('hut', 3, 1));
+      city._add(city.catalog.get('cottage'), 3, 1);
 
-      const hutUid = city.at(3, 1)?.uid as number;
-      expect(hutUid).toBeDefined();
+      const cottageUid = city.at(3, 1)?.uid as number;
+      expect(cottageUid).toBeDefined();
 
       sim.run(24);
-      const upgraded = city.get(hutUid);
+      const upgraded = city.get(cottageUid);
       expect(upgraded?.def.id).toBe('miner_cottage');
     });
   });
