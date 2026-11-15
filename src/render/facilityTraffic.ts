@@ -5,7 +5,7 @@ import { TileFlag } from '@/world/biomes';
 import { box } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
 
-type Kind = 'train' | 'boat' | 'plane';
+type Kind = 'train' | 'boat' | 'plane' | 'ship' | 'ferry';
 interface Point {
   x: number;
   y: number;
@@ -29,8 +29,10 @@ const FACILITIES = new Map<string, Kind>([
   ['fishing_harbor', 'boat'],
   ['fishing_dock', 'boat'],
   ['airfield', 'plane'],
+  ['cargo_port', 'ship'],
+  ['ferry_pier', 'ferry'],
 ]);
-const SPEED: Record<Kind, number> = { train: 3.2, boat: 1, plane: 4.2 };
+const SPEED: Record<Kind, number> = { train: 3.2, boat: 1, plane: 4.2, ship: 1.4, ferry: 1.8 };
 
 function vehicle(kind: Kind): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
@@ -45,6 +47,18 @@ function vehicle(kind: Kind): THREE.BufferGeometry {
       parts.push(box(0.73, 0.15, 0.43, '#895847', -0.05, 0, -0.03));
       parts.push(box(0.28, 0.21, 0.32, '#e1d6b8', -0.12, 0, 0.12));
       parts.push(box(0.03, 0.31, 0.03, '#65564c', 0.04, 0, 0.15));
+      break;
+    case 'ship':
+      parts.push(box(1.2, 0.22, 0.52, '#2b383f', -0.05, 0, 0));
+      parts.push(box(0.28, 0.28, 0.42, '#eceff1', -0.42, 0, 0.2));
+      parts.push(box(0.06, 0.16, 0.06, '#b71c1c', -0.48, 0, 0.38));
+      parts.push(box(0.32, 0.2, 0.36, '#1565c0', 0.12, 0, 0.16));
+      parts.push(box(0.28, 0.2, 0.34, '#c62828', -0.08, 0, 0.16));
+      break;
+    case 'ferry':
+      parts.push(box(0.95, 0.18, 0.48, '#37474f', 0, 0, 0));
+      parts.push(box(0.65, 0.18, 0.38, '#eceff1', 0, 0, 0.14));
+      parts.push(box(0.24, 0.16, 0.28, '#263238', 0.15, 0, 0.26));
       break;
     case 'plane':
       parts.push(box(0.9, 0.15, 0.17, '#eae4d6', 0, 0, 0.04));
@@ -84,7 +98,13 @@ export class FacilityTraffic {
       this.group.add(mesh);
       return mesh;
     };
-    this.meshes = { train: make('train'), boat: make('boat'), plane: make('plane') };
+    this.meshes = {
+      train: make('train'),
+      boat: make('boat'),
+      plane: make('plane'),
+      ship: make('ship'),
+      ferry: make('ferry'),
+    };
     for (const b of city.all()) this.add(b);
     city.on((e) => {
       if (e.type === 'added' || e.type === 'removed') {
@@ -132,19 +152,26 @@ export class FacilityTraffic {
       ];
     }
 
+    const isWater = kind === 'boat' || kind === 'ship' || kind === 'ferry';
     const suitable = (x: number, z: number): boolean => {
       const tile = this.city.at(x, z);
-      return kind === 'train'
-        ? tile?.def.id === 'rail_track'
-        : !tile && Boolean(this.city.terrain.tile(x, z).flags & TileFlag.Water);
+      if (kind === 'train') return tile?.def.id === 'rail_track';
+      if (isWater) {
+        return (
+          (!tile || tile.def.visual.shape === 'bridge') &&
+          Boolean(this.city.terrain.tile(x, z).flags & TileFlag.Water)
+        );
+      }
+      return false;
     };
     const points: Point[] = [];
+    const limit = kind === 'train' ? 25 : kind === 'ship' ? 40 : kind === 'ferry' ? 30 : 13;
     for (let z = b.z - 1; z < b.z + d + 1; z++) {
       for (let x = b.x - 1; x < b.x + w + 1; x++) {
         const outsideX = x < b.x || x >= b.x + w;
         const outsideZ = z < b.z || z >= b.z + d;
         if (outsideX === outsideZ || !suitable(x, z)) continue;
-        const path = this.follow(x, z, kind === 'train' ? 25 : 13, suitable);
+        const path = this.follow(x, z, limit, suitable);
         if (path.length > points.length) {
           points.length = 0;
           points.push(...path);
@@ -179,8 +206,8 @@ export class FacilityTraffic {
   }
 
   update(dt: number, cam: { x: number; z: number }, enabled: boolean, paused: boolean): void {
-    const { train, boat, plane } = this.meshes;
-    train.count = boat.count = plane.count = 0;
+    const { train, boat, plane, ship, ferry } = this.meshes;
+    train.count = boat.count = plane.count = ship.count = ferry.count = 0;
     if (!enabled) {
       this.refreshIn = 0;
       return;
@@ -222,5 +249,7 @@ export class FacilityTraffic {
     if (train.count) train.instanceMatrix.needsUpdate = true;
     if (boat.count) boat.instanceMatrix.needsUpdate = true;
     if (plane.count) plane.instanceMatrix.needsUpdate = true;
+    if (ship.count) ship.instanceMatrix.needsUpdate = true;
+    if (ferry.count) ferry.instanceMatrix.needsUpdate = true;
   }
 }
