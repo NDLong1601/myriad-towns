@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { BuildingDef } from '@/sim/catalog';
+import { architectureModel } from './architectureModels';
+import { box, gable, part, pyramid, shade } from './modelParts';
+
+export { box, part, shade } from './modelParts';
 
 /**
  * Procedural low-poly models built from a building's `visual` block, until real models
@@ -236,40 +240,6 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
     streetLamp(parts, top, brick ? 'brick' : paved ? 'stone' : 'dirt');
 }
 
-export function part(
-  geo: THREE.BufferGeometry,
-  color: string,
-  x: number,
-  y: number,
-  z: number,
-  glow = 0,
-): THREE.BufferGeometry {
-  const g = geo.index ? geo.toNonIndexed() : geo;
-  g.translate(x, y, z);
-  const c = new THREE.Color(color);
-  const n = g.getAttribute('position').count;
-  const colors = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) colors.set([c.r, c.g, c.b], i * 3);
-  g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  g.setAttribute('glow', new THREE.BufferAttribute(new Float32Array(n).fill(glow), 1));
-  g.deleteAttribute('uv');
-  return g;
-}
-
-/** Box resting on y=0, centred on (x, z). */
-export function box(
-  w: number,
-  h: number,
-  d: number,
-  color: string,
-  x: number,
-  z: number,
-  y = 0,
-  glow = 0,
-): THREE.BufferGeometry {
-  return part(new THREE.BoxGeometry(w, h, d), color, x, y + h / 2, z, glow);
-}
-
 /**
  * Small lit windows on the four walls of a w×d box standing on y0 with wall height h.
  * They look dark by day and glow at night (see the shader patch in buildingRenderer).
@@ -297,40 +267,6 @@ function windows(
     for (const side of [-1, 1])
       out.push(box(0.03, size, size, '#6c7a8c', cx + (side * w) / 2, z, y - size / 2, 1));
   }
-}
-
-/** Four-sided pyramid roof sitting on top of a w×d box. */
-function pyramid(
-  w: number,
-  h: number,
-  d: number,
-  color: string,
-  x: number,
-  z: number,
-  y: number,
-): THREE.BufferGeometry {
-  const g = new THREE.ConeGeometry(Math.SQRT1_2, h, 4, 1);
-  g.rotateY(Math.PI / 4);
-  g.scale(w, 1, d);
-  return part(g, color, x, y + h / 2, z);
-}
-
-/** Gable roof (triangular prism) running along x. */
-function gable(
-  w: number,
-  h: number,
-  d: number,
-  color: string,
-  x: number,
-  z: number,
-  y: number,
-): THREE.BufferGeometry {
-  const g = new THREE.CylinderGeometry(1, 1, w, 3, 1);
-  g.rotateZ(Math.PI / 2);
-  g.rotateX(Math.PI); // ridge up
-  // A unit triangle (radius 1) spans 1.5 tall, √3 wide; scale it to the roof.
-  g.scale(1, h / 1.5, d / Math.sqrt(3));
-  return part(g, color, x, y + h / 3, z);
 }
 
 function miningModel(
@@ -430,7 +366,11 @@ function miningModel(
   }
 }
 
-function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
+function addDefaultGeometry(
+  def: BuildingDef,
+  variant: number,
+  parts: THREE.BufferGeometry[],
+): void {
   const { w, d } = def.footprint;
   const v = def.visual;
   const h = v.height ?? 0.6;
@@ -438,53 +378,7 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const roof = v.roof ?? shade(color, 0.7);
   const cx = w / 2;
   const cz = d / 2;
-  const parts: THREE.BufferGeometry[] = [];
-  switch (
-    def.id === 'airfield' ||
-    def.id === 'rail_track' ||
-    def.id === 'flower_garden' ||
-    def.id === 'bus_stop' ||
-    def.id === 'metro_station' ||
-    def.id === 'skyscraper'
-      ? def.id
-      : v.shape
-  ) {
-    case 'bus_stop': {
-      parts.push(box(w * 0.85, 0.04, d * 0.85, '#7f8c8d', cx, cz));
-      parts.push(box(w * 0.7, 0.45, 0.04, '#34495e', cx, cz - 0.28, 0.04));
-      parts.push(box(w * 0.75, 0.04, 0.5, '#2980b9', cx, cz, 0.49));
-      parts.push(box(0.4, 0.12, 0.15, '#d35400', cx, cz - 0.1, 0.04));
-      parts.push(box(0.04, 0.6, 0.04, '#f1c40f', cx + 0.3, cz + 0.25, 0.04));
-      parts.push(box(0.12, 0.12, 0.02, '#e74c3c', cx + 0.3, cz + 0.25, 0.54));
-      break;
-    }
-    case 'metro_station': {
-      parts.push(box(w * 0.95, 0.06, d * 0.95, '#5d6d7e', cx, cz));
-      parts.push(box(1.0, 0.08, 1.2, '#1b2631', cx, cz, 0.06));
-      parts.push(box(1.1, 0.45, 1.3, '#2471a3', cx, cz, 0.1));
-      parts.push(box(0.08, 1.0, 0.08, '#2c3e50', cx + 0.65, cz + 0.65, 0.06));
-      parts.push(box(0.2, 0.2, 0.05, '#e74c3c', cx + 0.65, cz + 0.65, 0.9));
-      break;
-    }
-    case 'skyscraper': {
-      parts.push(box(w * 0.88, h * 0.45, d * 0.88, color, cx, cz));
-      windows(w * 0.88, d * 0.88, cx, cz, 0, h * 0.45, parts);
-      parts.push(box(w * 0.72, h * 0.35, d * 0.72, shade(color, 0.95), cx, cz, h * 0.45));
-      windows(w * 0.72, d * 0.72, cx, cz, h * 0.45, h * 0.35, parts);
-      parts.push(box(w * 0.52, h * 0.2, d * 0.52, roof, cx, cz, h * 0.8));
-      parts.push(box(0.08, 0.8, 0.08, '#f1c40f', cx, cz, h));
-      break;
-    }
-    case 'airfield': {
-      parts.push(box(w * 0.96, 0.06, d * 0.96, '#688257', cx, cz));
-      parts.push(box(w, 0.1, 1.15, color, cx, cz));
-      for (let i = 0; i < 4; i++) parts.push(box(0.45, 0.012, 0.04, '#ede5cd', i + 0.5, cz, 0.1));
-      parts.push(box(1.5, h * 0.65, 0.9, '#dcd1b9', cx, cz - 1.25));
-      parts.push(gable(1.6, 0.27, 1, roof, cx, cz - 1.25, h * 0.65));
-      parts.push(box(0.55, h, 0.6, '#d8d4c7', cx + 1.2, cz + 1.1));
-      parts.push(box(0.65, 0.22, 0.7, '#526676', cx + 1.2, cz + 1.1, h));
-      break;
-    }
+  switch (def.id === 'rail_track' ? def.id : v.shape) {
     case 'rail_track': {
       parts.push(box(0.9, 0.04, 0.9, color, cx, cz));
       const straight = variant || ROAD_E | ROAD_W;
@@ -522,29 +416,6 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
       }
       break;
     }
-    case 'flower_garden': {
-      parts.push(box(w * 0.97, h, d * 0.97, color, cx, cz));
-      parts.push(box(0.35, 0.03, d, '#d5b98a', cx, cz, h));
-      const blossoms = [roof, '#f1c149', '#e9e0ed'];
-      for (let row = 0; row < 5; row++) {
-        for (const x of [0.34, 0.65, 1.35, 1.65]) {
-          const z = 0.34 + row * 0.56;
-          parts.push(box(0.07, 0.15, 0.07, '#458551', x, z, h));
-          parts.push(
-            pyramid(
-              0.2,
-              0.08,
-              0.2,
-              blossoms[(row + Math.round(x * 3)) % blossoms.length]!,
-              x,
-              z,
-              h + 0.13,
-            ),
-          );
-        }
-      }
-      break;
-    }
     case 'road':
     case 'bridge':
       roadModel(parts, def, variant, h);
@@ -552,26 +423,6 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
     case 'field': {
       if (def.crop) {
         cropField(parts, def, variant || 4);
-        break;
-      }
-      if (def.id === 'stockpile') {
-        parts.push(box(w * 0.94, 0.06, d * 0.94, '#84745c', cx, cz));
-        for (let i = 0; i < 5; i++) {
-          const x = 0.3 + (i % 3) * 0.56;
-          const z = 0.43 + Math.floor(i / 3) * 0.76;
-          parts.push(box(0.45, 0.14, 0.48, '#625749', x, z, 0.06));
-          parts.push(
-            box(
-              0.37,
-              0.18 + (i % 2) * 0.12,
-              0.34,
-              i % 2 ? '#a8a59a' : '#7d8a8b',
-              x + 0.08,
-              z,
-              0.18,
-            ),
-          );
-        }
         break;
       }
       parts.push(box(w * 0.94, 0.06, d * 0.94, shade(color, 0.6), cx, cz));
@@ -645,6 +496,11 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
       parts.push(box(0.1, 0.06, 0.1, '#e8a0b8', cx + 0.34 * w, cz - 0.4 * d));
       break;
   }
+}
+
+function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
+  const parts: THREE.BufferGeometry[] = [];
+  if (!architectureModel(def, parts)) addDefaultGeometry(def, variant, parts);
   const merged = mergeGeometries(parts, false);
   if (!merged) throw new Error(`could not build model for ${def.id}`);
   for (const p of parts) p.dispose();
@@ -658,16 +514,24 @@ function cropField(parts: THREE.BufferGeometry[], def: BuildingDef, stage: numbe
   const kind = def.crop?.kind;
   const soil = kind === 'berries' ? '#694530' : kind === 'grain' ? '#906044' : '#765341';
   parts.push(box(w * 0.97, 0.045, d * 0.97, soil, w / 2, d / 2));
+  const irrigated = def.id === 'irrigated_wheat';
+  const fieldWidth = w * (irrigated ? 0.69 : 0.89);
+  const fieldX = w * (irrigated ? 0.6 : 0.5);
+  if (irrigated) {
+    parts.push(box(w * 0.19, 0.021, d * 0.96, '#648f9d', w * 0.15, d / 2, 0.046));
+    parts.push(box(w * 0.06, 0.06, d * 0.96, '#9b917b', w * 0.25, d / 2, 0.045));
+    parts.push(box(w * 0.24, 0.062, 0.24, '#a7855d', w * 0.152, d * 0.47, 0.073));
+  }
   const rows = d * (kind === 'berries' ? 2 : 3);
   for (let i = 0; i < rows; i++) {
     const z = ((i + 0.5) * d) / rows;
-    parts.push(box(w * 0.89, 0.026, 0.12, shade(soil, 1.2), w / 2, z, 0.045));
+    parts.push(box(fieldWidth, 0.026, 0.12, shade(soil, 1.2), fieldX, z, 0.045));
     if (stage === 1) continue;
     if (kind === 'grain') {
       const h = stage === 2 ? 0.07 : stage === 3 ? 0.17 : 0.26;
       const color = stage === 2 ? '#82ab51' : stage === 3 ? '#adba50' : '#edc958';
-      parts.push(box(w * 0.9, h, stage === 4 ? 0.16 : 0.085, color, w / 2, z, 0.07));
-      if (stage === 4) parts.push(box(w * 0.88, 0.04, 0.13, '#f5df83', w / 2, z, 0.29));
+      parts.push(box(fieldWidth, h, stage === 4 ? 0.16 : 0.085, color, fieldX, z, 0.07));
+      if (stage === 4) parts.push(box(fieldWidth * 0.98, 0.04, 0.13, '#f5df83', fieldX, z, 0.29));
       continue;
     }
     const columns = w * (kind === 'berries' ? 2 : 3);
@@ -683,10 +547,4 @@ function cropField(parts: THREE.BufferGeometry[], def: BuildingDef, stage: numbe
       }
     }
   }
-}
-
-export function shade(hex: string, f: number): string {
-  const c = new THREE.Color(hex);
-  c.multiplyScalar(f);
-  return `#${c.getHexString()}`;
 }
