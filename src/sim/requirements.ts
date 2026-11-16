@@ -31,7 +31,9 @@ export interface PlacementCheck {
 
 /** Evaluate one requirement for a building (placed or hypothetical) at rect. */
 export function checkRequirement(
-  city: City,
+  city: Pick<City, 'near' | 'roadDistance' | 'terrain'> & {
+    fields: Pick<City['fields'], 'maxOver'>;
+  },
   req: Requirement,
   rect: Rect,
   selfUid?: number,

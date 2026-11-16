@@ -40,10 +40,17 @@ test('a village grows: huts upgrade near a well, the panel explains, toasts anno
     return n;
   }, s);
   expect(placed).toBe(12);
-  // 12 huts × 4 = 48 people ≥ 40: cottages unlock.
-  await page.evaluate(() => window.__MYRIAD__!.tick(8));
+  // New huts open with room for more residents, then fill while food is available.
+  const initialPopulation = await page.evaluate(() => {
+    const town = window.__MYRIAD__!;
+    town.tick(1);
+    return town.population();
+  });
+  expect(initialPopulation).toBeGreaterThan(0);
+  expect(initialPopulation).toBeLessThan(48);
+  await page.evaluate(() => window.__MYRIAD__!.tick(7));
   expect(await page.evaluate(() => window.__MYRIAD__!.population())).toBe(48);
-  await expect(page.locator('.mt-toast', { hasText: /Mở khoá/ })).toBeVisible();
+  await expect(page.locator('.mt-toast', { hasText: /Mở khoá:.*Nhà gỗ/ })).toBeVisible();
   await page.evaluate((s) => window.__MYRIAD__!.place('well', s.x + 2, s.z + 2), s);
   await page.evaluate(() => window.__MYRIAD__!.tick(16));
   expect(await page.evaluate((s) => window.__MYRIAD__!.buildingAt(s.x + 2, s.z + 1), s)).toBe(

@@ -27,10 +27,13 @@ import { PlanRenderer } from '@/render/planRenderer';
 import { WARNING_TINT } from '@/render/buildingRenderer';
 import { SimClock, SPEEDS, type Speed } from '@/sim/clock';
 import { PlanStore } from '@/sim/plan';
+import { RegionalTrade } from '@/sim/regionalTrade';
 import { Simulation } from '@/sim/simulation';
 import { mountHeatmapControls } from '@/ui/heatmapControls';
 import { mountNotifications } from '@/ui/notifications';
 import { mountPlanBar } from '@/ui/planBar';
+import { mountProgressAlerts } from '@/ui/progressAlerts';
+import { mountRegionalTrade } from '@/ui/regionalTrade';
 import { mountSimBar } from '@/ui/simBar';
 import { PoiRenderer } from '@/render/poiRenderer';
 import { Goals } from '@/sim/goals';
@@ -200,13 +203,19 @@ const setup: GameSetup = loaded
 const history = new History(city);
 const sim = new Simulation(city);
 const pois = new PoiStore(city, seed);
-const towns = new TownStore(city);
+const towns = new TownStore(city, (uid) => sim.residentsOf(uid));
+const regionalTrade = new RegionalTrade(city, towns);
+sim.regionalTrade = regionalTrade;
+towns.policyFor = (town, policy) => regionalTrade.isPolicyActive(town, policy);
 towns.enforceTerritory = setup.mode === 'goals';
 // ?tiers=0 keeps every town fully simulated (for comparisons).
 const tiersOn = params.get('tiers') !== '0';
 sim.tiers = towns;
 const goals = setup.mode === 'goals' ? new Goals(city, sim, pois) : undefined;
-if (goals) goals.townCount = () => towns.all().length;
+if (goals) {
+  goals.townCount = () => towns.all().length;
+  goals.townMetrics = () => towns.all();
+}
 if (setup.mode === 'sandbox') {
   applySandbox(setup.sandbox, city, sim);
   if (!loaded) city._addStock({ charter: 3 }, 1);
@@ -344,7 +353,8 @@ city.on((e) => {
 });
 // Restore a saved game now that every system and renderer is listening.
 let missingDefs: string[] = [];
-if (loaded) missingDefs = applySave({ city, sim, towns, pois, goals }, loaded).missing;
+if (loaded)
+  missingDefs = applySave({ city, sim, towns, pois, goals, regionalTrade }, loaded).missing;
 // Warn visibly on the building itself, not only in a toast.
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
@@ -387,6 +397,7 @@ interfaceLayer.appendChild(bottom);
 const menu = mountBuildMenu(city, history, bottom, params.get('tray') !== '0');
 mountEncyclopedia(document.body, city.catalog, menu);
 mountPolicyMenu(city, document.body, menu.tools);
+mountRegionalTrade(city, towns, regionalTrade, menu.tools);
 const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
@@ -402,7 +413,14 @@ top.appendChild(left);
 const readouts = document.createElement('div');
 readouts.className = 'mt-readouts';
 top.appendChild(readouts);
-mountResourceBar(city, readouts, sim);
+mountResourceBar(
+  city,
+  readouts,
+  sim,
+  (x, z) => view.controller.teleport(x, z),
+  (building, resource) =>
+    regionalTrade.operatingStock(towns.townOfBuilding(building), resource) === city.stock,
+);
 left.appendChild(hud);
 const leftPanels = document.createElement('div');
 leftPanels.className = 'mt-left-panels';
@@ -412,6 +430,7 @@ else mountSandboxPanel(setup.sandbox, city, sim, leftPanels);
 const renderTowns = mountTownsPanel(towns, sim, leftPanels, (x, z) =>
   view.controller.teleport(x, z),
 );
+mountProgressAlerts(city, sim, leftPanels, (x, z) => view.controller.teleport(x, z));
 towns.on((e) => {
   if (e.type === 'removed') sim.setDormant(e.town.id, false);
 });
@@ -447,7 +466,7 @@ new BuildTool(
 
 // Saves: this game's slot (the loaded one, or a new one on first save).
 const session = new SaveSession(
-  { city, sim, towns, pois, goals },
+  { city, sim, towns, pois, goals, regionalTrade },
   loaded?.meta ?? {
     name: cityName,
     mode: setup.mode,
@@ -595,7 +614,7 @@ const map = mountMinimap(bottom, seed, view.controller, city, view, {
   onToggle: savePanel('showMinimap'),
 });
 const renderSimBar = mountSimBar(sim, clock, map.toolbar.parentElement!, readouts);
-mountPlanBar(plans, history, map.panels, map.toolbar);
+mountPlanBar(plans, history, map.panels, map.toolbar, () => view.controller.state);
 mountHeatmapControls(heatmap, map.panels, map.toolbar, {
   open: settings.showHeatmap,
   onToggle: savePanel('showHeatmap'),
@@ -622,7 +641,7 @@ function updateTiers(): void {
   const c = view.controller.state;
   for (const tw of towns.all()) {
     const away = Math.hypot(tw.x - c.x, tw.z - c.z) - towns.radiusOf(tw);
-    sim.setDormant(tw.id, tiersOn && away > DORMANT_DISTANCE);
+    sim.setDormant(tw.id, tiersOn && away > DORMANT_DISTANCE && !regionalTrade.reserve(tw.id));
   }
   renderTowns();
 }

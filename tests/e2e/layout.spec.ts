@@ -55,7 +55,8 @@ test('resources stay legible and the shared map dock fits beside or above the tr
   });
   expect(placed).toBe(true);
   const foodChip = page.locator('[data-res="food"]');
-  await expect(foodChip.locator('.down')).toHaveText(/^[−-]0,2\/giây$/);
+  // Half-full starter housing initially consumes half its full food rate.
+  await expect(foodChip.locator('.down')).toHaveText(/^[−-]0,1\/giây$/);
   await expect(page.locator('.mt-labor.warning svg[aria-label="Lao động"]')).toBeVisible();
   const stockAndRateShareRow = await foodChip.evaluate((chip) => {
     const stock = chip.querySelector('b')!.getBoundingClientRect();

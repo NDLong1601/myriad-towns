@@ -182,6 +182,8 @@ interface Goal {
   building?: string;
   resource?: string;
   min: number;
+  happiness?: number;
+  population?: number;
 }
 const packs =
   (readJson(join(dataDir, 'packs.json')) as { packs: { id: string; buildings: string[] }[] })
@@ -189,7 +191,12 @@ const packs =
 const chapters =
   (
     readJson(join(dataDir, 'chapters.json')) as {
-      chapters: { id: string; goals: Goal[]; reward?: Record<string, number> }[];
+      chapters: {
+        id: string;
+        goals: Goal[];
+        alternativeGoals?: Goal[];
+        reward?: Record<string, number>;
+      }[];
     }
   )?.chapters ?? [];
 const packOf = new Map<string, string>();
@@ -200,20 +207,50 @@ for (const p of packs) {
     packOf.set(id, p.id);
   }
 }
-const goalTypes = new Set(['population', 'count', 'stock', 'production', 'explore', 'towns']);
+const goalTypes = new Set([
+  'population',
+  'count',
+  'stock',
+  'production',
+  'explore',
+  'towns',
+  'happyTowns',
+]);
 for (const c of chapters) {
-  const population = c.goals.find((g) => g.type === 'population')?.min ?? 0;
-  for (const g of c.goals) {
-    if (!goalTypes.has(g.type)) errors.push(`chapter "${c.id}": unknown goal type "${g.type}"`);
+  validateGoalPath(c.id, c.goals);
+  if (c.alternativeGoals) validateGoalPath(c.id, c.alternativeGoals);
+  for (const r of Object.keys(c.reward ?? {}))
+    if (!resourceIds.has(r)) errors.push(`chapter "${c.id}": unknown reward resource "${r}"`);
+}
+
+function validateGoalPath(id: string, goals: Goal[]): void {
+  if (!goals.length) errors.push(`chapter "${id}": goal path cannot be empty`);
+  const population = goals.find((g) => g.type === 'population')?.min ?? 0;
+  for (const g of goals) {
+    if (!goalTypes.has(g.type)) errors.push(`chapter "${id}": unknown goal type "${g.type}"`);
     if (!Number.isFinite(g.min) || g.min <= 0)
-      errors.push(`chapter "${c.id}": invalid threshold "${g.min}" for "${g.type}"`);
+      errors.push(`chapter "${id}": invalid threshold "${g.min}" for "${g.type}"`);
+    if (g.type === 'happyTowns') {
+      const happiness = g.happiness ?? NaN;
+      const inhabitants = g.population ?? NaN;
+      if (
+        !Number.isInteger(g.min) ||
+        !Number.isInteger(happiness) ||
+        happiness < 1 ||
+        happiness > 100 ||
+        !Number.isInteger(inhabitants) ||
+        inhabitants < 1
+      ) {
+        errors.push(`chapter "${id}": invalid happiness or population in the town quality goal`);
+      }
+    }
     if (g.building && !buildings.has(g.building))
-      errors.push(`chapter "${c.id}": unknown building "${g.building}"`);
+      errors.push(`chapter "${id}": unknown building "${g.building}"`);
     if (
       (g.type === 'production' || g.type === 'stock') &&
       !resources.stock.includes(g.resource ?? '')
     )
-      errors.push(`chapter "${c.id}": invalid stock resource "${g.resource}"`);
+      errors.push(`chapter "${id}": invalid stock resource "${g.resource}"`);
     if (g.type === 'production' && g.resource) {
       const resource = g.resource;
       if (
@@ -230,13 +267,11 @@ for (const c of chapters) {
         )
       ) {
         errors.push(
-          `chapter "${c.id}": "${resource}" needs a producer available without a pack or rare terrain by population ${population}`,
+          `chapter "${id}": "${resource}" needs a producer available without a pack or rare terrain by population ${population}`,
         );
       }
     }
   }
-  for (const r of Object.keys(c.reward ?? {}))
-    if (!resourceIds.has(r)) errors.push(`chapter "${c.id}": unknown reward resource "${r}"`);
 }
 
 const i18nDir = join(dataDir, 'i18n');

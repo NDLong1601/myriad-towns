@@ -162,7 +162,7 @@ export class City {
   }
 
   /** Distance from rect to the nearest road tile, or Infinity if none within maxDistance. */
-  roadDistance(rect: Rect, maxDistance: number, paved = false): number {
+  roadDistance(rect: Rect, maxDistance: number, paved = false, excludeUid?: number): number {
     // Scan rings outward (most buildings touch a road), stopping once no closer ring is left.
     let best = Infinity;
     for (let ring = 1; ring <= maxDistance && best > ring; ring++) {
@@ -174,7 +174,12 @@ export class City {
         const edge = z === z0 || z === z1;
         for (let x = x0; x <= x1; x += edge ? 1 : x1 - x0) {
           const b = this.at(x, z);
-          if (b && isRoadDef(b.def) && (!paved || b.def.tags?.includes('paved'))) {
+          if (
+            b &&
+            b.uid !== excludeUid &&
+            isRoadDef(b.def) &&
+            (!paved || b.def.tags?.includes('paved'))
+          ) {
             const d = rectDistance(rect, { x, z, w: 1, d: 1 });
             if (d < best) best = d;
           }

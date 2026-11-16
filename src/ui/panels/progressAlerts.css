@@ -1,0 +1,64 @@
+.mt-goal-path {
+  margin: 8px 0 3px;
+  color: var(--hud-muted);
+  font-size: inherit;
+}
+
+.mt-progress-alerts {
+  padding: 7px 9px;
+  border: 1px solid var(--hud-border);
+  border-radius: 10px;
+  box-shadow: var(--hud-shadow);
+  background: var(--hud-bg);
+  color: var(--hud-fg);
+  font-size: 13px;
+}
+
+.mt-progress-alerts > summary {
+  min-height: 28px;
+  align-content: center;
+  color: var(--hud-warn);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.mt-progress-alerts[open] > summary {
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--hud-border);
+}
+
+.mt-progress-alerts ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mt-progress-alerts li + li {
+  margin-block-start: 6px;
+}
+
+.mt-progress-alerts button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--hud-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--hud-fg);
+  background: var(--hud-bg-elevated);
+  font: inherit;
+  text-align: start;
+  white-space: pre-line;
+  cursor: pointer;
+}
+
+.mt-progress-alerts button:hover,
+.mt-progress-alerts button:focus-visible {
+  border-color: var(--hud-accent);
+}
+
+@media (pointer: coarse) {
+  .mt-progress-alerts > summary {
+    min-height: 44px;
+  }
+}

@@ -44,13 +44,17 @@ export class TownStore {
   enforceTerritory = false;
   /** Bumped whenever membership may change (founding or removal). */
   version = 0;
+  policyFor?: (town: number, policy: string) => boolean;
   private towns: Town[] = [];
   /** While a save loads, buildings come back without founding towns. */
   private restoring = false;
   private nextId = 1;
   private listeners: ((e: TownEvent) => void)[] = [];
 
-  constructor(private readonly city: City) {
+  constructor(
+    private readonly city: City,
+    private readonly residents?: (uid: number) => number,
+  ) {
     city.siteRules.push((def, rect) => this.siteCheck(def, rect));
     city.on((e) => {
       if (e.type === 'added') this.onAdded(e.building);
@@ -112,7 +116,7 @@ export class TownStore {
     for (const b of this.city.all()) {
       if (!b.def.housing || !this.city.isActive(b.uid)) continue;
       const id = this.townOfBuilding(b);
-      pop.set(id, (pop.get(id) ?? 0) + b.def.housing);
+      pop.set(id, (pop.get(id) ?? 0) + (this.residents?.(b.uid) ?? b.def.housing));
 
       // Amenities vs disamenities
       const greenery = this.city.fields.get(b.x, b.z, 'greenery');
@@ -133,7 +137,7 @@ export class TownStore {
         education * 3 +
         commerce * 2 +
         connectivity * 2;
-      const pollFactor = this.city.isPolicyActive('green_city') ? 3 : 6;
+      const pollFactor = this.policyActive(id, 'green_city') ? 3 : 6;
       const neg = pollution * pollFactor + noise * 3;
       const score = Math.max(0, Math.min(100, Math.round(50 + pos - neg)));
       hapSum.set(id, (hapSum.get(id) ?? 0) + score);
@@ -148,15 +152,19 @@ export class TownStore {
       }
       const count = hapCount.get(t.id) ?? 0;
       let h = count > 0 ? Math.round((hapSum.get(t.id) ?? 0) / count) : 75;
-      if (this.city.isPolicyActive('healthcare_focus')) h = Math.min(100, h + 10);
-      if (this.city.isPolicyActive('green_city')) h = Math.min(100, h + 5);
-      if (this.city.isPolicyActive('industrial_drive')) h = Math.max(0, h - 5);
+      if (this.policyActive(t.id, 'healthcare_focus')) h = Math.min(100, h + 10);
+      if (this.policyActive(t.id, 'green_city')) h = Math.min(100, h + 5);
+      if (this.policyActive(t.id, 'industrial_drive')) h = Math.max(0, h - 5);
       if (h !== t.happiness) {
         t.happiness = h;
         changed = true;
       }
     }
     if (changed) this.emit({ type: 'changed' });
+  }
+
+  private policyActive(town: number, policy: string): boolean {
+    return this.policyFor?.(town, policy) ?? this.city.isPolicyActive(policy);
   }
 
   private siteCheck(def: BuildingDef, rect: Rect): CheckResult | null {

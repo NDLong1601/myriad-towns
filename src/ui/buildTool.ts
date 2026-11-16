@@ -2,6 +2,7 @@ import { type BuildingDef, type Requirement, isRoadDef } from '@/sim/catalog';
 import { type City, rectOf } from '@/sim/city';
 import { BatchCommand, DemolishCommand, type History, PlaceCommand } from '@/sim/commands';
 import { forTilesInRadius, type Rect } from '@/sim/geometry';
+import { ImpactPreview, type LocalImpact } from '@/sim/impact';
 import { type CheckResult, checkPlacement, checkSustain, checkUpgrades } from '@/sim/requirements';
 import { pickTile } from '@/render/picking';
 import type { PlacementPreview, PreviewTiles } from '@/render/placementPreview';
@@ -28,6 +29,9 @@ export class BuildTool {
   private down: { x: number; y: number; tile: { x: number; z: number } | null } | null = null;
   private inspected: number | null = null;
   private readonly ac = new AbortController();
+  private readonly impact: ImpactPreview;
+  private impactRevision = 0;
+  private cachedImpact?: { revision: number; key: string; value: LocalImpact };
 
   constructor(
     private readonly view: WorldView,
@@ -43,6 +47,7 @@ export class BuildTool {
     /** Right-hand panel for the chosen or selected building. */
     private readonly detail?: DetailPanel,
   ) {
+    this.impact = new ImpactPreview(city);
     const canvas = view.renderer.domElement;
     const signal = this.ac.signal;
     canvas.addEventListener('pointermove', (e) => this.onMove(e), { signal });
@@ -63,7 +68,12 @@ export class BuildTool {
       view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isLinearTool(tool.defId));
       this.refresh();
     });
-    city.on(() => this.refresh());
+    city.on((event) => {
+      if (event.type === 'added' || event.type === 'removed' || event.type === 'status') {
+        this.impactRevision++;
+      }
+      this.refresh();
+    });
     history.onChange(() => this.refresh());
     plans?.on(() => this.refresh());
   }
@@ -192,6 +202,20 @@ export class BuildTool {
     if (this.tool.kind !== 'none' || this.inspected === null) this.refresh();
   }
 
+  private localImpact(def: BuildingDef, x: number, z: number, uid?: number): LocalImpact {
+    const key = `${def.id}:${x}:${z}:${uid ?? ''}`;
+    if (this.cachedImpact?.key === key && this.cachedImpact.revision === this.impactRevision)
+      return this.cachedImpact.value;
+    const value = this.impact.inspect({
+      def,
+      x,
+      z,
+      ...(uid === undefined ? {} : { removeUid: uid }),
+    });
+    this.cachedImpact = { key, value, revision: this.impactRevision };
+    return value;
+  }
+
   /** Recompute preview overlays and the checklist panel. */
   refresh(): void {
     const tool = this.tool;
@@ -299,13 +323,24 @@ export class BuildTool {
 
     if (tool.kind === 'demolish') {
       this.preview.setGhost(null);
+      const draft = this.planning ? this.plans?.at(this.hover.x, this.hover.z) : undefined;
+      if (draft) {
+        this.preview.setTiles(empty);
+        this.panel.show({ title: t('impact.removeDraft'), sections: [] }, this.screen);
+        return;
+      }
       const b = this.city.at(this.hover.x, this.hover.z);
       if (!b) {
         this.preview.setTiles(empty);
         this.panel.hide();
         return;
       }
-      this.preview.setTiles({ ...empty, footprint: rectTiles(rectOf(b.def, b.x, b.z), false) });
+      const impact = this.localImpact(b.def, b.x, b.z, b.uid);
+      this.preview.setTiles({
+        ...empty,
+        footprint: rectTiles(rectOf(b.def, b.x, b.z), false),
+        markers: impactMarkers(impact),
+      });
       this.panel.show(
         {
           title: `${t('ui.demolish').replace(/ \(.*\)/, '')}: ${buildingName(b.def.id)}`,
@@ -315,6 +350,7 @@ export class BuildTool {
                 { text: t('ui.refund', { cost: formatAmounts(this.city.refundOf(b.def)) || '—' }) },
               ],
             },
+            ...impactSections(this.city.isActive(b.uid) ? b.def : undefined, impact, true),
           ],
         },
         this.screen,
@@ -345,12 +381,13 @@ export class BuildTool {
     const c = this.corner(def, this.hover);
     const check = checkPlacement(this.city, def, c.x, c.z);
     const rect = rectOf(def, c.x, c.z);
+    const impact = check.ok ? this.localImpact(def, c.x, c.z) : undefined;
     this.preview.setGhost(def, c.x, c.z, check.ok);
     this.preview.setTiles({
       footprint: rectTiles(rect, check.ok),
       affects: emitTiles(def, rect),
       checks: checkTiles(check.requires, rect),
-      markers: markersFor(this.city, check.requires),
+      markers: [...impactMarkers(impact), ...markersFor(this.city, check.requires)],
     });
     const content: PanelContent = {
       title: buildingName(def.id),
@@ -364,6 +401,7 @@ export class BuildTool {
             ...(check.treesToCut ? [{ text: t('ui.treesCleared') }] : []),
           ],
         },
+        ...impactSections(check.ok || this.planning ? def : undefined, impact, false),
       ],
       verdict: this.planning
         ? {
@@ -455,12 +493,49 @@ export class BuildTool {
       });
     }
     if (active && out.length === 0) out.push({ ok: true, text: t('status.working') });
+    if (active && b.def.housing)
+      out.push({
+        text: t('status.residents', { n: sim.residentsOf(uid), capacity: b.def.housing }),
+      });
     return out;
   }
 
   dispose(): void {
     this.ac.abort();
   }
+}
+
+function impactMarkers(impact?: LocalImpact): PreviewTiles['markers'] {
+  if (!impact) return [];
+  return [
+    ...impact.atRisk.map(({ x, z }) => ({ x, z, good: false })),
+    ...impact.improved.map(({ x, z }) => ({ x, z, good: true })),
+  ];
+}
+
+function impactSections(
+  def: BuildingDef | undefined,
+  impact: LocalImpact | undefined,
+  remove: boolean,
+): PanelContent['sections'] {
+  const lines: PanelLine[] = [];
+  if (impact?.atRisk.length)
+    lines.push({ ok: false, text: t('impact.atRisk', { n: impact.atRisk.length }) });
+  if (impact?.improved.length)
+    lines.push({ ok: true, text: t('impact.improved', { n: impact.improved.length }) });
+  if (def && Object.keys(def.produces ?? {}).length)
+    lines.push({
+      text: t(remove ? 'impact.losesOutput' : 'impact.gainsOutput', {
+        what: formatAmounts(def.produces),
+      }),
+    });
+  if (def && Object.keys(def.upkeep ?? {}).length)
+    lines.push({
+      text: t(remove ? 'impact.savesInput' : 'impact.needsInput', {
+        what: formatAmounts(def.upkeep),
+      }),
+    });
+  return lines.length ? [{ title: t('impact.title'), lines }] : [];
 }
 
 function problemText(p: Problem): string {

@@ -1,0 +1,70 @@
+.mt-regional {
+  color: var(--hud-fg);
+  background: var(--hud-bg-elevated);
+  border: 1px solid var(--hud-border);
+  border-radius: 12px;
+  box-sizing: border-box;
+  max-width: min(94vw, 620px);
+  max-height: 86dvh;
+  padding: 1rem;
+}
+.mt-regional::backdrop {
+  background: #141910b3;
+}
+.mt-regional header,
+.mt-regional label,
+.mt-regional-actions,
+.mt-regional li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.mt-regional h2,
+.mt-regional h3 {
+  margin: 0.4rem 0;
+}
+.mt-regional section {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--hud-border);
+}
+.mt-regional label {
+  margin: 0.25rem 0;
+}
+.mt-regional select,
+.mt-regional input,
+.mt-regional button {
+  font: inherit;
+  color: inherit;
+  background: var(--hud-control);
+  border: 1px solid var(--hud-border);
+  border-radius: 6px;
+  min-height: 44px;
+  max-width: 100%;
+}
+.mt-regional option {
+  color: var(--hud-fg);
+  background: var(--hud-bg-elevated);
+}
+.mt-regional :focus-visible {
+  outline: 2px solid var(--hud-accent);
+  outline-offset: 2px;
+}
+.mt-regional button:disabled {
+  opacity: 0.55;
+}
+.mt-regional input {
+  width: 6ch;
+}
+.mt-regional li {
+  padding: 0.4rem 0;
+}
+.mt-regional ul {
+  padding: 0;
+}
+.mt-tools > .mt-regional-button {
+  min-height: 44px;
+  cursor: pointer;
+}

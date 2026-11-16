@@ -11,6 +11,7 @@ import type { City } from '@/sim/city';
 import type { Goals } from '@/sim/goals';
 import type { PoiStore } from '@/sim/poi';
 import type { ProgressSnapshot } from '@/sim/progress';
+import type { RegionalTrade } from '@/sim/regionalTrade';
 import type { Simulation } from '@/sim/simulation';
 import type { TownStore } from '@/sim/towns';
 
@@ -63,6 +64,9 @@ export interface SaveData {
   policies?: string[];
   /** Active crop and voyage phases keyed by building uid. Legacy saves start at phase zero. */
   work?: [number, number][];
+  /** Residents keyed by home uid. Legacy saves treat active housing as full. */
+  residents?: [number, number][];
+  regionalTrade?: ReturnType<RegionalTrade['snapshot']>;
 }
 
 /** The live objects a save is taken from and loaded into. */
@@ -72,6 +76,7 @@ export interface Game {
   towns: TownStore;
   pois: PoiStore;
   goals?: Goals | undefined;
+  regionalTrade?: RegionalTrade;
 }
 
 export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null): SaveData {
@@ -121,6 +126,8 @@ export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null):
     towns: game.towns.snapshot(),
     policies: [...city.policies],
     work: sim.exportWork(),
+    residents: sim.exportResidents(),
+    ...(game.regionalTrade ? { regionalTrade: game.regionalTrade.snapshot() } : {}),
   };
 }
 
@@ -174,15 +181,22 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
       if (Array.isArray(entry)) sim.importWork(entry[0], entry[1]);
     }
   }
+  if (Array.isArray(data.residents)) {
+    for (const entry of data.residents) {
+      if (Array.isArray(entry)) sim.importResidents(entry[0], entry[1]);
+    }
+  }
   city._setNextUid(data.nextUid);
   for (const k of Object.keys(city.stock)) delete city.stock[k];
   Object.assign(city.stock, data.stock);
   sim.tick = data.tick;
+  sim.refreshPopulation();
   if (game.goals && data.goals) {
     game.goals.index = data.goals.index;
     game.goals.pending = data.goals.pending;
   }
   towns.done();
+  if (data.regionalTrade) game.regionalTrade?.restore(data.regionalTrade);
   city._addStock({}, 1); // refresh every stock listener once
   return { missing: [...missing] };
 }

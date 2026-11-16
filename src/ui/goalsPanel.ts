@@ -1,5 +1,5 @@
 import type { City } from '@/sim/city';
-import type { Goal, Goals } from '@/sim/goals';
+import type { Goal, Goals, GoalStatus } from '@/sim/goals';
 import { PACKS } from '@/sim/progress';
 import type { Simulation } from '@/sim/simulation';
 import { buildingName, fmt, formatAmounts, t } from './i18n';
@@ -9,6 +9,10 @@ function goalText(g: Goal, have: number): string {
   const p: Record<string, string | number> = { min: g.min, have: fmt(have) };
   if ('building' in g) p.building = buildingName(g.building);
   if ('resource' in g) p.resource = t(`resource.${g.resource}`);
+  if (g.type === 'happyTowns') {
+    p.population = fmt(g.population);
+    p.happiness = fmt(g.happiness);
+  }
   return t(`goal.${g.type}`, p);
 }
 
@@ -16,6 +20,20 @@ const CHAPTER_PRODUCER: Readonly<Record<string, string>> = {
   goods: 'craft_studio',
   knowledge: 'public_library',
 };
+
+function goalList(status: readonly GoalStatus[]): string {
+  const rows = status
+    .map((s) => {
+      const producer = s.goal.type === 'production' ? CHAPTER_PRODUCER[s.goal.resource] : undefined;
+      const hint =
+        !s.done && producer
+          ? `<small>${t('ui.goalProducer', { building: buildingName(producer) })}</small>`
+          : '';
+      return `<li class="${s.done ? 'ok' : ''}">${s.done ? '✓' : '○'} ${goalText(s.goal, s.have)}${hint}</li>`;
+    })
+    .join('');
+  return `<ul>${rows}</ul>`;
+}
 
 /** Goals mode: the current chapter's checklist, and the pack choice when a chapter ends. */
 export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
@@ -48,22 +66,15 @@ export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
       summary.textContent = t('ui.goals');
     }
     completed = false;
-    const rows = goals
-      .status()
-      .map((s) => {
-        const producer =
-          s.goal.type === 'production' ? CHAPTER_PRODUCER[s.goal.resource] : undefined;
-        const hint =
-          !s.done && producer
-            ? `<small>${t('ui.goalProducer', { building: buildingName(producer) })}</small>`
-            : '';
-        return `<li class="${s.done ? 'ok' : ''}">${s.done ? '✓' : '○'} ${goalText(s.goal, s.have)}${hint}</li>`;
-      })
-      .join('');
+    const primary = goalList(goals.status());
+    const alternative = goals.alternativeStatus();
+    const paths = alternative.length
+      ? `<small>${t('ui.goalEitherPath')}</small><h4 class="mt-goal-path">${t('ui.goalPrimaryPath')}</h4>${primary}<h4 class="mt-goal-path">${t('ui.goalAlternativePath')}</h4>${goalList(alternative)}`
+      : primary;
     const reward = ch.reward
       ? `<small>${t('ui.reward', { what: formatAmounts(ch.reward) })}</small>`
       : '';
-    const html = `<h3>${t(`chapter.${ch.id}`)}</h3><ul>${rows}</ul>${reward}`;
+    const html = `<h3>${t(`chapter.${ch.id}`)}</h3>${paths}${reward}`;
     if (html !== last) {
       contents.innerHTML = html;
       last = html;
