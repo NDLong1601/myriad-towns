@@ -56,6 +56,7 @@ export class BuildingRenderer {
   private tints = new Map<number, THREE.Color>();
   /** uid -> seconds since its pop started. */
   private pops = new Map<number, number>();
+  private readonly crops = new Set<number>();
   private addsThisFrame = 0;
   /** Off for tests and screenshots (?anim=0). */
   animate = true;
@@ -65,6 +66,7 @@ export class BuildingRenderer {
     private readonly origin: FloatingOrigin,
     /** Ground y at a world tile. */
     private readonly heightAt: (x: number, z: number) => number,
+    private readonly cropStage?: (uid: number) => number,
   ) {
     this.group.name = 'buildings';
     this.patchMaterial();
@@ -205,7 +207,19 @@ export class BuildingRenderer {
   }
 
   private add(b: PlacedBuilding): void {
-    this.attach(b, this.roadMask(b), true);
+    if (b.def.crop) this.crops.add(b.uid);
+    this.attach(b, b.def.crop ? (this.cropStage?.(b.uid) ?? 1) : this.roadMask(b), true);
+  }
+
+  updateCrops(): void {
+    for (const uid of this.crops) {
+      const stage = this.cropStage?.(uid);
+      if (!stage || this.variantOf(uid) === stage) continue;
+      const plot = this.city.get(uid);
+      if (!plot) continue;
+      this.detach(uid);
+      this.attach(plot, stage, false);
+    }
   }
 
   private attach(b: PlacedBuilding, variant: number, pop: boolean): void {
@@ -221,6 +235,7 @@ export class BuildingRenderer {
   }
 
   private remove(uid: number): void {
+    this.crops.delete(uid);
     // A replace (upgrade/decline) re-adds the same uid right away; keep its tint then.
     if (!this.city.get(uid)) {
       this.tints.delete(uid);

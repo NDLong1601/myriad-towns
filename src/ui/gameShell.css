@@ -405,12 +405,65 @@
 .mt-menu .mt-row {
   grid-row: 2;
 }
-.mt-menu .mt-items {
+.mt-tray {
   grid-row: 1;
-  margin-top: 0;
-  padding: 2px 3px 7px;
-  border: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  align-items: stretch;
+  gap: 4px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--hud-border);
+}
+.mt-tray:has(.mt-items[hidden]) {
+  display: none;
+}
+.mt-menu .mt-items {
+  margin: 0;
+  min-width: 0;
+  padding: 2px 3px;
+  border: 0;
+  touch-action: pan-x;
+  cursor: grab;
+}
+.mt-menu .mt-items:active {
+  cursor: grabbing;
+}
+.mt-menu .mt-item {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  padding: 3px;
+  user-select: none;
+}
+.mt-menu .mt-item .mt-item-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.mt-menu .mt-item .mt-thumb {
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+}
+.mt-menu .mt-tray > button {
+  padding: 0;
+  font-size: 24px;
+}
+.mt-build-lock,
+.mt-build-poor {
+  position: absolute;
+  inset: auto 2px 2px auto;
+  color: var(--hud-warn);
+  background: var(--mt-ink);
+  border-radius: 4px;
+  padding-inline: 3px;
+  font-size: 11px;
+  font-weight: 700;
 }
 .mt-menu .mt-tabs button {
   display: grid;

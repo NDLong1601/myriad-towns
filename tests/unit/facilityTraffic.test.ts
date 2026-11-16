@@ -43,9 +43,12 @@ describe('facility traffic', () => {
     add('fishing_harbor', 1200, 0);
     for (let x = 1200; x <= 1204; x++) terrain.special.set(`${x},3`, { flags: TileFlag.Water });
     origin.follow(1200, 0);
-    traffic.update(1.25, { x: 1200, z: 0 }, true, false);
+    traffic.update(0, { x: 1200, z: 0 }, true, false);
     expect(mesh('boat').count).toBe(1);
-    expect(position('boat').x + origin.x).toBeCloseTo(1201.75);
+    const start = position('boat').x;
+    traffic.update(1.25, { x: 1200, z: 0 }, true, false);
+    expect(Math.abs(position('boat').x - start)).toBeCloseTo(1.25);
+    expect(position('boat').x + origin.x).toBeGreaterThan(1200);
     expect(position('boat').z).toBeCloseTo(3.5);
   });
 

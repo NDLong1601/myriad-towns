@@ -23,6 +23,7 @@ export interface PlacedBuilding {
 }
 
 export type CityEvent =
+  | { type: 'consolidated'; building: PlacedBuilding }
   | { type: 'added'; building: PlacedBuilding }
   | { type: 'removed'; building: PlacedBuilding }
   | { type: 'stock' }
@@ -61,6 +62,7 @@ export class City {
   private spatial = new Map<ChunkKey, Set<number>>();
   private nextUid = 1;
   private listeners: ((e: CityEvent) => void)[] = [];
+  private pendingEvents: CityEvent[] | undefined;
   private activePolicies = new Set<string>();
 
   constructor(
@@ -160,7 +162,7 @@ export class City {
   }
 
   /** Distance from rect to the nearest road tile, or Infinity if none within maxDistance. */
-  roadDistance(rect: Rect, maxDistance: number): number {
+  roadDistance(rect: Rect, maxDistance: number, paved = false): number {
     // Scan rings outward (most buildings touch a road), stopping once no closer ring is left.
     let best = Infinity;
     for (let ring = 1; ring <= maxDistance && best > ring; ring++) {
@@ -172,7 +174,7 @@ export class City {
         const edge = z === z0 || z === z1;
         for (let x = x0; x <= x1; x += edge ? 1 : x1 - x0) {
           const b = this.at(x, z);
-          if (b && isRoadDef(b.def)) {
+          if (b && isRoadDef(b.def) && (!paved || b.def.tags?.includes('paved'))) {
             const d = rectDistance(rect, { x, z, w: 1, d: 1 });
             if (d < best) best = d;
           }
@@ -265,6 +267,42 @@ export class City {
     return b;
   }
 
+  /** Replace a fully occupied rectangle of 1×1 homes, then publish the new state. */
+  _merge(
+    def: BuildingDef,
+    x: number,
+    z: number,
+    members: readonly PlacedBuilding[],
+  ): PlacedBuilding | undefined {
+    let index = 0;
+    for (let dz = 0; dz < def.footprint.d; dz++) {
+      for (let dx = 0; dx < def.footprint.w; dx++) {
+        const member = members[index++];
+        if (
+          !member ||
+          this.at(x + dx, z + dz) !== member ||
+          !this.isActive(member.uid) ||
+          member.def.footprint.w !== 1 ||
+          member.def.footprint.d !== 1
+        )
+          return undefined;
+      }
+    }
+    if (index !== members.length || index < 2) return undefined;
+    const events: CityEvent[] = [];
+    this.pendingEvents = events;
+    let building: PlacedBuilding;
+    try {
+      for (const member of members) this._remove(member.uid);
+      building = this._add(def, x, z).building;
+    } finally {
+      this.pendingEvents = undefined;
+    }
+    for (const event of events) this.emit(event);
+    this.emit({ type: 'consolidated', building });
+    return building;
+  }
+
   /**
    * Turns a building into another type in place (upgrade or decline). Footprints must match.
    * Emitted as removed + added with the same uid, so renderers need no extra case.
@@ -347,6 +385,10 @@ export class City {
   }
 
   private emit(e: CityEvent): void {
+    if (this.pendingEvents) {
+      this.pendingEvents.push(e);
+      return;
+    }
     for (const l of this.listeners) l(e);
   }
 }

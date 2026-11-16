@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import type { City, PlacedBuilding } from '@/sim/city';
+import type { Simulation } from '@/sim/simulation';
+import { waterRoute } from '@/sim/waterRoutes';
 import { TileFlag } from '@/world/biomes';
 import { box } from './buildingModels';
 import type { FloatingOrigin } from './floatingOrigin';
@@ -87,6 +89,7 @@ export class FacilityTraffic {
     private readonly origin: FloatingOrigin,
     private readonly groundY: (x: number, z: number) => number,
     private readonly capacity: number,
+    private readonly navigation?: Pick<Simulation, 'voyageRouteOf' | 'voyagePhaseOf'>,
   ) {
     const material = new THREE.MeshLambertMaterial({ vertexColors: true });
     const make = (kind: Kind): THREE.InstancedMesh => {
@@ -116,7 +119,9 @@ export class FacilityTraffic {
           for (const service of this.services.values()) {
             const { building, kind } = service;
             if (
-              kind === (changed.def.id === 'rail_track' ? 'train' : 'boat') &&
+              (changed.def.id === 'rail_track'
+                ? kind === 'train'
+                : kind !== 'train' && kind !== 'plane') &&
               Math.abs(changed.x - building.x) <= 32 &&
               Math.abs(changed.z - building.z) <= 32
             ) {
@@ -131,13 +136,24 @@ export class FacilityTraffic {
   }
 
   private add(building: PlacedBuilding): void {
-    const kind = FACILITIES.get(building.def.id);
+    const voyage = building.def.voyage;
+    const kind = voyage
+      ? voyage.kind === 'cargo'
+        ? 'ship'
+        : 'boat'
+      : FACILITIES.get(building.def.id);
     if (kind) this.services.set(building.uid, { building, kind, phase: 0 });
   }
 
   private route(service: Service): Point[] {
     const { building: b, kind } = service;
     const { w, d } = b.def.footprint;
+    if (b.def.voyage) {
+      const route =
+        this.navigation?.voyageRouteOf(b.uid) ??
+        waterRoute(this.city.terrain, b, b.def.voyage.range);
+      return route.map(({ x, z }) => ({ x: x + 0.5, z: z + 0.5, y: this.groundY(x, z) + 0.1 }));
+    }
     if (kind === 'plane') {
       const x = b.x + w / 2;
       const z = b.z + d / 2;
@@ -230,7 +246,14 @@ export class FacilityTraffic {
       const loop = service.kind === 'plane';
       const end = route.length - 1;
       const period = loop ? route.length : end * 2;
-      if (!paused) service.phase = (service.phase + dt * SPEED[service.kind]) % period;
+      if (service.building.def.voyage && this.navigation) {
+        const target = this.navigation.voyagePhaseOf(service.building.uid) * period;
+        const advance = (target - service.phase + period) % period;
+        service.phase =
+          paused || advance > period / 3
+            ? target
+            : (service.phase + Math.min(advance, dt * period * 5)) % period;
+      } else if (!paused) service.phase = (service.phase + dt * SPEED[service.kind]) % period;
       const segment = Math.floor(service.phase);
       const index = segment <= end || loop ? segment : period - segment;
       const next = loop ? (index + 1) % route.length : index + (segment < end ? 1 : -1);

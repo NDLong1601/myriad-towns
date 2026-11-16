@@ -2,7 +2,6 @@ import type { City } from '@/sim/city';
 import type { History } from '@/sim/commands';
 import { thumbnail } from '@/render/thumbnails';
 import { buildingName, t } from './i18n';
-import { amountsHtml } from './icons';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
 
@@ -40,10 +39,22 @@ export function mountBuildMenu(
     <button data-tool="demolish" title="${t('ui.demolish')}" aria-label="${t('ui.demolish')}">⛏ <span>${t('ui.demolish').replace(/ \(.*\)/, '')}</span></button>
     <button data-tool="undo" title="${t('ui.undo')}">↶</button>
     <button data-tool="redo" title="${t('ui.redo')}">↷</button>
-  </div></div><div id="mt-build-items" class="mt-items"></div>`;
+  </div></div><div class="mt-tray">
+    <button type="button" data-scroll="-1" aria-label="${t('ui.buildPrevious')}" title="${t('ui.buildPrevious')}">‹</button>
+    <div id="mt-build-items" class="mt-items" tabindex="0" role="region" aria-label="${t('ui.buildList')}"></div>
+    <button type="button" data-scroll="1" aria-label="${t('ui.buildNext')}" title="${t('ui.buildNext')}">›</button>
+  </div>`;
   parent.appendChild(el);
   const tabs = el.querySelector('.mt-tabs') as HTMLElement;
   const items = el.querySelector('.mt-items') as HTMLElement;
+  const arrows = el.querySelectorAll<HTMLButtonElement>('[data-scroll]');
+  const syncArrows = (): void => {
+    const end = items.scrollWidth - items.clientWidth;
+    for (const button of arrows) {
+      button.disabled =
+        button.dataset.scroll === '-1' ? items.scrollLeft < 1 : items.scrollLeft >= end - 1;
+    }
+  };
   items.hidden = !open;
   const tools = el.querySelector('.mt-tools') as HTMLElement;
   const undoBtn = el.querySelector('[data-tool=undo]') as HTMLButtonElement;
@@ -86,19 +97,15 @@ export function mountBuildMenu(
       .map((d) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const url = thumbnail(d);
-        const img = url ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44">` : '';
+        const img = url
+          ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44" draggable="false">`
+          : categoryIcon(d.category);
         const poor = city.canAfford(d.cost) ? '' : ' poor';
         const size = `${d.footprint.w}×${d.footprint.d}`;
         const lock = city.progress.lockReason(d);
-        if (lock) {
-          // Locked buildings stay visible (greyed) with what unlocks them.
-          const need =
-            lock.key === 'req.pack'
-              ? t('ui.packLocked', { pack: t(`pack.${lock.params.pack}`) })
-              : t('ui.unlockAt', { n: lock.params.pop });
-          return `<button class="mt-item locked${active}" data-def="${d.id}" title="${need}">${img}<span class="mt-item-text"><span>🔒 ${buildingName(d.id)}</span><small>${size} · ${need}</small></span></button>`;
-        }
-        return `<button class="mt-item${active}${poor}" data-def="${d.id}">${img}<span class="mt-item-text"><span>${buildingName(d.id)}</span><small>${size} · ${amountsHtml(d.cost) || '—'}</small></span></button>`;
+        const name = buildingName(d.id);
+        const needs = lock ? ` · ${t('ui.buildLocked')}` : '';
+        return `<button type="button" class="mt-item${lock ? ' locked' : ''}${active}${poor}" data-def="${d.id}" aria-label="${name}${needs}" aria-pressed="${Boolean(active)}" title="${name} · ${size}${needs}">${img}<span class="mt-item-text">${name}</span>${lock ? '<span class="mt-build-lock" aria-hidden="true">🔒</span>' : poor ? '<span class="mt-build-poor" aria-hidden="true">!</span>' : ''}</button>`;
       })
       .join('');
     if (html !== itemMarkup) {
@@ -110,6 +117,7 @@ export function mountBuildMenu(
         });
       }
       itemMarkup = html;
+      syncArrows();
     }
     demolishBtn.classList.toggle('active', tool.kind === 'demolish');
     demolishBtn.setAttribute('aria-pressed', String(tool.kind === 'demolish'));
@@ -133,7 +141,10 @@ export function mountBuildMenu(
   el.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest('button');
     if (!b) return;
-    if (b.dataset.cat) {
+    if (b.dataset.scroll) {
+      const step = Math.max(56, Math.round(items.clientWidth * 0.7));
+      items.scrollBy(Number(b.dataset.scroll) * step, 0);
+    } else if (b.dataset.cat) {
       const reopen = items.hidden || b.dataset.cat !== category;
       if (b.dataset.cat !== category) items.scrollLeft = 0;
       category = b.dataset.cat;
@@ -154,6 +165,55 @@ export function mountBuildMenu(
   });
   // Keep the canvas from treating menu clicks as map clicks.
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
+  items.addEventListener('scroll', syncArrows);
+  new ResizeObserver(syncArrows).observe(items);
+  items.addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const first = items.firstElementChild;
+    const last = items.lastElementChild;
+    const target = e.target instanceof HTMLButtonElement ? e.target : null;
+    const next =
+      e.key === 'Home'
+        ? first
+        : e.key === 'End'
+          ? last
+          : e.key === 'ArrowRight'
+            ? (target?.nextElementSibling ?? (target ? null : first))
+            : (target?.previousElementSibling ?? (target ? null : last));
+    if (next instanceof HTMLElement) next.focus();
+  });
+  let drag: { pointer: number; x: number; left: number } | undefined;
+  let dragged = false;
+  items.addEventListener('pointerdown', (e) => {
+    dragged = false;
+    if (e.pointerType !== 'mouse' || e.button !== 0 || items.scrollWidth <= items.clientWidth)
+      return;
+    drag = { pointer: e.pointerId, x: e.clientX, left: items.scrollLeft };
+  });
+  items.addEventListener('pointermove', (e) => {
+    if (!drag || drag.pointer !== e.pointerId || !e.buttons) return;
+    const dx = e.clientX - drag.x;
+    if (!dragged && Math.abs(dx) < 5) return;
+    if (!dragged) items.setPointerCapture(e.pointerId);
+    dragged = true;
+    items.scrollLeft = drag.left - dx;
+  });
+  for (const name of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+    items.addEventListener(name, () => {
+      drag = undefined;
+    });
+  }
+  items.addEventListener(
+    'click',
+    (e) => {
+      if (dragged && e.detail) {
+        dragged = false;
+        e.stopImmediatePropagation();
+      }
+    },
+    { capture: true },
+  );
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Escape' || e.defaultPrevented || items.hidden) return;
     if (document.querySelector('[aria-modal="true"]:not([hidden], [hidden] *)')) return;

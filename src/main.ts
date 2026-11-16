@@ -260,12 +260,12 @@ const surfaceY = (x: number, z: number): number => {
   const s = terrain.tile(x, z);
   return s.flags & TileFlag.Water ? WATER_Y : landY(s.level);
 };
-const buildings = new BuildingRenderer(city, view.origin, surfaceY);
+const buildings = new BuildingRenderer(city, view.origin, surfaceY, (uid) => sim.cropStageOf(uid));
 // ?anim=0 turns the placement "pop" off (tests, screenshots).
 buildings.animate = params.get('anim') !== '0';
 // People and vehicles on the roads (?traffic=0 or the settings toggle turns them off).
 const traffic = new TrafficRenderer(city, view.origin, surfaceY, small ? 60 : 160);
-const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16);
+const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16, sim);
 traffic.enabled = params.has('traffic') ? params.get('traffic') !== '0' : settings.traffic;
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
@@ -620,6 +620,7 @@ function refreshTrafficPlan(x: number, z: number): void {
 }
 
 let simHud = 0;
+let cropTick = -1;
 view.onFrame((dt) => {
   tierClock += dt;
   if (tierClock >= 1) {
@@ -641,6 +642,10 @@ view.onFrame((dt) => {
     }
   }
   const s = view.controller.state;
+  if (cropTick !== sim.tick) {
+    cropTick = sim.tick;
+    buildings.updateCrops();
+  }
   heatmap.update(s.x, s.z);
   poiView.update(s.x, s.z);
   buildings.update(dt);

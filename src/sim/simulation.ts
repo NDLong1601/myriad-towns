@@ -9,6 +9,7 @@ import { type Amounts, type BuildingDef, LABOR_TIERS } from './catalog';
 import { type City, type PlacedBuilding, rectOf } from './city';
 import { TICK_DT, TICK_HZ } from './clock';
 import { type CheckResult, checkRequirement, checkSustain } from './requirements';
+import { waterRoute, type WaterTile } from './waterRoutes';
 
 /** Rule-engine stride: each building is checked every RULE_STRIDE ticks (2 s at 1×). */
 export const RULE_STRIDE = 8;
@@ -105,6 +106,8 @@ export class Simulation {
   tick = 0;
   private compiled = new Map<string, Compiled>();
   private state = new Map<number, BuildingState>();
+  private work = new Map<number, number>();
+  private routes = new Map<number, readonly WaterTile[]>();
   private order: PlacedBuilding[] = [];
   private byUid: number[] = [];
   private dirty = true;
@@ -128,14 +131,49 @@ export class Simulation {
     city.on((e) => {
       if (e.type === 'added') {
         if (!this.state.has(e.building.uid)) this.state.set(e.building.uid, freshState());
+        this.prepareWork(e.building);
         this.dirty = true;
       } else if (e.type === 'removed') {
+        this.work.delete(e.building.uid);
+        this.routes.delete(e.building.uid);
         // A replace emits removed + added with the same uid; keep its state in that case.
         if (!city.get(e.building.uid)) this.state.delete(e.building.uid);
         this.dirty = true;
       }
     });
-    for (const b of city.all()) this.state.set(b.uid, freshState());
+    for (const b of city.all()) {
+      this.state.set(b.uid, freshState());
+      this.prepareWork(b);
+    }
+  }
+
+  private prepareWork(b: PlacedBuilding): void {
+    if (b.def.voyage) this.routes.set(b.uid, waterRoute(this.city.terrain, b, b.def.voyage.range));
+    if (b.def.voyage || b.def.crop) this.work.set(b.uid, 0);
+  }
+
+  cropStageOf(uid: number): number {
+    const crop = this.city.get(uid)?.def.crop;
+    return crop ? 1 + Math.floor((4 * (this.work.get(uid) ?? 0)) / crop.ticks) : 0;
+  }
+
+  voyageRouteOf(uid: number): readonly WaterTile[] | undefined {
+    return this.routes.get(uid);
+  }
+
+  voyagePhaseOf(uid: number): number {
+    const period = this.city.get(uid)?.def.voyage?.ticks;
+    return period ? (this.work.get(uid) ?? 0) / period : 0;
+  }
+
+  exportWork(): [number, number][] {
+    return [...this.work].filter(([, age]) => age > 0).sort((a, b) => a[0] - b[0]);
+  }
+
+  importWork(uid: number, age: number): void {
+    const def = this.city.get(uid)?.def;
+    const period = def?.crop?.ticks ?? def?.voyage?.ticks;
+    if (period && Number.isSafeInteger(age) && age >= 0) this.work.set(uid, age % period);
   }
 
   on(fn: (e: SimEvent) => void): () => void {
@@ -304,6 +342,7 @@ export class Simulation {
       mix(s.unmetTicks);
       mix(s.warnedAt);
       mix((s.staffed ? 1 : 0) | (s.supplied ? 2 : 0));
+      if (this.work.has(uid)) mix(this.work.get(uid) ?? 0);
     }
     return h >>> 0;
   }
@@ -333,7 +372,8 @@ export class Simulation {
       const s = this.state.get(b.uid) as BuildingState;
       const c = this.info(b.def);
       if (s.shortages.length) s.shortages = [];
-      if (!city.isActive(b.uid)) {
+      const voyageTicks = b.def.voyage?.ticks ?? 0;
+      if (!city.isActive(b.uid) || (voyageTicks && !this.routes.get(b.uid)?.length)) {
         s.staffed = false;
         s.supplied = false;
         continue;
@@ -361,6 +401,13 @@ export class Simulation {
         }
       }
       if (!s.supplied) continue;
+      const period = voyageTicks || b.def.crop?.ticks || 0;
+      let arrived = false;
+      if (period) {
+        const age = ((this.work.get(b.uid) ?? 0) + 1) % period;
+        this.work.set(b.uid, age);
+        arrived = age === 0;
+      }
       for (const [r, n] of c.inputs) {
         stock[r] = (stock[r] ?? 0) - n * TICK_DT;
         flows.consumed[r] = (flows.consumed[r] ?? 0) + n;
@@ -375,6 +422,13 @@ export class Simulation {
         }
         const cap = city.capacityOf(r);
         const cur = stock[r] ?? 0;
+        if (voyageTicks) {
+          const elapsed = voyageTicks * TICK_DT;
+          const cargo = Math.min(Math.max(0, cap - cur), n * mult * elapsed);
+          if (arrived) stock[r] = cur + cargo;
+          flows.produced[r] = (flows.produced[r] ?? 0) + cargo / elapsed;
+          continue;
+        }
         const add = Math.min(Math.max(0, cap - cur), n * mult * TICK_DT);
         stock[r] = cur + add;
         flows.produced[r] = (flows.produced[r] ?? 0) + add / TICK_DT;
@@ -486,6 +540,15 @@ export class Simulation {
       s.unmetTicks = 0;
       s.warnedAt = -1;
       if (!s.supplied) continue;
+      const merge = b.def.mergeInto && this.findMerge(b);
+      if (merge) {
+        changes.push(() => {
+          const merged = city._merge(merge.target, merge.x, merge.z, merge.members);
+          if (merged)
+            this.emit({ type: 'upgraded', uid: merged.uid, from: b.def.id, to: merged.def.id });
+        });
+        continue;
+      }
       const target = this.upgradeTarget(b);
       if (target) {
         changes.push(() => {
@@ -496,6 +559,49 @@ export class Simulation {
     }
     // Apply after checking, so every building in this slice saw the same city.
     for (const c of changes) c();
+  }
+
+  private findMerge(
+    b: PlacedBuilding,
+  ): { target: BuildingDef; x: number; z: number; members: PlacedBuilding[] } | undefined {
+    const city = this.city;
+    for (const rule of b.def.mergeInto ?? []) {
+      if (!city.catalog.has(rule.to)) continue;
+      const target = city.catalog.get(rule.to);
+      if (!city.progress.isUnlocked(target)) continue;
+      const { w, d } = target.footprint;
+      for (let z = b.z - d + 1; z <= b.z; z++) {
+        for (let x = b.x - w + 1; x <= b.x; x++) {
+          const rect = rectOf(target, x, z);
+          if (!rule.when.every((req) => checkRequirement(city, req, rect).ok)) continue;
+          const members: PlacedBuilding[] = [];
+          let level: number | undefined;
+          for (let dz = 0; dz < d; dz++) {
+            for (let dx = 0; dx < w; dx++) {
+              const home = city.at(x + dx, z + dz);
+              if (
+                home?.def !== b.def ||
+                !city.isActive(home.uid) ||
+                this.asleep(home.uid) ||
+                !this.state.get(home.uid)?.supplied ||
+                !checkSustain(city, home.uid).every((c) => c.ok)
+              )
+                continue;
+              const ground = city.terrain.tile(x + dx, z + dz).level;
+              level ??= ground;
+              if (ground === level) members.push(home);
+            }
+          }
+          if (
+            members.length === w * d &&
+            (target.requires ?? []).every((req) => checkRequirement(city, req, rect).ok)
+          ) {
+            return { target, x, z, members };
+          }
+        }
+      }
+    }
+    return undefined;
   }
 
   /** Enough stock for one second of this building's material upkeep. */

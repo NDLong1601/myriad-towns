@@ -33,7 +33,12 @@ interface Building {
   emits?: { field: string }[];
   placeOn?: string[];
   requires?: Requirement[];
+  placementRequires?: Requirement[];
   upgrades?: { to: string; when: Requirement[] }[];
+  mergeInto?: { to: string; when: Requirement[] }[];
+  crop?: { kind: string; ticks: number };
+  voyage?: { kind: string; ticks: number };
+  housing?: number;
   decline?: { to?: string };
   unlock?: { population?: number; buildings?: Record<string, number> };
   tags?: string[];
@@ -113,7 +118,11 @@ for (const b of all) {
     if (!terrainTags.has(t))
       errors.push(`building "${b.id}": unknown terrain tag "${t}" in placeOn`);
   }
-  const allReqs = [...(b.requires ?? []), ...(b.upgrades ?? []).flatMap((u) => u.when)];
+  const allReqs = [
+    ...(b.requires ?? []),
+    ...(b.placementRequires ?? []),
+    ...[...(b.upgrades ?? []), ...(b.mergeInto ?? [])].flatMap((u) => u.when),
+  ];
   for (const r of allReqs) {
     if (r.field && !fieldIds.has(r.field))
       errors.push(`building "${b.id}": unknown field "${r.field}"`);
@@ -126,7 +135,8 @@ for (const b of all) {
 for (const b of all) {
   const refs: string[] = [];
   for (const r of b.requires ?? []) if (r.building) refs.push(r.building);
-  for (const u of b.upgrades ?? []) {
+  for (const r of b.placementRequires ?? []) if (r.building) refs.push(r.building);
+  for (const u of [...(b.upgrades ?? []), ...(b.mergeInto ?? [])]) {
     refs.push(u.to);
     for (const r of u.when) if (r.building) refs.push(r.building);
   }
@@ -139,6 +149,30 @@ for (const b of all) {
     const target = id && byId.get(id);
     if (target && (target.footprint.w !== b.footprint.w || target.footprint.d !== b.footprint.d))
       errors.push(`building "${b.id}": replacement "${id}" must have the same footprint`);
+  }
+  for (const merge of b.mergeInto ?? []) {
+    const target = byId.get(merge.to);
+    if (!target) continue;
+    const area = target.footprint.w * target.footprint.d;
+    if (
+      !b.housing ||
+      b.footprint.w !== 1 ||
+      b.footprint.d !== 1 ||
+      area < 2 ||
+      target.footprint.w > 2 ||
+      target.footprint.d > 2 ||
+      (target.housing ?? 0) < b.housing * area ||
+      !target.tags?.includes('upgrade_only')
+    )
+      errors.push(`building "${b.id}": invalid housing consolidation "${target.id}"`);
+  }
+  if (b.crop && b.voyage)
+    errors.push(`building "${b.id}": crop and voyage cannot share a work cycle`);
+  if (
+    (b.crop || b.voyage) &&
+    !Object.entries(b.produces ?? {}).some(([r, n]) => resources.stock.includes(r) && n > 0)
+  ) {
+    errors.push(`building "${b.id}": work cycles need stock output`);
   }
 }
 
@@ -189,7 +223,9 @@ for (const c of chapters) {
             !b.tags?.includes('upgrade_only') &&
             (b.unlock?.population ?? 0) <= population &&
             (b.placeOn ?? []).every((tag) => ['land', 'flat', 'grass'].includes(tag)) &&
-            !(b.requires ?? []).some((rule) => rule.type === 'terrain') &&
+            ![...(b.requires ?? []), ...(b.placementRequires ?? [])].some(
+              (rule) => rule.type === 'terrain',
+            ) &&
             (b.produces?.[resource] ?? 0) > (b.upkeep?.[resource] ?? 0),
         )
       ) {

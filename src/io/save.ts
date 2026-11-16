@@ -61,6 +61,8 @@ export interface SaveData {
   goals: { index: number; pending: string[] | null } | null;
   towns: ReturnType<TownStore['snapshot']>;
   policies?: string[];
+  /** Active crop and voyage phases keyed by building uid. Legacy saves start at phase zero. */
+  work?: [number, number][];
 }
 
 /** The live objects a save is taken from and loaded into. */
@@ -118,6 +120,7 @@ export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null):
       : null,
     towns: game.towns.snapshot(),
     policies: [...city.policies],
+    work: sim.exportWork(),
   };
 }
 
@@ -165,6 +168,11 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   if (cleared) {
     cleared.clear();
     for (const k of data.trees) cleared.add(k);
+  }
+  if (Array.isArray(data.work)) {
+    for (const entry of data.work) {
+      if (Array.isArray(entry)) sim.importWork(entry[0], entry[1]);
+    }
   }
   city._setNextUid(data.nextUid);
   for (const k of Object.keys(city.stock)) delete city.stock[k];

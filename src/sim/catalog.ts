@@ -12,7 +12,7 @@ export type Requirement =
   | { type: 'notNear'; building: string; radius: number }
   | { type: 'field'; field: string; min?: number; max?: number }
   | { type: 'terrain'; terrain: string; radius: number; min?: number }
-  | { type: 'road'; maxDistance: number };
+  | { type: 'road'; maxDistance: number; paved?: boolean };
 
 export interface Emit {
   field: string;
@@ -53,7 +53,12 @@ export interface BuildingDef {
   emits?: Emit[];
   placeOn?: string[];
   requires?: Requirement[];
+  placementRequires?: Requirement[];
   upgrades?: { to: string; when: Requirement[] }[];
+  /** Ordered larger forms, each requiring a rectangle of matching active homes. */
+  mergeInto?: { to: string; when: Requirement[] }[];
+  crop?: { kind: 'berries' | 'grain' | 'vegetables'; ticks: number };
+  voyage?: { kind: 'fish' | 'cargo'; ticks: number; range: number };
   decline?: { warnAtTicks?: number; graceTicks?: number; to?: string };
   unlock?: { population?: number; buildings?: Amounts; revealAt?: number };
   visual: BuildingVisual;

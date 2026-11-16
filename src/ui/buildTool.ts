@@ -259,10 +259,12 @@ export class BuildTool {
           def: b.def,
           status: this.statusLines(b.uid),
           conditions: sustain.map(line),
-          next: upgrades.map((u) => ({
-            def: this.city.catalog.get(u.to),
-            lines: u.checks.map(line),
-          })),
+          next: upgrades
+            .map((u) => ({
+              def: this.city.catalog.get(u.to),
+              lines: u.checks.map(line),
+            }))
+            .concat(this.mergeOptions(b.def)),
           action: demolishAction,
         });
         return;
@@ -378,20 +380,43 @@ export class BuildTool {
     if (!this.detail) return;
     const def = this.city.catalog.get(defId);
     const live = this.hover && !(def.id === 'road' && this.down?.tile);
+    const locked = this.city.progress.lockReason(def);
     const conditions: PanelLine[] = live
       ? (() => {
           const c = this.corner(def, this.hover as { x: number; z: number });
-          return checkPlacement(this.city, def, c.x, c.z).requires.map(line);
+          const check = checkPlacement(this.city, def, c.x, c.z);
+          return [...check.site.filter((item) => !item.ok), ...check.requires].map(line);
         })()
-      : (def.requires ?? []).map((r) => ({ text: describeCheck(placeholder(r)) }));
+      : [
+          ...(locked ? [line({ ok: false, key: locked.key, params: locked.params })] : []),
+          ...[...(def.requires ?? []), ...(def.placementRequires ?? [])].map((r) => ({
+            text: describeCheck(placeholder(r)),
+          })),
+        ];
     this.detail.show({
       def,
       cost: def.cost,
       conditions,
-      next: (def.upgrades ?? []).map((u) => ({
-        def: this.city.catalog.get(u.to),
-        lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
-      })),
+      next: (def.upgrades ?? [])
+        .map((u) => ({
+          def: this.city.catalog.get(u.to),
+          lines: u.when.map((r): PanelLine => ({ text: describeCheck(placeholder(r)) })),
+        }))
+        .concat(this.mergeOptions(def)),
+    });
+  }
+
+  private mergeOptions(def: BuildingDef): { def: BuildingDef; lines: PanelLine[] }[] {
+    return (def.mergeInto ?? []).map((rule) => {
+      const target = this.city.catalog.get(rule.to);
+      const { w, d } = target.footprint;
+      return {
+        def: target,
+        lines: [
+          { text: t('ui.mergeHomes', { n: w * d, w, d }) },
+          ...rule.when.map((req) => ({ text: describeCheck(placeholder(req)) })),
+        ],
+      };
     });
   }
 
@@ -404,6 +429,20 @@ export class BuildTool {
     const active = this.city.isActive(uid);
     const s = sim.stateOf(uid);
     if (!active) out.push({ ok: false, text: t('status.abandoned') });
+    if (b.def.crop) out.push({ text: t(`crop.stage${sim.cropStageOf(uid)}`) });
+    if (b.def.voyage) {
+      const phase = sim.voyagePhaseOf(uid);
+      if (!sim.voyageRouteOf(uid)?.length) out.push({ ok: false, text: t('voyage.noRoute') });
+      else
+        out.push({
+          text: t(
+            phase === 0 ? 'voyage.docked' : phase < 0.5 ? 'voyage.outbound' : 'voyage.returning',
+            {
+              n: Math.floor(phase * 100),
+            },
+          ),
+        });
+    }
     for (const p of s?.shortages ?? []) out.push({ ok: false, text: problemText(p) });
     const left = sim.declineIn(uid);
     if (left !== undefined) {
@@ -485,7 +524,11 @@ function placeholder(r: Requirement): CheckResult {
         params: { terrain: r.terrain, r: r.radius, need: r.min ?? 1, have: '…' },
       };
     case 'road':
-      return { ok: false, key: 'req.road', params: { d: r.maxDistance } };
+      return {
+        ok: false,
+        key: r.paved ? 'req.pavedRoad' : 'req.road',
+        params: { d: r.maxDistance },
+      };
   }
 }
 

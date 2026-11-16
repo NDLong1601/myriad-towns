@@ -62,20 +62,20 @@ const ROCK: RGB = [120, 118, 112];
 const TRUNK: RGB = [110, 80, 52];
 const RESOURCE_COLOR: Partial<Record<number, RGB>> = {
   [Resource.Iron]: [170, 85, 60],
-  [Resource.Coal]: [45, 45, 50],
+  [Resource.Coal]: [68, 72, 76],
   [Resource.Clay]: [185, 120, 75],
   [Resource.Stone]: [135, 134, 128],
   [Resource.FertileSoil]: [115, 150, 78],
 };
 const ORE_ROCK_COLOR: Partial<Record<number, RGB>> = {
   [Resource.Iron]: [145, 68, 48],
-  [Resource.Coal]: [32, 32, 35],
+  [Resource.Coal]: [66, 71, 79],
   [Resource.Stone]: [120, 118, 112],
 };
 const LEAF: Record<number, RGB> = {
-  [Biome.Forest]: [58, 116, 62],
-  [Biome.Temperate]: [76, 136, 70],
-  [Biome.Cold]: [52, 96, 78],
+  [Biome.Forest]: [61, 124, 61],
+  [Biome.Temperate]: [88, 150, 67],
+  [Biome.Cold]: [50, 104, 84],
   [Biome.Steppe]: [120, 140, 70],
   [Biome.Ruins]: [96, 120, 74],
 };
@@ -337,16 +337,91 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
           (LEAF[biome] ?? LEAF[Biome.Temperate]) as RGB,
           0.9 + hashFloat(seed, Purpose.Trees, x, z, 4) * 0.2,
         );
-        b.box(jx - 0.06, y, jz - 0.06, jx + 0.06, y + 0.25, jz + 0.06, TRUNK);
-        if (biome === Biome.Cold || biome === Biome.Forest) {
-          b.pyramid(jx, y + 0.2, y + 0.25 + h, jz, 0.32, leaf); // conifer
+        const snowy = biome === Biome.Cold || level >= SNOW_LEVEL;
+        if (
+          snowy ||
+          (biome === Biome.Forest && hashFloat(seed, Purpose.Decoration, x, z, 6) < 0.5)
+        ) {
+          b.box(jx - 0.065, y, jz - 0.065, jx + 0.065, y + h * 0.7, jz + 0.065, TRUNK);
+          for (let tier = 0; tier < 3; tier++) {
+            const half = 0.32 - tier * 0.075;
+            const base = y + h * (0.24 + 0.22 * tier);
+            const top = base + h * 0.25;
+            b.box(
+              jx - half,
+              base,
+              jz - half,
+              jx + half,
+              top,
+              jz + half,
+              shade(leaf, 0.86 + tier * 0.11),
+            );
+            if (snowy) {
+              b.box(
+                jx - half * 0.92,
+                top,
+                jz - half * 0.92,
+                jx + half * 0.92,
+                top + 0.04,
+                jz + half * 0.92,
+                SNOW,
+              );
+            }
+          }
+          b.pyramid(jx, y + h * 0.88, y + h * 1.17, jz, 0.13, snowy ? SNOW : shade(leaf, 1.16));
         } else {
-          b.box(jx - 0.25, y + 0.25, jz - 0.25, jx + 0.25, y + 0.25 + h * 0.6, jz + 0.25, leaf); // broadleaf block
+          b.box(jx - 0.075, y, jz - 0.075, jx + 0.075, y + h * 0.68, jz + 0.075, TRUNK);
+          b.box(jx - 0.26, y + h * 0.48, jz - 0.24, jx + 0.27, y + h * 0.89, jz + 0.26, leaf);
+          b.box(
+            jx - 0.28,
+            y + h * 0.71,
+            jz - 0.17,
+            jx + 0.07,
+            y + h * 1.12,
+            jz + 0.19,
+            shade(leaf, 1.13),
+          );
+          b.box(
+            jx + 0.02,
+            y + h * 0.61,
+            jz - 0.29,
+            jx + 0.31,
+            y + h * 0.97,
+            jz + 0.04,
+            shade(leaf, 0.91),
+          );
         }
       } else if (flags & TileFlag.Rock) {
-        const r = 0.15 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.15;
+        const r = 0.14 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.1;
         const rockCol = (res && ORE_ROCK_COLOR[res]) || ROCK;
-        b.box(jx - r, y, jz - r * 0.8, jx + r, y + r * 1.1, jz + r * 0.8, shade(rockCol, 1.1));
+        b.box(jx - r, y, jz - r * 0.7, jx + r, y + r * 1.3, jz + r * 0.7, shade(rockCol, 1.38));
+        b.box(
+          jx - r * 0.6,
+          y + r * 1.3,
+          jz - r * 0.5,
+          jx + r * 0.7,
+          y + r * 1.8,
+          jz + r * 0.52,
+          shade(rockCol, 1.55),
+        );
+        b.box(
+          jx - r * 1.22,
+          y,
+          jz + r * 0.16,
+          jx - r * 0.48,
+          y + r * 0.7,
+          jz + r * 1.14,
+          shade(rockCol, 1.22),
+        );
+        b.box(
+          jx + r * 0.51,
+          y,
+          jz + r * 0.42,
+          jx + r * 1.23,
+          y + r * 0.55,
+          jz + r * 1.24,
+          shade(rockCol, 1.45),
+        );
       }
     }
   }

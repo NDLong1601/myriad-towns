@@ -316,6 +316,30 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
       break;
     }
     case 'field': {
+      if (def.crop) {
+        cropField(parts, def, variant || 4);
+        break;
+      }
+      if (def.id === 'stockpile') {
+        parts.push(box(w * 0.94, 0.06, d * 0.94, '#84745c', cx, cz));
+        for (let i = 0; i < 5; i++) {
+          const x = 0.3 + (i % 3) * 0.56;
+          const z = 0.43 + Math.floor(i / 3) * 0.76;
+          parts.push(box(0.45, 0.14, 0.48, '#625749', x, z, 0.06));
+          parts.push(
+            box(
+              0.37,
+              0.18 + (i % 2) * 0.12,
+              0.34,
+              i % 2 ? '#a8a59a' : '#7d8a8b',
+              x + 0.08,
+              z,
+              0.18,
+            ),
+          );
+        }
+        break;
+      }
       parts.push(box(w * 0.94, 0.06, d * 0.94, shade(color, 0.6), cx, cz));
       const rows = Math.max(3, d * 3);
       for (let i = 0; i < rows; i++) {
@@ -395,6 +419,38 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   merged.computeVertexNormals();
   merged.computeBoundingSphere();
   return merged;
+}
+
+function cropField(parts: THREE.BufferGeometry[], def: BuildingDef, stage: number): void {
+  const { w, d } = def.footprint;
+  const kind = def.crop?.kind;
+  const soil = kind === 'berries' ? '#694530' : kind === 'grain' ? '#906044' : '#765341';
+  parts.push(box(w * 0.97, 0.045, d * 0.97, soil, w / 2, d / 2));
+  const rows = d * (kind === 'berries' ? 2 : 3);
+  for (let i = 0; i < rows; i++) {
+    const z = ((i + 0.5) * d) / rows;
+    parts.push(box(w * 0.89, 0.026, 0.12, shade(soil, 1.2), w / 2, z, 0.045));
+    if (stage === 1) continue;
+    if (kind === 'grain') {
+      const h = stage === 2 ? 0.07 : stage === 3 ? 0.17 : 0.26;
+      const color = stage === 2 ? '#82ab51' : stage === 3 ? '#adba50' : '#edc958';
+      parts.push(box(w * 0.9, h, stage === 4 ? 0.16 : 0.085, color, w / 2, z, 0.07));
+      if (stage === 4) parts.push(box(w * 0.88, 0.04, 0.13, '#f5df83', w / 2, z, 0.29));
+      continue;
+    }
+    const columns = w * (kind === 'berries' ? 2 : 3);
+    for (let j = 0; j < columns; j++) {
+      const x = ((j + 0.5) * w) / columns;
+      const size = stage === 2 ? 0.08 : stage === 3 ? 0.19 : kind === 'berries' ? 0.32 : 0.25;
+      const height = size * (kind === 'berries' ? 0.85 : 0.48);
+      const color = kind === 'berries' ? '#42743c' : (j + i) % 2 ? '#78ac46' : '#4d923d';
+      parts.push(box(size, height, size * 0.85, color, x, z, 0.072));
+      if (stage === 4) {
+        const fruit = kind === 'berries' ? '#c84467' : '#d99048';
+        parts.push(box(0.071, 0.042, 0.064, fruit, x + 0.065, z - 0.042, height + 0.057));
+      }
+    }
+  }
 }
 
 export function shade(hex: string, f: number): string {

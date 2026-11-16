@@ -14,7 +14,7 @@
       "color": "#8e8e86",
       "height": 0.08
     },
-    "tags": ["road", "upgrade_only"],
+    "tags": ["road", "upgrade_only", "paved"],
     "upgrades": [
       {
         "to": "brick_road",
@@ -52,7 +52,7 @@
       "color": "#b3654a",
       "height": 0.09
     },
-    "tags": ["road", "upgrade_only"],
+    "tags": ["road", "upgrade_only", "paved"],
     "unlock": {
       "population": 150,
       "revealAt": 80
@@ -118,7 +118,7 @@
       "color": "#a9a9a2",
       "height": 0.09
     },
-    "tags": ["road", "bridge", "upgrade_only"],
+    "tags": ["road", "bridge", "upgrade_only", "paved"],
     "placeOn": ["water"],
     "requires": [
       {

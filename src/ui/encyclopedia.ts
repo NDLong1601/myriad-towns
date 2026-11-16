@@ -90,7 +90,7 @@ export function formatRequirement(req: Requirement): string {
         r: req.radius,
       });
     case 'road':
-      return t('encyclopedia.req.road', {
+      return t(req.paved ? 'req.pavedRoad' : 'encyclopedia.req.road', {
         d: req.maxDistance,
       });
   }
@@ -197,7 +197,7 @@ export function mountEncyclopedia(
     const upkeepText = def.upkeep ? formatAmounts(def.upkeep) : '';
 
     const emits = def.emits ?? [];
-    const requires = def.requires ?? [];
+    const requires = [...(def.requires ?? []), ...(def.placementRequires ?? [])];
     const upgrades = def.upgrades ?? [];
     const fromList = upgradedFromMap.get(def.id) ?? [];
 
