@@ -333,6 +333,103 @@ function gable(
   return part(g, color, x, y + h / 3, z);
 }
 
+function miningModel(
+  parts: THREE.BufferGeometry[],
+  def: BuildingDef,
+  h: number,
+  color: string,
+): void {
+  switch (def.id) {
+    case 'quarry': {
+      parts.push(box(0.94, 0.035, 0.94, '#a8a191', 0.5, 0.5));
+      // Cut faces step up away from the open work floor.
+      parts.push(box(0.89, h * 0.4, 0.46, shade(color, 0.75), 0.5, 0.27, 0.035));
+      parts.push(box(0.88, h * 0.34, 0.32, color, 0.5, 0.2, 0.035 + h * 0.4));
+      parts.push(box(0.87, h * 0.28, 0.19, shade(color, 1.6), 0.5, 0.14, 0.035 + h * 0.74));
+      parts.push(box(0.16, h * 0.4, 0.24, shade(color, 0.9), 0.86, 0.58, 0.035));
+      parts.push(box(0.15, 0.07, 0.14, '#d9d2bd', 0.31, 0.67, 0.035));
+      parts.push(box(0.12, 0.12, 0.12, '#b9b29f', 0.19, 0.65, 0.035));
+      parts.push(box(0.13, 0.065, 0.13, '#e4d9c3', 0.19, 0.8, 0.035));
+      break;
+    }
+    case 'clay_pit': {
+      // An elliptical cut with successively lower inside terraces.
+      const ledge = (profile: [number, number][], tint: string): void => {
+        const g = new THREE.LatheGeometry(
+          profile.map(([r, y]) => new THREE.Vector2(r, y)),
+          12,
+        );
+        g.scale(1, 1, 0.86);
+        parts.push(part(g, tint, 0.5, 0, 0.48));
+      };
+      ledge(
+        [
+          [0.48, 0.015],
+          [0.435, h * 0.76],
+          [0.32, h * 0.76],
+        ],
+        shade(color, 1.37),
+      );
+      ledge(
+        [
+          [0.32, h * 0.76],
+          [0.27, h * 0.51],
+          [0.21, h * 0.51],
+        ],
+        color,
+      );
+      ledge(
+        [
+          [0.21, h * 0.51],
+          [0.165, 0.024],
+          [0.001, 0.024],
+        ],
+        shade(color, 0.55),
+      );
+      parts.push(box(0.28, 0.042, 0.11, '#947254', 0.48, 0.87, 0.015));
+      break;
+    }
+    case 'iron_mine': {
+      const steel = '#535e63';
+      const deck = h * 1.46;
+      parts.push(box(0.93, 0.05, 0.94, '#837c74', 0.5, 0.5));
+      parts.push(box(0.42, 0.13, 0.4, '#282e32', 0.48, 0.44, 0.05));
+      for (const x of [-1, 1]) {
+        for (const z of [-1, 1]) {
+          const foot = new THREE.Vector3(0.48 + x * 0.31, 0.05, 0.44 + z * 0.3);
+          const top = new THREE.Vector3(0.48 + x * 0.108, deck, 0.44 + z * 0.12);
+          const direction = top.clone().sub(foot);
+          const beam = new THREE.BoxGeometry(0.07, direction.length(), 0.067);
+          beam.applyQuaternion(
+            new THREE.Quaternion().setFromUnitVectors(
+              new THREE.Vector3(0, 1, 0),
+              direction.normalize(),
+            ),
+          );
+          const center = foot.add(top).multiplyScalar(0.5);
+          parts.push(part(beam, steel, center.x, center.y, center.z));
+        }
+      }
+      parts.push(box(0.39, 0.07, 0.37, '#969a94', 0.48, 0.44, deck - 0.04));
+      const sheave = new THREE.CylinderGeometry(0.14, 0.14, 0.06, 12);
+      sheave.rotateZ(Math.PI / 2);
+      parts.push(part(sheave, '#ac6747', 0.48, deck + 0.12, 0.44));
+      parts.push(box(0.38, 0.065, 0.065, steel, 0.48, 0.44, deck + 0.1));
+      for (const x of [0.42, 0.54]) parts.push(box(0.026, 0.028, 0.39, '#b0ae9d', x, 0.75, 0.051));
+      parts.push(box(0.2, 0.1, 0.17, color, 0.48, 0.81, 0.062));
+      break;
+    }
+    default: {
+      const { w, d } = def.footprint;
+      const cx = w / 2;
+      const cz = d / 2;
+      parts.push(box(w * 0.85, h * 0.5, d * 0.85, shade(color, 0.85), cx, cz));
+      parts.push(gable(w * 0.5, h * 0.8, d * 0.5, color, cx, cz, h * 0.5));
+      parts.push(box(0.25, 0.25, 0.25, '#3a3a3a', cx + 0.25, cz + 0.25, h * 0.5));
+    }
+  }
+}
+
 function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const { w, d } = def.footprint;
   const v = def.visual;
@@ -516,9 +613,7 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
       parts.push(pyramid(0.65, 0.25, 0.65, roof, cx, cz, h + 0.4));
       break;
     case 'mine':
-      parts.push(box(w * 0.85, h * 0.5, d * 0.85, shade(color, 0.85), cx, cz));
-      parts.push(gable(w * 0.5, h * 0.8, d * 0.5, color, cx, cz, h * 0.5));
-      parts.push(box(0.25, 0.25, 0.25, '#3a3a3a', cx + 0.25, cz + 0.25, h * 0.5));
+      miningModel(parts, def, h, color);
       break;
     case 'tower':
       parts.push(box(0.5 * w, h, 0.5 * d, color, cx, cz));

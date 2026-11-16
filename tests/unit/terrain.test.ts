@@ -94,25 +94,42 @@ describe('terrain mesh', () => {
     c.biome.fill(Biome.Temperate);
     const index = localIndex(5, 5);
     const plain = buildTerrainMesh(SEED, c).positions.length;
-    const palettes = [];
+    const profiles = new Map<number, { height: number; width: number; centerHeight: number }>();
     for (const resource of [Resource.Stone, Resource.Clay, Resource.Iron]) {
       c.resource[index] = resource;
       c.flags[index] = TileFlag.Rock;
       const exposed = buildTerrainMesh(SEED, c);
       expect(exposed.positions.length).toBeGreaterThan(plain);
-      const colors: number[] = [];
+      let height = 0;
+      let centerHeight = 0;
+      let left = 6;
+      let right = 5;
       for (let i = 0; i < exposed.positions.length; i += 3) {
-        if (exposed.positions[i + 1]! > landY(SEA_LEVEL) + 0.03)
-          colors.push(...exposed.colors.slice(i, i + 3));
+        const x = exposed.positions[i]!;
+        const y = exposed.positions[i + 1]! - landY(SEA_LEVEL);
+        const z = exposed.positions[i + 2]!;
+        if (y < 0.03 || x <= 5 || x >= 6 || z <= 5 || z >= 6) continue;
+        height = Math.max(height, y);
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        if (Math.hypot(x - 5.5, z - 5.5) < 0.12) centerHeight = Math.max(centerHeight, y);
       }
-      expect(colors.length).toBeGreaterThan(0);
-      palettes.push(colors);
+      profiles.set(resource, { height, width: right - left, centerHeight });
 
       c.flags[index] = TileFlag.Rock | TileFlag.Covered;
       expect(buildTerrainMesh(SEED, c).positions.length).toBe(plain);
       expect(c.resource[index]).toBe(resource);
     }
-    expect(new Set(palettes.map((colors) => colors.join(','))).size).toBe(3);
+    const stone = profiles.get(Resource.Stone)!;
+    const clay = profiles.get(Resource.Clay)!;
+    const iron = profiles.get(Resource.Iron)!;
+    expect(stone.height).toBeGreaterThan(0.2);
+    expect(stone.width).toBeGreaterThan(stone.height * 2);
+    expect(clay.height).toBeLessThan(stone.height);
+    expect(clay.width).toBeGreaterThan(0.6);
+    expect(clay.centerHeight).toBeLessThan(clay.height / 2);
+    expect(iron.height).toBeGreaterThan(stone.height * 2);
+    expect(iron.height).toBeGreaterThan(iron.width);
   });
 
   it('produces consistent buffers', () => {
