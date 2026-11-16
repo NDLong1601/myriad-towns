@@ -1,3 +1,4 @@
+import { cottage } from './cottage';
 import { type Lot, type Recipes } from './lot';
 
 const grass = '#729953';
@@ -50,15 +51,7 @@ export const housing: Recipes = {
     l.windows(0.59, 0.649, 0.13, 0.14, 0.072, 1);
     l.block(0.68, 0.78, 0.17, 0.11, 0.035, 0.08, '#988566');
   },
-  cottage(l) {
-    l.base(grass);
-    l.roofed(0.44, 0.36, 0.7, 0.56, 0.035, 0.39);
-    l.roofed(0.6, 0.65, 0.3, 0.4, 0.035, 0.34, 'z');
-    l.block(0.22, 0.36, 0.12, 0.14, 0.38, 0.31, '#936151');
-    l.windows(0.33, 0.644, 0.22, 0.22, 0.12, 1);
-    l.block(0.59, 0.86, 0.15, 0.05, 0.04, 0.19, wood);
-    l.tree(0.18, 0.82, 0.31);
-  },
+  cottage,
   townhouse(l) {
     l.base('#9c9c89');
     l.block(0.5, 0.42, 0.6, 0.67, 0.05, 1.18);
