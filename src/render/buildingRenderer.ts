@@ -11,7 +11,7 @@ function network(def: BuildingDef): 'road' | 'rail' | undefined {
   return undefined;
 }
 
-const WHITE = new THREE.Color(1, 1, 1);
+import { lotFinish } from '@/render/visualPalette';
 /** Abandoned buildings are drawn dark and desaturated. */
 const ABANDONED = new THREE.Color(0.45, 0.42, 0.4);
 /** Buildings with a pending decline get a warm warning tint. */
@@ -316,7 +316,12 @@ export class BuildingRenderer {
   }
 
   private writeColor(batch: Batch, index: number, uid: number): void {
-    batch.mesh.setColorAt(index, this.tints.get(uid) ?? WHITE);
+    const b = this.city.get(uid);
+    if (!b) return;
+    this.c.copy(lotFinish(b.def.id, b.x, b.z));
+    const tint = this.tints.get(uid) ?? (!this.city.isActive(uid) ? ABANDONED : undefined);
+    if (tint) this.c.multiply(tint);
+    batch.mesh.setColorAt(index, this.c);
     if (batch.mesh.instanceColor) batch.mesh.instanceColor.needsUpdate = true;
   }
 

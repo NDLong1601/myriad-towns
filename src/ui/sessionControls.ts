@@ -1,4 +1,5 @@
 import { t } from './i18n';
+import { hudIcon } from './icons';
 
 export type LightingMode = 'cycle' | 'day' | 'night';
 
@@ -11,11 +12,11 @@ export function mountLighting(
   el.className = 'mt-lighting';
   el.setAttribute('role', 'group');
   el.setAttribute('aria-label', t('launch.lighting'));
-  const modes = { cycle: '↻', day: '☀', night: '☾' } as const;
-  el.innerHTML = `${Object.entries(modes)
+  const modes = ['cycle', 'day', 'night'] as const;
+  el.innerHTML = `${modes
     .map(
-      ([mode, glyph]) =>
-        `<button type="button" data-light="${mode}" aria-label="${t(`launch.${mode}`)}" title="${t(`launch.${mode}`)}" aria-pressed="${mode === initial}">${glyph}</button>`,
+      (mode) =>
+        `<button type="button" data-light="${mode}" aria-label="${t(`launch.${mode}`)}" title="${t(`launch.${mode}`)}" aria-pressed="${mode === initial}">${hudIcon(mode, 16)}</button>`,
     )
     .join('')}<time></time>`;
   const buttons = el.querySelectorAll<HTMLButtonElement>('button');

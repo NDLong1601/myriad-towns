@@ -3,6 +3,7 @@ import type { Goal, Goals, GoalStatus } from '@/sim/goals';
 import { PACKS } from '@/sim/progress';
 import type { Simulation } from '@/sim/simulation';
 import { buildingName, fmt, formatAmounts, t } from './i18n';
+import { hudIcon } from './icons';
 import type { SandboxOptions } from './newGame';
 
 function goalText(g: Goal, have: number): string {
@@ -57,8 +58,9 @@ export function mountGoalsPanel(goals: Goals, parent: HTMLElement): void {
       el.open = false;
       el.classList.add('is-complete');
       completed = true;
-      summary.textContent = `🏆 ${t('ui.chaptersComplete')}`;
-      contents.textContent = t('chapter.done');
+      summary.innerHTML = `${hudIcon('check', 16)}<span>${t('ui.chaptersComplete')}</span>`;
+      contents.textContent = t('ui.chaptersCompleteHint');
+      last = '';
       return;
     }
     if (completed) {

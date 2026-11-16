@@ -86,9 +86,14 @@ test('ongoing food shortages are grouped and jump to an affected home', async ({
   expect(placed).toEqual([true, true, true]);
 
   const alerts = page.locator('.mt-progress-alerts');
-  await alerts.locator('summary').click();
-  const food = alerts.getByRole('button').filter({ hasText: /2 công trình.*Thiếu/s });
+  await alerts.locator(':scope > summary').click();
+  const food = alerts.getByRole('button').filter({ hasText: /Thiếu.*2 công trình/s });
   await expect(food).toHaveCount(1);
+  const row = food.locator('..');
+  const advice = row.getByText(/Nhà thiếu ăn không cung cấp lao động/);
+  await expect(advice).toBeHidden();
+  await row.getByLabel('Xem cách xử lý').click();
+  await expect(advice).toBeVisible();
   await food.click();
   const centre = await page.evaluate(() => window.__MYRIAD__!.camera());
   expect(centre.x).toBeCloseTo(spot.x + 1.5);

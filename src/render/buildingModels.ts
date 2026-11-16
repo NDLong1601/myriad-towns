@@ -4,6 +4,8 @@ import type { BuildingDef } from '@/sim/catalog';
 import { architectureModel } from './architectureModels';
 import { box, gable, part, pyramid, shade } from './modelParts';
 
+import { visualDefinition } from '@/render/visualPalette';
+
 export { box, part, shade } from './modelParts';
 
 /**
@@ -27,7 +29,7 @@ export function buildingGeometry(def: BuildingDef, variant = 0): THREE.BufferGeo
   const key = `${def.id}#${variant}`;
   let g = cache.get(key);
   if (!g) {
-    g = makeGeometry(def, variant);
+    g = makeGeometry(visualDefinition(def), variant);
     cache.set(key, g);
   }
   return g;
@@ -174,12 +176,12 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
   const shoulder = roadOutline(mask, 0.43);
   const street = roadOutline(mask, 0.34);
   parts.push(
-    roadSurface(shoulder, top - 0.013, base, bridge ? '#7b7970' : paved ? '#b9b7a7' : '#897458'),
+    roadSurface(shoulder, top - 0.013, base, bridge ? '#7b7970' : paved ? '#a4a191' : '#998566'),
     roadSurface(
       street,
       top,
       top - 0.014,
-      bridge ? (paved ? '#767d80' : '#9e8a6b') : brick ? '#755b55' : paved ? '#656e70' : '#a18b69',
+      bridge ? (paved ? '#767d80' : '#9e8a6b') : brick ? '#8d7568' : paved ? '#747b7a' : '#ad9875',
     ),
   );
   if (bridge) {
@@ -192,7 +194,7 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
       }
     }
   } else if (paved) {
-    roadEdge(parts, street, 0.024, top - 0.004, 0.025, '#ddd9cc');
+    roadEdge(parts, street, 0.018, top - 0.004, 0.024, '#bab4a4');
   }
 
   const connections = arms(mask);
@@ -201,37 +203,21 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
     const axisX = i % 2 === 0;
     const sign = i < 2 ? 1 : -1;
     const straight = connections === 2 && Boolean(mask & (ROAD_SIDES[(i + 2) % 4] as number));
-    for (const along of [0.27, 0.44]) {
-      const tint = bridge ? (paved ? '#646c70' : '#77654e') : brick ? '#a48877' : '#b49b76';
-      if (bridge || brick) {
-        parts.push(
-          box(
-            axisX ? 0.016 : 0.62,
-            0.003,
-            axisX ? 0.62 : 0.016,
-            tint,
-            0.5 + (axisX ? sign * along : 0),
-            0.5 + (axisX ? 0 : sign * along),
-            top,
-          ),
-        );
-      } else if (!paved) {
-        for (const verge of [-0.376, 0.376]) {
-          parts.push(
-            box(
-              0.029,
-              0.004,
-              0.021,
-              tint,
-              0.5 + (axisX ? sign * along : verge),
-              0.5 + (axisX ? verge : sign * along),
-              top - 0.012,
-            ),
-          );
-        }
-      }
+    for (const along of bridge ? [0.27, 0.44] : brick ? [0.37] : []) {
+      const tint = bridge ? (paved ? '#646c70' : '#77654e') : '#957e70';
+      parts.push(
+        box(
+          axisX ? 0.016 : 0.62,
+          0.003,
+          axisX ? 0.62 : 0.016,
+          tint,
+          0.5 + (axisX ? sign * along : 0),
+          0.5 + (axisX ? 0 : sign * along),
+          top,
+        ),
+      );
     }
-    if (paved && !bridge) {
+    if (paved && !brick && !bridge) {
       for (const offset of [-0.387, 0.387]) {
         parts.push(
           box(
@@ -257,7 +243,7 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
           axisX ? length : 0.028,
           0.004,
           axisX ? 0.028 : length,
-          paved ? '#e5d6ad' : '#917a5e',
+          paved ? '#d3c6a5' : '#a38d6c',
           0.5 + (axisX ? sign * center : offset),
           0.5 + (axisX ? offset : sign * center),
           top,

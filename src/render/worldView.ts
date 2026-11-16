@@ -12,7 +12,16 @@ import { AdaptiveResolution, qualitySettings, type QualitySettings } from './qua
 import { TerrainRenderer } from './terrainRenderer';
 import { lightingAt, type Lighting } from './dayNight';
 
-const SKY = new THREE.Color('#9cc9dc');
+import {
+  DAY_BOUNCE,
+  DAY_FILL,
+  DAY_FILL_INTENSITY,
+  DAY_KEY_INTENSITY,
+  DAY_SKY,
+  DAY_SUN,
+} from '@/render/visualPalette';
+
+const SKY = new THREE.Color(DAY_SKY);
 
 export interface WorldViewOptions {
   seed: number;
@@ -26,6 +35,7 @@ export interface WorldViewOptions {
   patchChunk?: (chunk: ChunkData) => boolean;
   /** Defaults to the 'medium' preset for this device. */
   quality?: QualitySettings;
+  waterDetail?: boolean;
 }
 
 /** The 3D world: renderer, lights, camera, and terrain chunks that stream around the camera. */
@@ -81,16 +91,16 @@ export class WorldView {
 
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.5, 1200);
 
-    this.hemi = new THREE.HemisphereLight('#dceeff', '#5a6b48', 1.1);
+    this.hemi = new THREE.HemisphereLight(DAY_FILL, DAY_BOUNCE, DAY_FILL_INTENSITY);
     this.scene.add(this.hemi);
-    this.sun = new THREE.DirectionalLight('#fff1d6', 2.0);
+    this.sun = new THREE.DirectionalLight(DAY_SUN, DAY_KEY_INTENSITY);
     this.sun.castShadow = q.shadows;
     this.sun.shadow.mapSize.set(q.shadowMapSize, q.shadowMapSize);
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.05;
     this.scene.add(this.sun, this.sun.target);
 
-    this.terrain = new TerrainRenderer(this.origin);
+    this.terrain = new TerrainRenderer(this.origin, opts.waterDetail);
     this.scene.add(this.terrain.group);
 
     const sx = opts.start?.x ?? 0;
@@ -132,11 +142,11 @@ export class WorldView {
     this.timeOfDayValue = time;
     if (time === null) {
       this.sky.copy(SKY);
-      this.sun.color.set('#fff1d6');
-      this.sun.intensity = 2.0;
-      this.hemi.color.set('#dceeff');
-      this.hemi.groundColor.set('#5a6b48');
-      this.hemi.intensity = 1.1;
+      this.sun.color.set(DAY_SUN);
+      this.sun.intensity = DAY_KEY_INTENSITY;
+      this.hemi.color.set(DAY_FILL);
+      this.hemi.groundColor.set(DAY_BOUNCE);
+      this.hemi.intensity = DAY_FILL_INTENSITY;
       this.sunDir.set(60, 110, 35).normalize();
       return;
     }
@@ -263,6 +273,7 @@ export class WorldView {
     this.sun.target.position.set(t.x, 0, t.z);
 
     for (const fn of this.frameListeners) fn(dt);
+    this.terrain.update(dt, this.nightness);
     this.renderer.render(this.scene, this.camera);
   }
 

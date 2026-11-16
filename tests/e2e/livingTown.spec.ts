@@ -13,7 +13,7 @@ test('the thumbnail tray browses buildings with both arrows, drag and keyboard',
   await expect(next).toBeEnabled();
   const initial = items.locator('.mt-item').first();
   await expect(initial.locator('img')).toBeVisible();
-  expect((await initial.boundingBox())?.width).toBeLessThan(65);
+  await expect(initial.locator('.mt-item-text')).toBeVisible();
   await next.click();
   await expect.poll(() => items.evaluate((el) => el.scrollLeft)).toBeGreaterThan(1);
   await previous.click();

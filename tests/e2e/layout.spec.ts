@@ -89,6 +89,11 @@ test('resources stay legible and the shared map dock fits beside or above the tr
     const dockBox = (await dock.boundingBox())!;
     const menuBox = (await menu.boundingBox())!;
     const leftBox = (await page.locator('.mt-left').boundingBox())!;
+    // Every category and management button fits without a hidden horizontal scroller.
+    for (const row of await menu.locator('.mt-tabs, .mt-tools').all()) {
+      const horizontalOverflow = await row.evaluate((e) => e.scrollWidth > e.clientWidth + 1);
+      expect(horizontalOverflow).toBe(false);
+    }
     expect(leftBox.y + leftBox.height).toBeLessThan(dockBox.y);
     expect(heatToggle.y).toBeCloseTo(mapToggle.y);
     expect(planToggle.y).toBeCloseTo(mapToggle.y);
@@ -157,6 +162,8 @@ test('construction tray scrolls and collapses; goals collapse automatically on c
 
   await page.goto('./?mode=sandbox&seed=e2e-tray&r=2&speed=0&autosave=0');
   await expect(items.locator('.mt-item').first()).toHaveAttribute('data-def', 'road');
+  await expect(items.locator('.mt-item-text').first()).toBeVisible();
+  await expect(items.locator('.mt-thumb').first()).toHaveCSS('width', '62px');
   await items.hover();
   await page.mouse.wheel(0, 275);
   await expect.poll(() => items.evaluate((e) => e.scrollLeft)).toBeGreaterThan(0);

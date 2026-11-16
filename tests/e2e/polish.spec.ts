@@ -57,15 +57,15 @@ test('audio starts on the first click; mute is remembered', async ({ page }) => 
   await ready(page);
   expect(await page.evaluate(() => window.__MYRIAD__!.audio().started)).toBe(false);
   const mute = page.locator('.mt-mute');
-  await expect(mute).toHaveText('🔊');
+  await expect(mute).toHaveAttribute('aria-pressed', 'false');
   await mute.click();
-  await expect(mute).toHaveText('🔇');
+  await expect(mute).toHaveAttribute('aria-pressed', 'true');
   const a = await page.evaluate(() => window.__MYRIAD__!.audio());
   expect(a.started).toBe(true);
   expect(a.muted).toBe(true);
   await page.reload();
   await ready(page);
-  await expect(page.locator('.mt-mute')).toHaveText('🔇');
+  await expect(page.locator('.mt-mute')).toHaveAttribute('aria-pressed', 'true');
   expect(errors).toEqual([]);
 });
 

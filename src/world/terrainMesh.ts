@@ -8,6 +8,7 @@
  * Coordinates are local to the chunk: x, z in [0, CHUNK_SIZE], y up. One tile = 1 unit.
  */
 import { CHUNK_SIZE, localIndex, localToTile } from '@/core/coords';
+import { simplex2 } from '@/core/noise';
 import { hash32, hashFloat, Purpose } from '@/core/prng';
 import { Biome, Resource, TileFlag } from './biomes';
 import type { ChunkData } from './chunk';
@@ -37,11 +38,18 @@ export interface MeshArrays {
   positions: Float32Array;
   normals: Int8Array;
   colors: Uint8Array;
+  water: Uint8Array;
   indices: Uint32Array;
 }
 
 export function meshBuffers(m: MeshArrays): ArrayBuffer[] {
-  return [m.positions.buffer, m.normals.buffer, m.colors.buffer, m.indices.buffer] as ArrayBuffer[];
+  return [
+    m.positions.buffer,
+    m.normals.buffer,
+    m.colors.buffer,
+    m.water.buffer,
+    m.indices.buffer,
+  ] as ArrayBuffer[];
 }
 
 type RGB = readonly [number, number, number];
@@ -62,26 +70,26 @@ function ring(x: number, y: number, z: number, rx: number, rz: number): Point[] 
 }
 
 const BIOME_COLOR: Record<number, RGB> = {
-  [Biome.Ocean]: [64, 132, 178],
-  [Biome.Beach]: [226, 208, 158],
-  [Biome.Temperate]: [126, 176, 98],
-  [Biome.Forest]: [92, 150, 80],
-  [Biome.Steppe]: [196, 186, 112],
+  [Biome.Ocean]: [53, 106, 122],
+  [Biome.Beach]: [207, 188, 145],
+  [Biome.Temperate]: [143, 166, 106],
+  [Biome.Forest]: [113, 143, 97],
+  [Biome.Steppe]: [180, 168, 113],
   [Biome.Cold]: [206, 220, 222],
   [Biome.Mountain]: [140, 138, 132],
   [Biome.Ruins]: [158, 150, 128],
 };
 const SNOW: RGB = [240, 244, 246];
-const RIVER: RGB = [86, 160, 200];
+const SHALLOWS: RGB = [106, 157, 150];
 const DIRT: RGB = [138, 112, 82];
 const ROCK: RGB = [120, 118, 112];
 const TRUNK: RGB = [110, 80, 52];
 const RESOURCE_COLOR: Partial<Record<number, RGB>> = {
-  [Resource.Iron]: [127, 82, 78],
-  [Resource.Coal]: [68, 72, 76],
-  [Resource.Clay]: [191, 112, 71],
-  [Resource.Stone]: [161, 160, 149],
-  [Resource.FertileSoil]: [115, 150, 78],
+  [Resource.Iron]: [137, 105, 96],
+  [Resource.Coal]: [104, 101, 93],
+  [Resource.Clay]: [173, 121, 87],
+  [Resource.Stone]: [158, 152, 134],
+  [Resource.FertileSoil]: [129, 151, 97],
 };
 const ORE_ROCK_COLOR: Partial<Record<number, RGB>> = {
   [Resource.Coal]: [66, 71, 79],
@@ -91,8 +99,8 @@ export function hasDepositModel(resource: number): boolean {
   return resource === Resource.Stone || resource === Resource.Clay || resource === Resource.Iron;
 }
 const LEAF: Record<number, RGB> = {
-  [Biome.Forest]: [61, 124, 61],
-  [Biome.Temperate]: [88, 150, 67],
+  [Biome.Forest]: [66, 104, 75],
+  [Biome.Temperate]: [93, 130, 82],
   [Biome.Cold]: [50, 104, 84],
   [Biome.Steppe]: [120, 140, 70],
   [Biome.Ruins]: [96, 120, 74],
@@ -113,6 +121,7 @@ class Builder {
   pos: number[] = [];
   nrm: number[] = [];
   col: number[] = [];
+  waterQuads: number[] = [];
   idx: number[] = [];
 
   quad(
@@ -130,13 +139,16 @@ class Builder {
     dz: number,
     n: readonly [number, number, number],
     c: RGB,
+    water?: readonly [RGB, RGB, RGB, RGB],
   ): void {
     const base = this.pos.length / 3;
     this.pos.push(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz);
     for (let k = 0; k < 4; k++) {
       this.nrm.push(n[0] * 127, n[1] * 127, n[2] * 127);
-      this.col.push(lin(c[0]), lin(c[1]), lin(c[2]));
+      const color = water?.[k] ?? c;
+      this.col.push(lin(color[0]), lin(color[1]), lin(color[2]));
     }
+    if (water) this.waterQuads.push(base);
     this.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
 
@@ -173,19 +185,6 @@ class Builder {
     this.quad(x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, [-1, 0, 0], c);
   }
 
-  /** Four-sided pyramid with apex at (x, yTop, z). */
-  pyramid(x: number, y0: number, yTop: number, z: number, r: number, c: RGB): void {
-    const a = [x - r, y0, z - r];
-    const b = [x + r, y0, z - r];
-    const cc = [x + r, y0, z + r];
-    const d = [x - r, y0, z + r];
-    const t = [x, yTop, z];
-    this.tri(d, cc, t, c);
-    this.tri(cc, b, t, c);
-    this.tri(b, a, t, c);
-    this.tri(a, d, t, c);
-  }
-
   band(outer: readonly Point[], inner: readonly Point[], color: RGB): void {
     for (let i = 0; i < outer.length; i++) {
       const next = (i + 1) % outer.length;
@@ -203,10 +202,13 @@ class Builder {
   }
 
   finish(): MeshArrays {
+    const water = new Uint8Array(this.pos.length / 3);
+    for (const base of this.waterQuads) water.fill(1, base, base + 4);
     return {
       positions: new Float32Array(this.pos),
       normals: new Int8Array(this.nrm),
       colors: new Uint8Array(this.col),
+      water,
       indices: new Uint32Array(this.idx),
     };
   }
@@ -222,6 +224,36 @@ function shade(c: RGB, f: number): RGB {
     Math.min(255, Math.round(c[1] * f)),
     Math.min(255, Math.round(c[2] * f)),
   ];
+}
+
+const HEXAGON = [
+  [1, 0],
+  [0.5, 0.866],
+  [-0.5, 0.866],
+  [-1, 0],
+  [-0.5, -0.866],
+  [0.5, -0.866],
+] as const;
+
+function treeRing(x: number, y: number, z: number, rx: number, rz: number): Point[] {
+  return HEXAGON.map(([dx, dz]) => [x + dx * rx, y, z + dz * rz]);
+}
+
+function crown(
+  b: Builder,
+  x: number,
+  y: number,
+  z: number,
+  rx: number,
+  rz: number,
+  h: number,
+  leaf: RGB,
+): void {
+  const rim = treeRing(x, y, z, rx, rz);
+  const top = treeRing(x - rx * 0.09, y + h * 0.55, z, rx * 0.61, rz * 0.65);
+  b.band(rim, top, leaf);
+  b.cap(top, [x, y + h * 0.72, z], shade(leaf, 1.1));
+  b.cap(rim.reverse(), [x, y - h * 0.74, z], shade(leaf, 0.88));
 }
 
 function stoneDeposit(b: Builder, x: number, y: number, z: number): void {
@@ -287,25 +319,56 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
   // Surface heights with a one-tile apron from neighbouring chunks.
   const W = S + 2;
   const apron = new Float32Array(W * W);
+  const depths = new Int8Array(W * W);
   for (let az = 0; az < W; az++) {
     for (let ax = 0; ax < W; ax++) {
       const lx = ax - 1;
       const lz = az - 1;
-      let y: number;
+      let level: number;
+      let flags: number;
       if (lx >= 0 && lx < S && lz >= 0 && lz < S) {
         const i = localIndex(lx, lz);
-        y = surfaceY(chunk.level[i] as number, ((chunk.flags[i] as number) & TileFlag.Water) !== 0);
-      } else if ((lx < 0 || lx >= S) && (lz < 0 || lz >= S)) {
-        y = 0; // corners are never needed
+        level = chunk.level[i] as number;
+        flags = chunk.flags[i] as number;
       } else {
         const { x, z } = localToTile(chunk.cx, chunk.cz, lx, lz);
         const s = sampleTile(seed, x, z);
-        y = surfaceY(s.level, (s.flags & TileFlag.Water) !== 0);
+        level = s.level;
+        flags = s.flags;
       }
-      apron[az * W + ax] = y;
+      const water = (flags & TileFlag.Water) !== 0;
+      apron[az * W + ax] = surfaceY(level, water);
+      depths[az * W + ax] = !water
+        ? -1
+        : flags & TileFlag.River
+          ? 2
+          : Math.max(0, SEA_LEVEL - level);
     }
   }
   const yAt = (lx: number, lz: number): number => apron[(lz + 1) * W + (lx + 1)] as number;
+  // The four tiles meeting at a water vertex determine its colour. Every copy of a
+  // shared vertex sees the same neighbours, including on a diagonal chunk boundary.
+  const shore = new Array<RGB | undefined>((S + 1) ** 2);
+  const waterAt = (lx: number, lz: number): RGB => {
+    const key = lz * (S + 1) + lx;
+    const hit = shore[key];
+    if (hit) return hit;
+    const i = lz * W + lx;
+    let dry = 0;
+    let depth = 0;
+    for (const j of [i, i + 1, i + W, i + W + 1]) {
+      const d = depths[j] as number;
+      if (d < 0) dry++;
+      else depth += d;
+    }
+    const shallow = dry ? 0.79 + dry * 0.05 : Math.max(0, 0.46 - depth * 0.035);
+    const deep = BIOME_COLOR[Biome.Ocean] as RGB;
+    return (shore[key] = [
+      Math.round(deep[0] + (SHALLOWS[0] - deep[0]) * shallow),
+      Math.round(deep[1] + (SHALLOWS[1] - deep[1]) * shallow),
+      Math.round(deep[2] + (SHALLOWS[2] - deep[2]) * shallow),
+    ]);
+  };
 
   for (let lz = 0; lz < S; lz++) {
     for (let lx = 0; lx < S; lx++) {
@@ -318,21 +381,30 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
       const y = yAt(lx, lz);
 
       const res = chunk.resource[i] as number;
-      // Top colour: resource tint, biome, snow on peaks, deeper water darker, small per-tile variation.
-      let top: RGB;
-      if (water) {
-        top =
-          flags & TileFlag.River
-            ? RIVER
-            : shade(BIOME_COLOR[Biome.Ocean] as RGB, 0.75 + level * 0.06);
-      } else if (level >= SNOW_LEVEL) {
-        top = SNOW;
-      } else if (res && RESOURCE_COLOR[res]) {
-        top = shade(RESOURCE_COLOR[res] as RGB, 0.94 + (hash32(seed, x, z) % 13) / 100);
-      } else {
-        top = shade(BIOME_COLOR[biome] as RGB, 0.94 + (hash32(seed, x, z) % 13) / 100);
-      }
-      b.quad(lx, y, lz, lx, y, lz + 1, lx + 1, y, lz + 1, lx + 1, y, lz, [0, 1, 0], top);
+      const base =
+        level >= SNOW_LEVEL ? SNOW : (RESOURCE_COLOR[res] ?? (BIOME_COLOR[biome] as RGB));
+      const top = water
+        ? base
+        : shade(base, 1 + simplex2(seed ^ 0x3d3c, x * 0.065, z * 0.065) * 0.05);
+      b.quad(
+        lx,
+        y,
+        lz,
+        lx,
+        y,
+        lz + 1,
+        lx + 1,
+        y,
+        lz + 1,
+        lx + 1,
+        y,
+        lz,
+        [0, 1, 0],
+        top,
+        water
+          ? [waterAt(lx, lz), waterAt(lx, lz + 1), waterAt(lx + 1, lz + 1), waterAt(lx + 1, lz)]
+          : undefined,
+      );
 
       // Walls toward lower neighbours (+x, -x, +z, -z).
       const side = water
@@ -435,58 +507,37 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
           0.9 + hashFloat(seed, Purpose.Trees, x, z, 4) * 0.2,
         );
         const snowy = biome === Biome.Cold || level >= SNOW_LEVEL;
-        if (
-          snowy ||
-          (biome === Biome.Forest && hashFloat(seed, Purpose.Decoration, x, z, 6) < 0.5)
-        ) {
-          b.box(jx - 0.065, y, jz - 0.065, jx + 0.065, y + h * 0.7, jz + 0.065, TRUNK);
+        const style = hash32(seed, x, z, Purpose.Decoration) % 5;
+        const conifer = snowy || (biome === Biome.Forest && style >= 3);
+        b.box(jx - 0.05, y, jz - 0.05, jx + 0.05, y + h * 0.71, jz + 0.05, TRUNK);
+        if (conifer) {
           for (let tier = 0; tier < 3; tier++) {
-            const half = 0.32 - tier * 0.075;
-            const base = y + h * (0.24 + 0.22 * tier);
-            const top = base + h * 0.25;
-            b.box(
-              jx - half,
-              base,
-              jz - half,
-              jx + half,
-              top,
-              jz + half,
-              shade(leaf, 0.86 + tier * 0.11),
+            const base = y + h * (0.22 + 0.22 * tier);
+            const radius = (0.24 - tier * 0.048) * (style === 4 ? 0.83 : 1);
+            const rim = treeRing(jx, base, jz, radius, radius);
+            b.cap(
+              rim,
+              [jx, base + h * 0.45, jz],
+              snowy ? shade(SNOW, 0.81 + tier * 0.07) : shade(leaf, 0.87 + tier * 0.095),
             );
-            if (snowy) {
-              b.box(
-                jx - half * 0.92,
-                top,
-                jz - half * 0.92,
-                jx + half * 0.92,
-                top + 0.04,
-                jz + half * 0.92,
-                SNOW,
-              );
-            }
+            // Undersides keep the tier silhouette solid at shallow camera angles.
+            b.cap([...rim].reverse(), [jx, base - h * 0.065, jz], shade(leaf, 0.76));
           }
-          b.pyramid(jx, y + h * 0.88, y + h * 1.17, jz, 0.13, snowy ? SNOW : shade(leaf, 1.16));
         } else {
-          b.box(jx - 0.075, y, jz - 0.075, jx + 0.075, y + h * 0.68, jz + 0.075, TRUNK);
-          b.box(jx - 0.26, y + h * 0.48, jz - 0.24, jx + 0.27, y + h * 0.89, jz + 0.26, leaf);
-          b.box(
-            jx - 0.28,
-            y + h * 0.71,
-            jz - 0.17,
-            jx + 0.07,
-            y + h * 1.12,
-            jz + 0.19,
-            shade(leaf, 1.13),
-          );
-          b.box(
-            jx + 0.02,
-            y + h * 0.61,
-            jz - 0.29,
-            jx + 0.31,
-            y + h * 0.97,
-            jz + 0.04,
-            shade(leaf, 0.91),
-          );
+          const width = style === 0 ? 0.3 : style === 1 ? 0.19 : 0.255;
+          const crownY = y + h * (style === 1 ? 0.65 : 0.73);
+          crown(b, jx, crownY, jz, width, width * (style === 0 ? 0.76 : 0.95), h * 0.42, leaf);
+          if (style === 2)
+            crown(
+              b,
+              jx + 0.12,
+              crownY - h * 0.13,
+              jz + 0.065,
+              0.15,
+              0.13,
+              h * 0.26,
+              shade(leaf, 0.89),
+            );
         }
       } else if (flags & TileFlag.Rock) {
         const r = 0.14 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.1;

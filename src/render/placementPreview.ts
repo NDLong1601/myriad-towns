@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { previewColors } from '@/ui/palette';
 import type { BuildingDef } from '@/sim/catalog';
 import { buildingGeometry } from './buildingModels';
+import { lotFinish } from '@/render/visualPalette';
 import type { FloatingOrigin } from './floatingOrigin';
 
 const MAX_TILES = 4096;
@@ -88,7 +89,8 @@ export class PlacementPreview {
     this.ghost.visible = def !== null;
     if (!def) return;
     this.ghost.geometry = buildingGeometry(def);
-    this.ghostMat.color.set(ok ? '#ffffff' : previewColors().ghostBad);
+    this.ghostMat.color.copy(lotFinish(def.id, x, z));
+    if (!ok) this.ghostMat.color.multiply(this.c.set(previewColors().ghostBad));
     this.placeGhost();
   }
 
