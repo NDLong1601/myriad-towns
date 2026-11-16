@@ -201,6 +201,36 @@ function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number
     const axisX = i % 2 === 0;
     const sign = i < 2 ? 1 : -1;
     const straight = connections === 2 && Boolean(mask & (ROAD_SIDES[(i + 2) % 4] as number));
+    for (const along of [0.27, 0.44]) {
+      const tint = bridge ? (paved ? '#646c70' : '#77654e') : brick ? '#a48877' : '#b49b76';
+      if (bridge || brick) {
+        parts.push(
+          box(
+            axisX ? 0.016 : 0.62,
+            0.003,
+            axisX ? 0.62 : 0.016,
+            tint,
+            0.5 + (axisX ? sign * along : 0),
+            0.5 + (axisX ? 0 : sign * along),
+            top,
+          ),
+        );
+      } else if (!paved) {
+        for (const verge of [-0.376, 0.376]) {
+          parts.push(
+            box(
+              0.029,
+              0.004,
+              0.021,
+              tint,
+              0.5 + (axisX ? sign * along : verge),
+              0.5 + (axisX ? verge : sign * along),
+              top - 0.012,
+            ),
+          );
+        }
+      }
+    }
     if (paved && !bridge) {
       for (const offset of [-0.387, 0.387]) {
         parts.push(
@@ -286,6 +316,10 @@ function miningModel(
       parts.push(box(0.15, 0.07, 0.14, '#d9d2bd', 0.31, 0.67, 0.035));
       parts.push(box(0.12, 0.12, 0.12, '#b9b29f', 0.19, 0.65, 0.035));
       parts.push(box(0.13, 0.065, 0.13, '#e4d9c3', 0.19, 0.8, 0.035));
+      for (const x of [0.23, 0.38, 0.54, 0.7]) {
+        parts.push(box(0.007, 0.1, 0.012, '#676158', x, 0.503, 0.052));
+        parts.push(box(0.008, 0.084, 0.01, '#716b62', x + 0.061, 0.363, 0.207));
+      }
       break;
     }
     case 'clay_pit': {
@@ -323,6 +357,9 @@ function miningModel(
         shade(color, 0.55),
       );
       parts.push(box(0.28, 0.042, 0.11, '#947254', 0.48, 0.87, 0.015));
+      for (const x of [0.37, 0.45, 0.53, 0.61])
+        parts.push(box(0.052, 0.02, 0.12, '#c19263', x, 0.87, 0.057));
+      parts.push(box(0.128, 0.08, 0.09, '#966141', 0.82, 0.82, 0.014));
       break;
     }
     case 'iron_mine': {
@@ -353,6 +390,10 @@ function miningModel(
       parts.push(box(0.38, 0.065, 0.065, steel, 0.48, 0.44, deck + 0.1));
       for (const x of [0.42, 0.54]) parts.push(box(0.026, 0.028, 0.39, '#b0ae9d', x, 0.75, 0.051));
       parts.push(box(0.2, 0.1, 0.17, color, 0.48, 0.81, 0.062));
+      for (const z of [0.61, 0.7, 0.79, 0.88])
+        parts.push(box(0.26, 0.014, 0.045, '#766046', 0.48, z, 0.051));
+      for (const x of [0.423, 0.537])
+        parts.push(box(0.028, deck * 0.62, 0.024, '#b4a384', x, 0.565, deck * 0.28));
       break;
     }
     default: {
@@ -402,17 +443,18 @@ function addDefaultGeometry(
             ),
           );
         }
-        parts.push(
-          box(
-            x ? 0.09 : 0.41,
-            0.035,
-            z ? 0.09 : 0.41,
-            '#60452f',
-            cx + x * 0.31,
-            cz + z * 0.31,
-            0.025,
-          ),
-        );
+        for (const distance of [0.16, 0.31, 0.448])
+          parts.push(
+            box(
+              x ? 0.06 : 0.41,
+              0.035,
+              z ? 0.06 : 0.41,
+              '#765940',
+              cx + x * distance,
+              cz + z * distance,
+              0.025,
+            ),
+          );
       }
       break;
     }
@@ -521,6 +563,16 @@ function cropField(parts: THREE.BufferGeometry[], def: BuildingDef, stage: numbe
     parts.push(box(w * 0.19, 0.021, d * 0.96, '#648f9d', w * 0.15, d / 2, 0.046));
     parts.push(box(w * 0.06, 0.06, d * 0.96, '#9b917b', w * 0.25, d / 2, 0.045));
     parts.push(box(w * 0.24, 0.062, 0.24, '#a7855d', w * 0.152, d * 0.47, 0.073));
+  }
+  const boundary = kind === 'berries' ? '#8c6d50' : kind === 'grain' ? '#a48655' : '#997655';
+  for (const x of [0.09, w - 0.09]) {
+    parts.push(box(0.055, 0.095, 0.055, boundary, x, 0.09, 0.045));
+    parts.push(box(0.055, 0.095, 0.055, boundary, x, d - 0.09, 0.045));
+  }
+  parts.push(box(w - 0.18, 0.045, 0.048, boundary, w / 2, 0.09, 0.048));
+  if (kind === 'vegetables') {
+    for (const x of [0.22, 0.44, 0.66])
+      parts.push(box(0.078, 0.077, 0.08, '#b38357', x, d - 0.15, 0.045));
   }
   const rows = d * (kind === 'berries' ? 2 : 3);
   for (let i = 0; i < rows; i++) {

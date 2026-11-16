@@ -39,6 +39,8 @@ function rowHouses(l: Lot, terrace: boolean): void {
     l.windows(x, 0.829, 0.39, wallHeight * 0.62, 0.15, 2);
     l.windows(x, 0.829, 0.37, wallHeight * 0.3, 0.15, 2);
     l.block(x, 0.85, 0.115, 0.07, 0.04, 0.22, wood);
+    for (const z of [0.907, 0.942, 0.973]) l.block(x, z, 0.15, 0.024, 0.035, 0.033, '#c2b29a');
+    l.block(x - 0.133, 0.867, 0.067, 0.057, 0.036, 0.071, '#9c7355');
   }
 }
 
@@ -55,8 +57,7 @@ export const housing: Recipes = {
   townhouse(l) {
     l.base('#9c9c89');
     l.block(0.5, 0.42, 0.6, 0.67, 0.05, 1.18);
-    l.ridge(0.5, 0.42, 0.67, 0.75, 1.22, 0.46, 'z');
-    l.ridge(0.5, 0.67, 0.33, 0.19, 1.23, 0.18, 'x', '#ac7160');
+    l.mansard(0.5, 0.42, 0.68, 0.75, 1.22, 0.45);
     l.block(0.52, 0.79, 0.42, 0.13, 0.075, 0.44, '#d2baa1');
     l.block(0.46, 0.865, 0.15, 0.05, 0.09, 0.29, wood);
     for (const y of [0.58, 0.94]) l.windows(0.5, 0.759, 0.54, y, 0.17, 2);

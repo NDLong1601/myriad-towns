@@ -7,6 +7,25 @@ import { isRoadDef, loadCatalog } from '@/sim/catalog';
 const catalog = loadCatalog();
 
 describe('building architecture', () => {
+  it('keeps every catalogue building and crop stage renderable as one bounded mesh', () => {
+    for (const def of catalog.defs) {
+      const variants = def.crop ? [1, 2, 3, 4] : [0, 15];
+      for (const variant of variants) {
+        const geometry = buildingGeometry(def, variant);
+        geometry.computeBoundingBox();
+        const { min, max } = geometry.boundingBox!;
+        expect.soft(min.x, def.id).toBeGreaterThanOrEqual(-0.001);
+        expect.soft(min.z, def.id).toBeGreaterThanOrEqual(-0.001);
+        expect.soft(max.x, def.id).toBeLessThanOrEqual(def.footprint.w + 0.001);
+        expect.soft(max.z, def.id).toBeLessThanOrEqual(def.footprint.d + 0.001);
+        expect(geometry.getAttribute('position').count, def.id).toBeGreaterThan(0);
+        expect(geometry.getAttribute('normal').count, def.id).toBe(
+          geometry.getAttribute('glow').count,
+        );
+      }
+    }
+  });
+
   it('gives every ordinary catalogue building its own model within its lot', () => {
     const specialistModels = ['rail_track', 'quarry', 'clay_pit', 'iron_mine'];
     for (const def of catalog.defs) {
