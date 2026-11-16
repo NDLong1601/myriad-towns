@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { FloatingOrigin } from '@/render/floatingOrigin';
 import { pickVehicle, trafficPlan } from '@/render/trafficPlan';
@@ -77,5 +78,55 @@ describe('TrafficRenderer', () => {
     t2.setPlan(trafficPlan(300, 0, 50));
     run(t2, 5);
     expect(t2.counts.pedestrians).toBe(0);
+  });
+
+  it('accelerates out of rest and steers through a road corner without a jump', () => {
+    const { city } = makeCity();
+    for (const [x, z] of [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [1, 2],
+    ])
+      city._add(city.catalog.get('road'), x!, z!);
+    const tr = new TrafficRenderer(
+      city,
+      new FloatingOrigin(),
+      () => 0,
+      20,
+      () => 0,
+    );
+    tr.setPlan({
+      pedestrians: 0,
+      vehicles: 1,
+      weights: { handcart: 0, horsecart: 0, car: 1, bus: 0, truck: 0 },
+    });
+    const car = tr.group.getObjectByName('traffic:car') as THREE.InstancedMesh;
+    const transform = new THREE.Matrix4();
+    const sample = (dt: number) => {
+      tr.update(dt, { x: 0, z: 0 }, 20);
+      car.getMatrixAt(0, transform);
+      return new THREE.Vector3().setFromMatrixPosition(transform);
+    };
+    let previous = sample(0);
+    expect(car.count).toBe(1);
+    const start = sample(0.05);
+    expect(start.distanceTo(previous)).toBeLessThan(0.04);
+    previous = start;
+    let turning = false;
+    for (let i = 0; i < 35; i++) {
+      const pos = sample(0.05);
+      expect(pos.distanceTo(previous)).toBeLessThan(0.19);
+      if (
+        pos.z > 0.42 &&
+        pos.z < 0.68 &&
+        transform.elements[2]! > 0.3 &&
+        transform.elements[0]! > 0.3
+      )
+        turning = true;
+      previous = pos;
+    }
+    expect(turning).toBe(true);
+    expect(previous.z).toBeGreaterThan(1);
   });
 });
