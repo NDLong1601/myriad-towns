@@ -36,6 +36,7 @@ test('the thumbnail tray browses buildings with both arrows, drag and keyboard',
 
 test('the compact tray still opens a warehouse requirements panel', async ({ page }) => {
   await page.goto('./?mode=sandbox&seed=e2e-warehouse&r=2&speed=0&autosave=0&tut=0');
+  await page.locator('.mt-tabs [data-cat=production]').click();
   await page.locator('.mt-item[data-def=warehouse]').click();
   const detail = page.locator('.mt-detail');
   await expect(detail).toContainText('Nhà kho');

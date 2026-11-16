@@ -1,6 +1,7 @@
 import type { City } from '@/sim/city';
 import type { History } from '@/sim/commands';
 import { thumbnail } from '@/render/thumbnails';
+import { buildCategory } from '@/ui/buildCategory';
 import { buildingName, t } from './i18n';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
@@ -90,19 +91,20 @@ export function mountBuildMenu(
     const html = defs
       .filter(
         (d) =>
-          d.category === category &&
+          buildCategory(d) === category &&
           !d.tags?.includes('upgrade_only') &&
           city.progress.isRevealed(d),
       )
-      .map((d) => {
+      .map((d) => ({ d, lock: city.progress.lockReason(d) }))
+      .sort((a, b) => Number(Boolean(a.lock)) - Number(Boolean(b.lock)))
+      .map(({ d, lock }) => {
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const url = thumbnail(d);
         const img = url
           ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44" draggable="false">`
-          : categoryIcon(d.category);
+          : categoryIcon(category);
         const poor = city.canAfford(d.cost) ? '' : ' poor';
         const size = `${d.footprint.w}×${d.footprint.d}`;
-        const lock = city.progress.lockReason(d);
         const name = buildingName(d.id);
         const needs = lock ? ` · ${t('ui.buildLocked')}` : '';
         return `<button type="button" class="mt-item${lock ? ' locked' : ''}${active}${poor}" data-def="${d.id}" aria-label="${name}${needs}" aria-pressed="${Boolean(active)}" title="${name} · ${size}${needs}">${img}<span class="mt-item-text">${name}</span>${lock ? '<span class="mt-build-lock" aria-hidden="true">🔒</span>' : poor ? '<span class="mt-build-poor" aria-hidden="true">!</span>' : ''}</button>`;
@@ -128,7 +130,7 @@ export function mountBuildMenu(
   const setTool = (next: Tool): void => {
     tool = next;
     if (next.kind === 'build') {
-      const nextCategory = city.catalog.get(next.defId).category;
+      const nextCategory = buildCategory(city.catalog.get(next.defId));
       if (nextCategory !== category) items.scrollLeft = 0;
       category = nextCategory;
       items.hidden = false;

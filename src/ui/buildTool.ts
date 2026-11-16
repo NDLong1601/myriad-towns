@@ -20,7 +20,7 @@ const MAX_ROAD = 64;
 
 /**
  * Connects pointer input to the city: hover preview with the requirement checklist,
- * click to place, drag to lay roads, demolish, inspect, and undo/redo shortcuts.
+ * click to place, drag to lay roads and rail, demolish, inspect, and undo/redo shortcuts.
  */
 export class BuildTool {
   private hover: { x: number; z: number } | null = null;
@@ -59,8 +59,8 @@ export class BuildTool {
     window.addEventListener('keydown', (e) => this.onKey(e), { signal });
     menu.onToolChange((tool) => {
       this.inspected = null;
-      // Roads are drawn by dragging, so left-drag stops panning while the road tool is on.
-      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isRoadTool(tool.defId));
+      // An active route tool assigns left-drag to construction.
+      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isLinearTool(tool.defId));
       this.refresh();
     });
     city.on(() => this.refresh());
@@ -104,8 +104,8 @@ export class BuildTool {
     this.down = null;
     const tile = this.pick(e);
     const tool = this.tool;
-    if (tool.kind === 'build' && this.isRoadTool(tool.defId)) {
-      if (start && tile) this.layRoad(tool.defId, start, tile);
+    if (tool.kind === 'build' && this.isLinearTool(tool.defId)) {
+      if (start && tile) this.layRoute(tool.defId, start, tile);
     } else if (!moved && tile) {
       this.click(tile);
     }
@@ -146,18 +146,18 @@ export class BuildTool {
     }
   }
 
-  /** Roads, paved roads and bridges are drawn by dragging. */
-  private isRoadTool(defId: string): boolean {
-    return isRoadDef(this.city.catalog.get(defId));
+  /** Roads, bridges and rail are drawn by dragging. */
+  private isLinearTool(defId: string): boolean {
+    return defId === 'rail_track' || isRoadDef(this.city.catalog.get(defId));
   }
 
-  private layRoad(defId: string, a: { x: number; z: number }, b: { x: number; z: number }): void {
+  private layRoute(defId: string, a: { x: number; z: number }, b: { x: number; z: number }): void {
     if (this.planning && this.plans) {
       for (const p of roadPath(a, b)) this.plans.add(defId, p.x, p.z);
       return;
     }
     const parts = roadPath(a, b).map((p) => new PlaceCommand(defId, p.x, p.z));
-    this.history.run(new BatchCommand('road', parts));
+    this.history.run(new BatchCommand(defId, parts));
   }
 
   private onKey(e: KeyboardEvent): void {
@@ -323,8 +323,8 @@ export class BuildTool {
     }
 
     const def = this.city.catalog.get(tool.defId);
-    if (isRoadDef(def) && this.down?.tile) {
-      // Dragging a road: preview the whole path.
+    if (this.isLinearTool(def.id) && this.down?.tile) {
+      // Preview the whole path during a drag.
       const path = roadPath(this.down.tile, this.hover);
       const fp = path.map((p) => ({ ...p, ok: checkPlacement(this.city, def, p.x, p.z).ok }));
       const okCount = fp.filter((p) => p.ok).length;

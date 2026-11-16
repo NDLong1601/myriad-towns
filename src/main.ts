@@ -11,7 +11,7 @@ import { isRoadDef, loadCatalog } from '@/sim/catalog';
 import { City } from '@/sim/city';
 import { DemolishCommand, History, PlaceCommand } from '@/sim/commands';
 import { checkPlacement } from '@/sim/requirements';
-import { GeneratedTerrain } from '@/sim/terrainQuery';
+import { GeneratedTerrain, tileKey } from '@/sim/terrainQuery';
 import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
@@ -56,7 +56,7 @@ import { ambientMix } from '@/audio/ambientMix';
 import { timeOfDay } from '@/render/dayNight';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
-import { landY, setFlatTerrain, WATER_Y } from '@/world/terrainMesh';
+import { hasDepositModel, landY, setFlatTerrain, WATER_Y } from '@/world/terrainMesh';
 import { BIOME_NAMES, type Biome } from '@/world/biomes';
 import { InlineGenerator, WorkerPoolGenerator } from '@/world/genPool';
 import { sampleTile } from '@/world/terrain';
@@ -122,6 +122,8 @@ interface DebugApi {
   timeOfDay(fixed?: number | null): number | null;
   /** Ground height (world units) at a tile. */
   groundY(x: number, z: number): number;
+  /** Resource and visual flags of the loaded tile for terrain diagnostics. */
+  terrainAt(x: number, z: number): { resource: number; loadedFlags: number | null };
   /** Pedestrians and vehicles currently walking or driving. */
   traffic(): { pedestrians: number; vehicles: number; wantPedestrians: number };
   audio(): { started: boolean; muted: boolean; volume: number; popping: number };
@@ -238,7 +240,7 @@ const view = new WorldView(app, {
     z: num('z', originTile.z) + 0.5,
     ...(params.has('area') ? { distance: 38 } : {}),
   },
-  // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
+  // Apply persistent tree edits and hide surface decorations underneath buildings.
   patchChunk: (chunk) => {
     let changed = false;
     for (const key of terrain.clearedTrees) {
@@ -250,6 +252,32 @@ const view = new WorldView(app, {
       const before = chunk.flags[i] as number;
       chunk.flags[i] = before & ~TileFlag.Tree;
       if (chunk.flags[i] !== before) changed = true;
+    }
+    const x = chunk.cx * CHUNK_SIZE;
+    const z = chunk.cz * CHUNK_SIZE;
+    for (const b of city.near({ x, z, w: CHUNK_SIZE, d: CHUNK_SIZE }, 0)) {
+      for (
+        let tz = Math.max(z, b.z);
+        tz < Math.min(z + CHUNK_SIZE, b.z + b.def.footprint.d);
+        tz++
+      ) {
+        for (
+          let tx = Math.max(x, b.x);
+          tx < Math.min(x + CHUNK_SIZE, b.x + b.def.footprint.w);
+          tx++
+        ) {
+          const i = localIndex(tx - x, tz - z);
+          const flags = chunk.flags[i] as number;
+          if (
+            !(flags & (TileFlag.Covered | TileFlag.Water)) &&
+            (flags & (TileFlag.Rock | TileFlag.Tree) ||
+              hasDepositModel(chunk.resource[i] as number))
+          ) {
+            chunk.flags[i] = flags | TileFlag.Covered;
+            changed = true;
+          }
+        }
+      }
     }
     return changed;
   },
@@ -282,6 +310,38 @@ view.scene.add(
   poiView.group,
   territory.group,
 );
+// One remesh per touched chunk, even when the user draws an entire road at once.
+const terrainRefresh = new Map<string, { x: number; z: number }>();
+const refreshTerrainAt = (x: number, z: number): void => {
+  if (terrainRefresh.size === 0) {
+    queueMicrotask(() => {
+      view.refreshTiles([...terrainRefresh.values()]);
+      terrainRefresh.clear();
+    });
+  }
+  terrainRefresh.set(tileKey(x, z), { x, z });
+};
+city.on((e) => {
+  if (e.type === 'trees') {
+    for (const { x, z } of e.tiles) refreshTerrainAt(x, z);
+  } else if (e.type === 'added' || e.type === 'removed') {
+    const b = e.building;
+    for (let z = b.z; z < b.z + b.def.footprint.d; z++) {
+      for (let x = b.x; x < b.x + b.def.footprint.w; x++) {
+        const flags = view.tileFlagsAt(x, z);
+        if (flags === undefined || flags & TileFlag.Water) continue;
+        const covered = Boolean(flags & TileFlag.Covered);
+        if (covered === Boolean(city.at(x, z))) continue;
+        if (
+          covered ||
+          flags & (TileFlag.Rock | TileFlag.Tree) ||
+          hasDepositModel(terrain.tile(x, z).resource)
+        )
+          refreshTerrainAt(x, z);
+      }
+    }
+  }
+});
 // Restore a saved game now that every system and renderer is listening.
 let missingDefs: string[] = [];
 if (loaded) missingDefs = applySave({ city, sim, towns, pois, goals }, loaded).missing;
@@ -289,9 +349,6 @@ if (loaded) missingDefs = applySave({ city, sim, towns, pois, goals }, loaded).m
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
   else if (e.type === 'resolved' || (e.type === 'declined' && e.to)) buildings.setTint(e.uid, null);
-});
-city.on((e) => {
-  if (e.type === 'trees') view.refreshTiles(e.tiles);
 });
 
 // Sound: synthesised, starts on the first click or key press (?audio=0 keeps it off).
@@ -752,6 +809,10 @@ const api: DebugApi = {
     return view.timeOfDay;
   },
   groundY: (x, z) => surfaceY(x, z),
+  terrainAt: (x, z) => ({
+    resource: terrain.tile(x, z).resource,
+    loadedFlags: view.tileFlagsAt(x, z) ?? null,
+  }),
   traffic: () => ({ ...traffic.counts, wantPedestrians: traffic.planned.pedestrians }),
   audio: () => ({
     started: audio.started,

@@ -15,9 +15,6 @@ export const ROAD_W = 2; // -x
 export const ROAD_S = 4; // +z
 export const ROAD_N = 8; // -z
 
-/** Colour of a lit window or lamp; the shader scales it by the night factor. */
-const LIT = '#ffcf70';
-
 /**
  * Geometry for a building. `variant` only matters for roads: the mask of connected
  * neighbours, so roads auto-tile into straights, corners, junctions and dead ends.
@@ -39,6 +36,205 @@ function arms(mask: number): number {
 
 /** A bridge deck rides this far above the water surface, level with the shore roads at each end. */
 export const BRIDGE_LIFT = 0.2;
+
+type RoadPoint = [x: number, z: number];
+const ROAD_SIDES = [ROAD_E, ROAD_S, ROAD_W, ROAD_N] as const;
+
+/** Clockwise outline, with bevels on outside corners and fillets where two legs meet. */
+function roadOutline(mask: number, half: number): RoadPoint[] {
+  const outline: RoadPoint[] = [];
+  const corner = 0.05;
+  for (const [i, flag] of ROAD_SIDES.entries()) {
+    const forward = mask & flag;
+    const next = mask & (ROAD_SIDES[(i + 1) % 4] as number);
+    const points: RoadPoint[] = [[forward ? 0.5 : half, 0]];
+    if (forward && next) {
+      points.push(
+        [0.5, half],
+        [half + corner, half],
+        [half + corner * 0.3, half + corner * 0.3],
+        [half, half + corner],
+        [half, 0.5],
+      );
+    } else if (forward) points.push([0.5, half]);
+    else if (next) points.push([half, 0.5]);
+    else points.push([half, half - corner], [half - corner, half]);
+    for (const [x, z] of points) {
+      if (i === 0) outline.push([x, z]);
+      else if (i === 1) outline.push([-z, x]);
+      else if (i === 2) outline.push([-x, -z]);
+      else outline.push([z, -x]);
+    }
+  }
+  return outline;
+}
+
+function isRoadSeam(ax: number, az: number, bx: number, bz: number): boolean {
+  return (Math.abs(ax) === 0.5 && ax === bx) || (Math.abs(az) === 0.5 && az === bz);
+}
+
+function roadSurface(
+  outline: readonly RoadPoint[],
+  top: number,
+  bottom: number,
+  color: string,
+): THREE.BufferGeometry {
+  const positions: number[] = [];
+  for (let i = 0; i < outline.length; i++) {
+    const [ax, az] = outline[i] as RoadPoint;
+    const [bx, bz] = outline[(i + 1) % outline.length] as RoadPoint;
+    positions.push(0, top, 0, bx, top, bz, ax, top, az);
+    if (!isRoadSeam(ax, az, bx, bz))
+      positions.push(
+        ax,
+        bottom,
+        az,
+        ax,
+        top,
+        az,
+        bx,
+        top,
+        bz,
+        ax,
+        bottom,
+        az,
+        bx,
+        top,
+        bz,
+        bx,
+        bottom,
+        bz,
+      );
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.computeVertexNormals();
+  return part(geometry, color, 0.5, 0, 0.5);
+}
+
+/** A raised curb or guardrail follows the edge but leaves connections open. */
+function roadEdge(
+  parts: THREE.BufferGeometry[],
+  outline: readonly RoadPoint[],
+  width: number,
+  base: number,
+  height: number,
+  color: string,
+): void {
+  for (let i = 0; i < outline.length; i++) {
+    const [ax, az] = outline[i] as RoadPoint;
+    const [bx, bz] = outline[(i + 1) % outline.length] as RoadPoint;
+    if (isRoadSeam(ax, az, bx, bz)) continue;
+    const length = Math.hypot(bx - ax, bz - az);
+    const beam = new THREE.BoxGeometry(length, height, width);
+    beam.rotateY(-Math.atan2(bz - az, bx - ax));
+    parts.push(part(beam, color, 0.5 + (ax + bx) / 2, base + height / 2, 0.5 + (az + bz) / 2));
+  }
+}
+
+function streetLamp(
+  parts: THREE.BufferGeometry[],
+  height: number,
+  tier: 'dirt' | 'stone' | 'brick',
+): void {
+  const x = 0.91;
+  const z = 0.91;
+  parts.push(box(0.12, height, 0.12, '#8c8c81', x, z));
+  if (tier === 'dirt') {
+    parts.push(box(0.042, 0.31, 0.042, '#594635', x, z, height));
+    parts.push(box(0.095, 0.092, 0.095, '#d59d53', x, z, height + 0.31, 1));
+    parts.push(box(0.115, 0.028, 0.115, '#694934', x, z, height + 0.402));
+    return;
+  }
+  const brick = tier === 'brick';
+  const pole = brick ? '#465b60' : '#374645';
+  const top = height + (brick ? 0.79 : 0.61);
+  parts.push(box(0.105, 0.065, 0.105, '#8c8c81', x, z, height));
+  parts.push(box(0.033, top - height, 0.033, pole, x, z, height));
+  if (brick) {
+    parts.push(box(0.05, 0.038, 0.26, pole, x, z - 0.11, top - 0.025));
+    parts.push(box(0.112, 0.036, 0.17, '#d1d8cc', x, z - 0.25, top));
+    parts.push(box(0.096, 0.023, 0.145, '#fff0bd', x, z - 0.25, top - 0.024, 1));
+  } else {
+    parts.push(box(0.085, 0.111, 0.085, '#e5c488', x, z, top, 1));
+    parts.push(box(0.108, 0.034, 0.108, pole, x, z, top + 0.111));
+  }
+}
+
+function roadModel(parts: THREE.BufferGeometry[], def: BuildingDef, mask: number, h: number): void {
+  const bridge = def.visual.shape === 'bridge';
+  const paved = def.tags?.includes('paved');
+  const brick = def.id === 'brick_road';
+  const base = bridge ? BRIDGE_LIFT : 0;
+  const top = base + h;
+  const shoulder = roadOutline(mask, 0.43);
+  const street = roadOutline(mask, 0.34);
+  parts.push(
+    roadSurface(shoulder, top - 0.013, base, bridge ? '#7b7970' : paved ? '#b9b7a7' : '#897458'),
+    roadSurface(
+      street,
+      top,
+      top - 0.014,
+      bridge ? (paved ? '#767d80' : '#9e8a6b') : brick ? '#755b55' : paved ? '#656e70' : '#a18b69',
+    ),
+  );
+  if (bridge) {
+    roadEdge(parts, shoulder, 0.045, top + 0.13, 0.045, '#e9e5d7');
+    roadEdge(parts, shoulder, 0.024, top + 0.053, 0.028, '#b5b9af');
+    for (const x of [0.08, 0.92]) {
+      for (const z of [0.08, 0.92]) {
+        parts.push(box(0.055, 0.19, 0.055, '#a5a49b', x, z, top));
+        parts.push(box(0.105, top + 0.22, 0.105, '#767569', x, z, -0.22));
+      }
+    }
+  } else if (paved) {
+    roadEdge(parts, street, 0.024, top - 0.004, 0.025, '#ddd9cc');
+  }
+
+  const connections = arms(mask);
+  for (const [i, flag] of ROAD_SIDES.entries()) {
+    if (!(mask & flag)) continue;
+    const axisX = i % 2 === 0;
+    const sign = i < 2 ? 1 : -1;
+    const straight = connections === 2 && Boolean(mask & (ROAD_SIDES[(i + 2) % 4] as number));
+    if (paved && !bridge) {
+      for (const offset of [-0.387, 0.387]) {
+        parts.push(
+          box(
+            axisX ? 0.016 : 0.077,
+            0.003,
+            axisX ? 0.077 : 0.016,
+            '#969789',
+            0.5 + (axisX ? sign * 0.46 : offset),
+            0.5 + (axisX ? offset : sign * 0.46),
+            top - 0.012,
+          ),
+        );
+      }
+    }
+    if (paved && straight && i >= 2) continue;
+    // Ruts meet at the middle of straights and stop short in junctions.
+    const offsets = paved ? [0] : [-0.145, 0.145];
+    const length = paved ? (straight ? 0.39 : 0.15) : straight ? 0.5 : 0.32;
+    const center = paved ? (straight ? 0 : 0.31) : 0.5 - length / 2;
+    for (const offset of offsets) {
+      parts.push(
+        box(
+          axisX ? length : 0.028,
+          0.004,
+          axisX ? 0.028 : length,
+          paved ? '#e5d6ad' : '#917a5e',
+          0.5 + (axisX ? sign * center : offset),
+          0.5 + (axisX ? offset : sign * center),
+          top,
+        ),
+      );
+    }
+  }
+  const bend = connections === 2 && mask !== (ROAD_E | ROAD_W) && mask !== (ROAD_N | ROAD_S);
+  if (!bridge && (connections >= 3 || connections === 1 || (paved && bend)))
+    streetLamp(parts, top, brick ? 'brick' : paved ? 'stone' : 'dirt');
+}
 
 export function part(
   geo: THREE.BufferGeometry,
@@ -253,68 +449,9 @@ function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
       break;
     }
     case 'road':
-    case 'bridge': {
-      const bridge = v.shape === 'bridge';
-      // Bridges ride a little above the water on piles, with rails on the open sides.
-      const lift = bridge ? BRIDGE_LIFT : 0;
-      const half = bridge ? 0.4 : 0.36; // the carriageway; roads leave a verge on each side
-      const reach = 0.5 - half;
-      const l = (0.5 + half) / 2; // arm centre offset: from the centre block to the tile edge
-      parts.push(box(half * 2, h, half * 2, color, cx, cz, lift));
-      const arm = (ax: number, az: number, w2: number, d2: number): void => {
-        parts.push(box(w2, h, d2, color, cx + ax * l, cz + az * l, lift));
-      };
-      if (variant & ROAD_E) arm(1, 0, reach, half * 2);
-      if (variant & ROAD_W) arm(-1, 0, reach, half * 2);
-      if (variant & ROAD_S) arm(0, 1, half * 2, reach);
-      if (variant & ROAD_N) arm(0, -1, half * 2, reach);
-      const lane = shade(color, 1.25);
-      const eastWest = (variant & (ROAD_E | ROAD_W)) === (ROAD_E | ROAD_W) && arms(variant) === 2;
-      const northSouth = (variant & (ROAD_S | ROAD_N)) === (ROAD_S | ROAD_N) && arms(variant) === 2;
-      if (!bridge && eastWest) parts.push(box(0.32, 0.01, 0.06, lane, cx, cz, h));
-      if (!bridge && northSouth) parts.push(box(0.06, 0.01, 0.32, lane, cx, cz, h));
-      if (bridge) {
-        const rail = shade(color, 0.6);
-        const top = lift + h;
-        for (const p of [
-          [-1, -1],
-          [1, -1],
-          [-1, 1],
-          [1, 1],
-        ] as const) {
-          parts.push(box(0.08, top + 0.3, 0.08, rail, cx + p[0] * half, cz + p[1] * half, -0.3));
-          parts.push(box(0.1, 0.18, 0.1, rail, cx + p[0] * half, cz + p[1] * half, top));
-        }
-        // Rails along the edges that do not continue as a deck.
-        const bar = (x: number, z: number, w2: number, d2: number): void => {
-          parts.push(box(w2, 0.05, d2, rail, x, z, top + 0.12));
-        };
-        if (!(variant & ROAD_N)) bar(cx, cz - half, half * 2, 0.05);
-        if (!(variant & ROAD_S)) bar(cx, cz + half, half * 2, 0.05);
-        if (!(variant & ROAD_W)) bar(cx - half, cz, 0.05, half * 2);
-        if (!(variant & ROAD_E)) bar(cx + half, cz, 0.05, half * 2);
-        for (const [flag, ax, az] of [
-          [ROAD_E, 1, 0],
-          [ROAD_W, -1, 0],
-          [ROAD_S, 0, 1],
-          [ROAD_N, 0, -1],
-        ] as const) {
-          if (!(variant & flag)) continue;
-          const along = ax !== 0;
-          for (const side of [-1, 1]) {
-            const x = cx + ax * l + (along ? 0 : side * half);
-            const z = cz + az * l + (along ? side * half : 0);
-            bar(x, z, along ? reach : 0.05, along ? 0.05 : reach);
-          }
-        }
-      }
-      // A street lamp at junctions and dead ends (not on bridges).
-      if (!bridge && (arms(variant) >= 3 || arms(variant) === 1)) {
-        parts.push(box(0.05, 0.5, 0.05, '#4a4a4a', cx + 0.3, cz + 0.3, h));
-        parts.push(box(0.12, 0.1, 0.12, LIT, cx + 0.3, cz + 0.3, h + 0.5, 1));
-      }
+    case 'bridge':
+      roadModel(parts, def, variant, h);
       break;
-    }
     case 'field': {
       if (def.crop) {
         cropField(parts, def, variant || 4);

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { CHUNK_SIZE, localIndex, localToTile } from '@/core/coords';
-import { BIOME_COUNT, Biome, TileFlag } from '@/world/biomes';
+import { BIOME_COUNT, Biome, Resource, TileFlag } from '@/world/biomes';
 import { generateChunk, hashChunk } from '@/world/chunk';
 import { MAX_LEVEL, SEA_LEVEL, sampleTile } from '@/world/terrain';
-import { buildTerrainMesh } from '@/world/terrainMesh';
+import { buildTerrainMesh, landY } from '@/world/terrainMesh';
 
 const SEED = 42;
 
@@ -86,6 +86,35 @@ describe('terrain generation', () => {
 });
 
 describe('terrain mesh', () => {
+  it('distinguishes deposits and hides their geometry under a building without editing the deposit', () => {
+    const c = generateChunk(SEED, 0, 0);
+    c.flags.fill(0);
+    c.resource.fill(Resource.None);
+    c.level.fill(SEA_LEVEL);
+    c.biome.fill(Biome.Temperate);
+    const index = localIndex(5, 5);
+    const plain = buildTerrainMesh(SEED, c).positions.length;
+    const palettes = [];
+    for (const resource of [Resource.Stone, Resource.Clay, Resource.Iron]) {
+      c.resource[index] = resource;
+      c.flags[index] = TileFlag.Rock;
+      const exposed = buildTerrainMesh(SEED, c);
+      expect(exposed.positions.length).toBeGreaterThan(plain);
+      const colors: number[] = [];
+      for (let i = 0; i < exposed.positions.length; i += 3) {
+        if (exposed.positions[i + 1]! > landY(SEA_LEVEL) + 0.03)
+          colors.push(...exposed.colors.slice(i, i + 3));
+      }
+      expect(colors.length).toBeGreaterThan(0);
+      palettes.push(colors);
+
+      c.flags[index] = TileFlag.Rock | TileFlag.Covered;
+      expect(buildTerrainMesh(SEED, c).positions.length).toBe(plain);
+      expect(c.resource[index]).toBe(resource);
+    }
+    expect(new Set(palettes.map((colors) => colors.join(','))).size).toBe(3);
+  });
+
   it('produces consistent buffers', () => {
     const c = generateChunk(SEED, 0, 0);
     const m = buildTerrainMesh(SEED, c);

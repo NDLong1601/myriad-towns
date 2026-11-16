@@ -61,17 +61,19 @@ const DIRT: RGB = [138, 112, 82];
 const ROCK: RGB = [120, 118, 112];
 const TRUNK: RGB = [110, 80, 52];
 const RESOURCE_COLOR: Partial<Record<number, RGB>> = {
-  [Resource.Iron]: [170, 85, 60],
+  [Resource.Iron]: [127, 82, 78],
   [Resource.Coal]: [68, 72, 76],
-  [Resource.Clay]: [185, 120, 75],
-  [Resource.Stone]: [135, 134, 128],
+  [Resource.Clay]: [191, 112, 71],
+  [Resource.Stone]: [161, 160, 149],
   [Resource.FertileSoil]: [115, 150, 78],
 };
 const ORE_ROCK_COLOR: Partial<Record<number, RGB>> = {
-  [Resource.Iron]: [145, 68, 48],
   [Resource.Coal]: [66, 71, 79],
-  [Resource.Stone]: [120, 118, 112],
 };
+
+export function hasDepositModel(resource: number): boolean {
+  return resource === Resource.Stone || resource === Resource.Clay || resource === Resource.Iron;
+}
 const LEAF: Record<number, RGB> = {
   [Biome.Forest]: [61, 124, 61],
   [Biome.Temperate]: [88, 150, 67],
@@ -328,10 +330,35 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
           side,
         );
 
+      if (water || flags & TileFlag.Covered) continue;
       // Decoration, jittered inside the tile.
       const jx = lx + 0.35 + hashFloat(seed, Purpose.Decoration, x, z, 1) * 0.3;
       const jz = lz + 0.35 + hashFloat(seed, Purpose.Decoration, x, z, 2) * 0.3;
-      if (flags & TileFlag.Tree) {
+      const deposit = hasDepositModel(res);
+      const exposed =
+        deposit &&
+        !(flags & TileFlag.Tree) &&
+        (flags & TileFlag.Rock || hash32(seed, x, z) % 5 === 0);
+      if (exposed) {
+        if (res === Resource.Stone) {
+          b.box(jx - 0.19, y, jz - 0.18, jx + 0.2, y + 0.22, jz + 0.17, [181, 179, 168]);
+          b.box(jx - 0.13, y + 0.22, jz - 0.16, jx + 0.13, y + 0.34, jz + 0.09, [213, 210, 196]);
+          b.box(jx + 0.15, y, jz + 0.08, jx + 0.33, y + 0.12, jz + 0.26, [152, 153, 145]);
+          b.box(jx - 0.28, y, jz + 0.13, jx - 0.1, y + 0.09, jz + 0.28, [191, 188, 175]);
+        } else if (res === Resource.Clay) {
+          // Low terracotta shelves around a darker exposed seam.
+          b.box(jx - 0.32, y, jz - 0.28, jx + 0.31, y + 0.022, jz + 0.28, [119, 62, 49]);
+          b.box(jx - 0.31, y, jz - 0.28, jx + 0.26, y + 0.085, jz - 0.09, [211, 130, 86]);
+          b.box(jx - 0.23, y, jz - 0.25, jx + 0.22, y + 0.145, jz - 0.17, [232, 151, 103]);
+          b.box(jx - 0.19, y, jz + 0.13, jx + 0.31, y + 0.052, jz + 0.27, [180, 93, 62]);
+        } else {
+          // Iron has a dark host rock and raised rust-red bands.
+          b.box(jx - 0.22, y, jz - 0.16, jx + 0.17, y + 0.25, jz + 0.2, [77, 78, 87]);
+          b.box(jx - 0.17, y + 0.25, jz - 0.12, jx + 0.16, y + 0.32, jz + 0.11, [174, 74, 55]);
+          b.box(jx - 0.06, y + 0.32, jz - 0.12, jx + 0.16, y + 0.39, jz + 0.02, [130, 109, 105]);
+          b.box(jx + 0.15, y, jz + 0.13, jx + 0.3, y + 0.16, jz + 0.3, [158, 78, 66]);
+        }
+      } else if (flags & TileFlag.Tree) {
         const h = 0.9 + hashFloat(seed, Purpose.Trees, x, z, 3) * 0.7;
         const leaf = shade(
           (LEAF[biome] ?? LEAF[Biome.Temperate]) as RGB,

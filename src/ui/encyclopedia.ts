@@ -1,5 +1,6 @@
 import './encyclopedia.css';
 import type { BuildingDef, Catalog, Requirement } from '@/sim/catalog';
+import { buildCategory } from '@/ui/buildCategory';
 import type { BuildMenu } from './buildMenu';
 import { buildingName, fmt, formatAmounts, t } from './i18n';
 
@@ -31,7 +32,7 @@ export function filterBuildings(
   const filterCat = cat !== '' && cat !== 'all';
 
   return defs.filter((def) => {
-    if (filterCat && def.category !== cat) return false;
+    if (filterCat && buildCategory(def) !== cat) return false;
     if (!q) return true;
     const name = normalizeText(nameOf(def));
     return name.includes(q);
@@ -301,7 +302,7 @@ export function mountEncyclopedia(
         <div>
           <div class="mt-encyclopedia-card-header">
             <h3 class="mt-encyclopedia-card-title">${esc(buildingName(def.id))}</h3>
-            <span class="mt-encyclopedia-badge">${esc(t(`category.${def.category}`))}</span>
+            <span class="mt-encyclopedia-badge">${esc(t(`category.${buildCategory(def)}`))}</span>
           </div>
           <div class="mt-encyclopedia-body">
             ${details.join('')}

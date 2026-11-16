@@ -69,4 +69,25 @@ describe('road auto-tiling', () => {
     const g = buildingGeometry(city.catalog.get('hut'));
     expect(Array.from(g.getAttribute('glow').array).some((v) => v > 0)).toBe(true);
   });
+
+  it('keeps the carriageway width at connected edges and raises lamps as roads upgrade', () => {
+    const { city } = setup();
+    const mask = ROAD_E | ROAD_W | ROAD_S;
+    const lampHeights = ['road', 'stone_road', 'brick_road'].map((id) => {
+      const g = buildingGeometry(city.catalog.get(id), mask);
+      const vertices = g.getAttribute('position');
+      const glow = g.getAttribute('glow');
+      const edge: number[] = [];
+      let height = 0;
+      for (let i = 0; i < vertices.count; i++) {
+        if (vertices.getX(i) === 1) edge.push(vertices.getZ(i));
+        if (glow.getX(i)) height = Math.max(height, vertices.getY(i));
+      }
+      expect(Math.min(...edge)).toBeCloseTo(0.07, 2);
+      expect(Math.max(...edge)).toBeCloseTo(0.93, 2);
+      return height;
+    });
+    expect(lampHeights[0]).toBeLessThan(lampHeights[1]!);
+    expect(lampHeights[1]).toBeLessThan(lampHeights[2]!);
+  });
 });

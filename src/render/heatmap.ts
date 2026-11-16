@@ -10,6 +10,14 @@ const SIDE = RADIUS * 2 + 1;
 /** Colour-blind-safe sequential ramp (viridis stops), low → high. */
 const RAMP = ['#440154', '#3b528b', '#21918c', '#5ec962', '#fde725'].map((c) => new THREE.Color(c));
 
+export const DEPOSIT_COLORS = {
+  [Resource.Stone]: '#ebebdf',
+  [Resource.Clay]: '#ffb24a',
+  [Resource.Iron]: '#f27083',
+  [Resource.Coal]: '#242630',
+  [Resource.FertileSoil]: '#5cca61',
+} satisfies Record<Exclude<Resource, typeof Resource.None>, string>;
+
 /**
  * Heatmap of one local field (water access, pollution…) over the tiles around the camera.
  * One instanced quad per non-zero tile; rebuilt when the field may have changed or the
@@ -69,6 +77,10 @@ export class HeatmapOverlay {
   set(field: string | null): void {
     this.field = field;
     this.mesh.visible = field !== null;
+    const material = this.mesh.material as THREE.MeshBasicMaterial;
+    const deposits = field === 'resources';
+    material.opacity = deposits ? 0.73 : 0.55;
+    material.polygonOffset = !deposits;
     this.dirty = true;
     this.center = { x: Number.NaN, z: Number.NaN };
     for (const l of this.listeners) l();
@@ -92,17 +104,11 @@ export class HeatmapOverlay {
       for (let z = cz - RADIUS; z <= cz + RADIUS; z++) {
         for (let x = cx - RADIUS; x <= cx + RADIUS; x++) {
           const s = this.city.terrain.tile(x, z);
-          if (!s.resource) continue;
+          if (s.resource === Resource.None) continue;
           const p = this.origin.toLocal(x + 0.5, z + 0.5);
-          this.m.makeTranslation(p.x, this.heightAt(x, z) + 0.05, p.z);
+          this.m.makeTranslation(p.x, this.heightAt(x, z) + 0.015, p.z);
           this.mesh.setMatrixAt(n, this.m);
-          let col = '#ffffff';
-          if (s.resource === Resource.Iron) col = '#ff5722';
-          else if (s.resource === Resource.Coal) col = '#263238';
-          else if (s.resource === Resource.Clay) col = '#ffa000';
-          else if (s.resource === Resource.Stone) col = '#78909c';
-          else if (s.resource === Resource.FertileSoil) col = '#689f38';
-          this.c.set(col);
+          this.c.set(DEPOSIT_COLORS[s.resource]);
           this.mesh.setColorAt(n, this.c);
           n++;
         }

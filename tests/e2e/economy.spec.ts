@@ -9,10 +9,13 @@ test('menu offers base roads, bridges and production, while paving is automatic'
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('./?mode=sandbox&seed=e2e-economy&speed=0&autosave=0');
   await page.waitForFunction(() => window.__MYRIAD__?.ready(), null, { timeout: 30_000 });
-  for (const name of ['Cầu gỗ', 'Đường đất', 'Tháp nước', 'Sân bay nhỏ', 'Ga đường sắt'])
+  for (const name of ['Cầu gỗ', 'Đường đất', 'Sân bay nhỏ', 'Ga đường sắt'])
     await expect(page.locator('.mt-item', { hasText: name })).toBeVisible();
+  await expect(page.locator('.mt-item', { hasText: 'Tháp nước' })).toHaveCount(0);
   for (const id of ['stone_road', 'brick_road', 'stone_bridge'])
     await expect(page.locator(`.mt-item[data-def="${id}"]`)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Dịch vụ' }).click();
+  await expect(page.locator('.mt-item', { hasText: 'Tháp nước' })).toHaveCount(1);
   await page.locator('.mt-tabs button', { hasText: 'Sản xuất' }).click();
   for (const name of ['Hố sỏi', 'Trạm giao thương', 'Cối xay gió', 'Nhà máy điện', 'Xưởng đúc'])
     await expect(page.locator('.mt-items .mt-item', { hasText: name })).toHaveCount(1);
