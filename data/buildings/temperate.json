@@ -358,7 +358,39 @@
       "population": 200,
       "revealAt": 100
     },
-    "tags": ["residential"]
+    "tags": ["residential"],
+    "mergeInto": [
+      {
+        "to": "garden_court",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          }
+        ]
+      },
+      {
+        "to": "artisan_row_east",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          }
+        ]
+      },
+      {
+        "to": "artisan_row_south",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "villa",
@@ -476,7 +508,8 @@
       "food": 0.1
     },
     "produces": {
-      "labor": 2
+      "labor": 2,
+      "food": 0.65
     },
     "requires": [
       {
@@ -494,7 +527,12 @@
         "radius": 6
       }
     ],
-    "tags": ["residential", "coastal"]
+    "tags": ["residential", "coastal"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 32,
+      "range": 7
+    }
   },
   {
     "id": "berry_field",
@@ -531,7 +569,11 @@
         "maxDistance": 3
       }
     ],
-    "tags": ["starter"]
+    "tags": ["starter"],
+    "crop": {
+      "kind": "berries",
+      "ticks": 64
+    }
   },
   {
     "id": "wheat_farm",
@@ -568,7 +610,29 @@
     ],
     "unlock": {
       "population": 60
-    }
+    },
+    "crop": {
+      "kind": "grain",
+      "ticks": 80
+    },
+    "upgrades": [
+      {
+        "to": "irrigated_wheat",
+        "when": [
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "near",
+            "building": "grain_store",
+            "radius": 5,
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "fishing_dock",
@@ -598,7 +662,12 @@
         "maxDistance": 3
       }
     ],
-    "tags": ["coastal"]
+    "tags": ["coastal"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 36,
+      "range": 9
+    }
   },
   {
     "id": "hunting_lodge",

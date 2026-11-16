@@ -1,0 +1,135 @@
+.mt-resources > button[data-res] {
+  cursor: pointer;
+}
+
+.mt-resources > button[data-res]:hover,
+.mt-resources > button[data-res]:focus-visible {
+  border-color: var(--hud-accent);
+}
+
+.mt-resources > button[hidden],
+.mt-resources i[hidden] {
+  display: none;
+}
+
+.mt-economy {
+  box-sizing: border-box;
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 16px;
+  border: 1px solid var(--hud-border);
+  border-radius: 14px;
+  background: var(--hud-bg-elevated);
+  color: var(--hud-fg);
+  box-shadow: var(--hud-shadow);
+  overflow: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+}
+
+.mt-economy::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.mt-economy header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mt-economy h2,
+.mt-economy h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.mt-economy h2 {
+  font-size: 1.2rem;
+}
+
+.mt-economy dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.mt-economy dl > div {
+  padding: 8px;
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+}
+
+.mt-economy dd {
+  margin: 4px 0 0;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.mt-economy dt,
+.mt-economy p,
+.mt-economy li {
+  font-size: 0.875rem;
+}
+
+.mt-economy p {
+  color: var(--hud-muted);
+}
+
+.mt-economy .warning {
+  color: var(--hud-warn);
+}
+
+.mt-economy section + section {
+  margin-top: 16px;
+}
+
+.mt-economy ul {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mt-economy button,
+.mt-economy li > div {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 6px 9px;
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  background: var(--hud-control);
+  color: var(--hud-fg);
+  font: inherit;
+  text-align: start;
+}
+
+.mt-economy button {
+  cursor: pointer;
+}
+
+.mt-economy button:hover,
+.mt-economy button:focus-visible {
+  border-color: var(--hud-accent);
+}
+
+.mt-economy li > :is(button, div) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  width: 100%;
+}
+
+.mt-economy li small {
+  grid-column: 1 / -1;
+  color: var(--hud-warn);
+}
+
+@media (pointer: coarse) {
+  .mt-resources > button[data-res] {
+    min-height: 44px;
+  }
+}

@@ -94,6 +94,14 @@
         "maxDistance": 2
       }
     ],
+    "placementRequires": [
+      {
+        "type": "near",
+        "building": "stockpile",
+        "radius": 5,
+        "min": 1
+      }
+    ],
     "visual": {
       "shape": "hall",
       "color": "#6d4c41",
@@ -104,7 +112,41 @@
     "unlock": {
       "population": 50,
       "revealAt": 25
-    }
+    },
+    "upgrades": [
+      {
+        "to": "distribution_depot",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "near",
+            "building": "rail_station",
+            "radius": 5,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "distribution_depot",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "near",
+            "building": "cargo_port",
+            "radius": 5,
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "coal_mine",
@@ -147,7 +189,7 @@
       "shape": "mine",
       "color": "#37474f",
       "roof": "#212121",
-      "height": 1.0
+      "height": 1
     },
     "tags": ["mine", "industry"],
     "unlock": {
@@ -215,7 +257,8 @@
     },
     "upkeep": {
       "labor": 2,
-      "skilled": 1
+      "skilled": 1,
+      "wood": 0.3
     },
     "storage": {
       "wood": 1000,
@@ -253,7 +296,33 @@
     "unlock": {
       "population": 200,
       "revealAt": 120
-    }
+    },
+    "voyage": {
+      "kind": "cargo",
+      "ticks": 80,
+      "range": 24
+    },
+    "produces": {
+      "goods": 1.15
+    },
+    "upgrades": [
+      {
+        "to": "trade_harbor",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "near",
+            "building": "warehouse",
+            "radius": 6,
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "ferry_pier",

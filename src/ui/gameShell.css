@@ -1,0 +1,619 @@
+:root {
+  --hud-bg: rgb(15 28 30 / 0.94);
+  --hud-bg-elevated: #1c3032;
+  --hud-border: rgb(200 222 211 / 0.26);
+  --hud-muted: #b7c9c0;
+  --hud-accent: #f2c984;
+  --hud-accent-bg: rgb(242 201 132 / 0.16);
+  --mt-ink: #111f20;
+  --mt-mint: #8ccdb4;
+  --mt-gold: #f2c984;
+}
+
+.mt-launch {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: auto;
+  color: var(--hud-fg);
+  background:
+    linear-gradient(90deg, rgb(5 18 20 / 0.94), rgb(5 18 20 / 0.62) 37%, rgb(5 18 20 / 0.16) 77%),
+    #172b2c url('/art/menu-town.webp') center / cover no-repeat;
+}
+.mt-launch-layout {
+  box-sizing: border-box;
+  min-height: 100%;
+  width: min(100%, 1440px);
+  margin-inline: auto;
+  padding: clamp(24px, 5vw, 80px);
+  display: grid;
+  grid-template-columns: minmax(230px, 330px) minmax(0, 720px);
+  align-items: center;
+  gap: clamp(30px, 7vw, 110px);
+}
+.mt-launch-start {
+  align-self: center;
+}
+.mt-launch-brand {
+  color: var(--mt-gold);
+  margin-bottom: clamp(20px, 4vh, 38px);
+}
+.mt-launch-brand h1 {
+  color: #f9f3e5;
+  margin: 8px 0 0;
+  font-family: 'Archivo Black', 'Arial Black', system-ui, sans-serif;
+  font-weight: 950;
+  font-size: clamp(50px, 6.6vw, 109px);
+  line-height: 0.82;
+  letter-spacing: -0.08em;
+  text-shadow: 0 4px 36px rgb(0 0 0 / 0.7);
+}
+.mt-launch-brand h1 span {
+  color: var(--mt-gold);
+}
+.mt-launch-nav {
+  display: grid;
+  gap: 7px;
+  max-width: 320px;
+}
+.mt-launch-nav :is(button, a) {
+  box-sizing: border-box;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0;
+  padding: 9px 14px;
+  background: rgb(13 26 27 / 0.94);
+  border: 1px solid var(--hud-border);
+  border-inline-start: 3px solid var(--mt-mint);
+  border-radius: 5px;
+  color: var(--hud-fg);
+  font:
+    650 15px/1.3 system-ui,
+    sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: start;
+  transition: background-color 150ms ease;
+}
+.mt-launch-nav button:first-child,
+.mt-launch-nav button[aria-expanded='true'],
+.mt-launch-nav :is(button, a[href]):hover {
+  background: var(--mt-gold);
+  border-color: var(--mt-gold);
+  color: var(--mt-ink);
+}
+.mt-launch-nav [aria-disabled='true'] {
+  border-inline-start-color: var(--hud-border);
+  color: var(--hud-muted);
+  opacity: 0.65;
+  cursor: default;
+}
+.mt-launch-nav small {
+  overflow-wrap: anywhere;
+  font-weight: 500;
+  text-align: end;
+}
+.mt-launch-pane {
+  min-width: 0;
+}
+.mt-launch-pane > .mt-newgame {
+  position: static;
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+.mt-launch-pane .mt-newgame-card,
+.mt-launch-credits {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: none;
+  padding: clamp(16px, 2.5vw, 34px);
+  border: 1px solid var(--hud-border);
+  border-top: 3px solid var(--mt-gold);
+  border-radius: 9px;
+  background: rgb(15 28 30 / 0.97);
+  box-shadow: 0 14px 40px rgb(0 0 0 / 0.42);
+}
+.mt-launch-pane h2,
+.mt-world-config h2 {
+  margin: 0 0 16px;
+  font-size: clamp(23px, 3vw, 34px);
+  color: var(--mt-gold);
+  outline: none;
+  line-height: 1.1;
+}
+.mt-launch-credits p {
+  color: var(--hud-muted);
+}
+.mt-world-config {
+  width: min(660px, 100%);
+  box-sizing: border-box;
+}
+.mt-config-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.mt-config-fields > label {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  font-weight: 650;
+}
+.mt-config-fields .mt-seed {
+  margin: 0;
+  gap: 4px;
+}
+.mt-config-fields input,
+.mt-config-terrain select,
+.mt-settings select {
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 9px;
+  box-sizing: border-box;
+  color: var(--hud-fg);
+  background: #25383a;
+  border: 1px solid var(--hud-border);
+  border-radius: 5px;
+  font: inherit;
+}
+.mt-config-fields .mt-seed button {
+  min-height: 38px;
+  white-space: nowrap;
+}
+.mt-world-config legend {
+  padding: 0;
+  margin-block-end: 5px;
+  color: var(--mt-mint);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.035em;
+}
+.mt-world-config .mt-modes label {
+  border-radius: 5px;
+}
+.mt-world-config .mt-modes label:has(input:checked),
+.mt-config-choices label:has(input:checked) {
+  background: var(--hud-accent-bg);
+  border-color: var(--mt-gold);
+}
+.mt-config-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.mt-config-choices label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--hud-border);
+  cursor: pointer;
+}
+.mt-config-choices input,
+.mt-world-config :is(.mt-tut, .mt-sb) input {
+  margin: 0;
+  accent-color: var(--mt-gold);
+}
+.mt-config-options small,
+.mt-world-config .mt-modes small,
+.mt-settings small {
+  color: var(--hud-muted);
+  line-height: 1.4;
+}
+.mt-config-terrain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 650;
+}
+.mt-world-config :is(.mt-tut, .mt-sb label) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+}
+.mt-world-config .mt-sb[hidden] {
+  display: none;
+}
+.mt-config-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+  margin-top: 14px;
+}
+.mt-newgame .mt-config-actions .mt-primary,
+.mt-settings button.mt-primary {
+  width: auto;
+  min-width: 120px;
+  background: var(--mt-gold);
+  color: var(--mt-ink);
+}
+.mt-config-actions button,
+.mt-launch-credits button,
+.mt-session button {
+  min-height: 42px;
+  border: 1px solid var(--hud-border);
+  border-radius: 5px;
+  padding: 7px 12px;
+  color: inherit;
+  background: var(--hud-control);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.mt-launch-credits button:hover,
+.mt-session button:hover {
+  background: var(--hud-hover);
+}
+.mt-settings-fields {
+  display: grid;
+  gap: 4px 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 10px;
+}
+.mt-settings-fields > label:not(.mt-check) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.mt-settings-fields input[type='range'] {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--mt-gold);
+}
+.mt-settings-fields select {
+  width: 100%;
+}
+.mt-file {
+  position: relative;
+  overflow: hidden;
+}
+.mt-file input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.mt-file:focus-within,
+.mt-launch a:focus-visible {
+  outline: 2px solid var(--mt-gold);
+  outline-offset: 2px;
+}
+
+.mt-top {
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1fr);
+}
+.mt-left {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  width: min(315px, 100%);
+}
+.mt-hud-heading strong {
+  overflow-wrap: anywhere;
+}
+.mt-readouts {
+  justify-self: end;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+  max-width: 100%;
+  max-height: 100%;
+}
+.mt-readouts .mt-resources {
+  max-height: min(100%, 52dvh);
+}
+.mt-readouts .mt-simbar {
+  justify-self: end;
+  max-width: min(280px, 100%);
+  box-sizing: border-box;
+}
+.mt-left-panels {
+  max-height: min(48dvh, 420px);
+}
+.mt-left-panels .mt-detail {
+  position: static;
+  box-sizing: border-box;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+}
+.mt-left-panels:has(.mt-detail:not([hidden])) > .mt-goals {
+  display: none;
+}
+.mt-left-panels .mt-detail-img {
+  width: 68px;
+  height: 68px;
+}
+.mt-lighting,
+.mt-clock {
+  box-sizing: border-box;
+  color: var(--hud-fg);
+  border: 1px solid var(--hud-border);
+  border-radius: 6px;
+  background: var(--hud-bg);
+  box-shadow: var(--hud-shadow);
+  pointer-events: auto;
+  font-size: 12px;
+}
+.mt-lighting {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  padding: 3px;
+  gap: 3px;
+  align-items: center;
+}
+.mt-lighting time {
+  min-width: 5ch;
+  padding-inline: 3px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.mt-lighting button,
+.mt-clock button {
+  min-width: 28px;
+  min-height: 27px;
+  padding: 2px 5px;
+  color: inherit;
+  background: var(--hud-control);
+  border: 1px solid var(--hud-border);
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+.mt-lighting button[aria-pressed='true'],
+.mt-clock button[aria-pressed='true'] {
+  background: var(--mt-gold);
+  border-color: var(--mt-gold);
+  color: var(--mt-ink);
+}
+.mt-clock {
+  width: max-content;
+  padding: 4px;
+  margin: 0;
+}
+.mt-clock .mt-speeds {
+  padding: 0;
+  border: 0;
+}
+.mt-calendar {
+  margin-top: 3px;
+  text-align: center;
+  color: var(--hud-muted);
+  font-variant-numeric: tabular-nums;
+}
+.mt-menu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(680px, 100%);
+  box-sizing: border-box;
+  justify-self: center;
+  border-radius: 8px;
+}
+.mt-menu:has(.mt-items[hidden]) {
+  width: max-content;
+  max-width: 100%;
+}
+.mt-menu .mt-row {
+  grid-row: 2;
+}
+.mt-tray {
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  align-items: stretch;
+  gap: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hud-border);
+}
+.mt-tray:has(.mt-items[hidden]) {
+  display: none;
+}
+.mt-menu .mt-items {
+  margin: 0;
+  min-width: 0;
+  padding: 2px 3px;
+  border: 0;
+  touch-action: pan-x;
+  cursor: grab;
+}
+.mt-menu .mt-items:active {
+  cursor: grabbing;
+}
+.mt-menu .mt-item {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  padding: 3px;
+  user-select: none;
+}
+.mt-menu .mt-item .mt-item-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.mt-menu .mt-item .mt-thumb {
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+}
+.mt-menu .mt-tray > button {
+  padding: 0;
+  font-size: 24px;
+}
+.mt-build-lock,
+.mt-build-poor {
+  position: absolute;
+  inset: auto 2px 2px auto;
+  color: var(--hud-warn);
+  background: var(--mt-ink);
+  border-radius: 4px;
+  padding-inline: 3px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.mt-menu .mt-tabs button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 5px;
+  border-color: var(--hud-border);
+  position: relative;
+}
+.mt-tabs button span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.mt-menu button.active,
+.mt-menu .mt-tabs button.active {
+  border-color: var(--mt-gold);
+  color: var(--mt-gold);
+  background: var(--hud-accent-bg);
+}
+.mt-menu .mt-tools button {
+  min-height: 44px;
+  border-radius: 5px;
+}
+.mt-session {
+  width: min(320px, calc(100% - 48px));
+  padding: 18px;
+  color: var(--hud-fg);
+  background: var(--hud-bg-elevated);
+  border: 1px solid var(--hud-border);
+  border-top: 3px solid var(--mt-gold);
+  border-radius: 8px;
+}
+.mt-session[open] {
+  display: grid;
+  gap: 8px;
+}
+.mt-session::backdrop {
+  background: rgb(5 15 16 / 0.65);
+}
+.mt-session h2,
+.mt-session p {
+  margin: 0;
+}
+.mt-session p:empty {
+  display: none;
+}
+
+@media (max-width: 880px) {
+  .mt-launch-layout {
+    gap: 18px;
+  }
+  .mt-launch-pane .mt-newgame-card {
+    padding: 17px;
+  }
+  .mt-top > .mt-left,
+  .mt-top > .mt-readouts {
+    grid-row: 1;
+  }
+  .mt-readouts .mt-simbar {
+    grid-column: 1;
+  }
+  .mt-minimap-dock {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+  }
+  .mt-map-upper {
+    grid-column: 1 / -1;
+  }
+  .mt-map-toolbar {
+    grid-row: 2;
+  }
+  .mt-clock {
+    grid-row: 2;
+    grid-column: 2;
+  }
+}
+@media (max-width: 660px) {
+  .mt-launch {
+    background-position: 60% center;
+  }
+  .mt-launch-layout {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    padding: 22px;
+  }
+  .mt-launch-layout:has(.mt-launch-pane:not([hidden])) {
+    align-content: start;
+    padding: 12px;
+  }
+  .mt-launch-layout:has(.mt-launch-pane:not([hidden])) .mt-launch-start {
+    display: none;
+  }
+  .mt-launch-brand h1 {
+    font-size: clamp(54px, 13vw, 83px);
+  }
+  .mt-config-choices label {
+    min-height: 30px;
+  }
+  .mt-launch-pane .mt-world-config {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+  .mt-launch-pane .mt-config-actions {
+    position: sticky;
+    bottom: -17px;
+    margin: 10px -17px -17px;
+    padding: 8px 17px 12px;
+    background: var(--mt-ink);
+    border-top: 1px solid var(--hud-border);
+  }
+  .mt-left-panels {
+    max-height: min(38dvh, 270px);
+  }
+  .mt-readouts .mt-resources {
+    max-height: min(100%, 48dvh);
+  }
+}
+@media (max-width: 460px) {
+  .mt-config-fields {
+    grid-template-columns: 1fr;
+  }
+  .mt-settings-fields {
+    grid-template-columns: 1fr;
+  }
+  .mt-menu .mt-tabs button {
+    width: 40px;
+  }
+  .mt-lighting button {
+    min-height: 33px;
+  }
+  .mt-left-panels .mt-detail-img {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-height: 510px) and (max-width: 880px) {
+  .mt-map-upper {
+    max-height: 28dvh;
+  }
+  .mt-map-upper .mt-minimap {
+    width: 68px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mt-launch-nav :is(button, a) {
+    transition: none;
+  }
+}

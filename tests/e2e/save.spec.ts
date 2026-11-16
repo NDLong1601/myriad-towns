@@ -77,17 +77,26 @@ test('export a save to a file and import it back as a new slot', async ({ page }
   await expect(page.locator('.mt-saves li[data-id]')).toHaveCount(2, SLOW);
 });
 
-test('the new-game screen offers to continue the latest save', async ({ page }) => {
+test('leaving the game saves it and the launcher can continue or load it', async ({ page }) => {
   await page.goto('./?seed=e2e-continue&mode=goals&speed=0&autosave=0');
   await ready(page);
   await buildSomething(page);
-  await page.evaluate(() => window.__MYRIAD__!.save());
-  await page.goto('./?speed=0');
+  await page.getByRole('button', { name: 'Menu chính', exact: true }).click();
+  await page.getByRole('button', { name: 'Lưu và về menu' }).click();
   const cont = page.locator('.mt-continue');
   await expect(cont).toBeVisible({ timeout: 30_000 });
   await expect(cont).toContainText('e2e-continue');
-  await cont.click();
+  await expect(cont).toHaveAttribute('href', /load=/);
+  await page.getByRole('button', { name: 'Tải ván', exact: true }).click();
+  const library = page.locator('.mt-saves');
+  await expect(library.locator('.mt-slots')).toContainText('e2e-continue');
+  await library.getByRole('button', { name: 'Tải', exact: true }).click();
   await expect(page).toHaveURL(/load=/, SLOW);
+  await ready(page);
+  expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBeGreaterThan(10);
+  await page.goto('./?speed=0');
+  await expect(cont).toHaveAttribute('aria-disabled', 'false');
+  await cont.click();
   await ready(page);
   expect(await page.evaluate(() => window.__MYRIAD__!.buildingCount())).toBeGreaterThan(10);
 });

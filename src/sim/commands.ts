@@ -1,4 +1,5 @@
-import type { City } from './city';
+import { type City, rectOf } from './city';
+import { type Rect, rectDistance } from './geometry';
 import { checkPlacement } from './requirements';
 
 /** A reversible change to the city. `do` returns false if it could not be applied. */
@@ -6,6 +7,8 @@ export interface Command {
   readonly label: string;
   do(city: City): boolean;
   undo(city: City): void;
+  /** Whether an automatic land change can invalidate this command. */
+  touches?(city: City, area: Rect): boolean;
 }
 
 export class PlaceCommand implements Command {
@@ -44,6 +47,10 @@ export class PlaceCommand implements Command {
   get placedUid(): number | undefined {
     return this.uid;
   }
+
+  touches(city: City, area: Rect): boolean {
+    return rectDistance(area, rectOf(city.catalog.get(this.defId), this.x, this.z)) === 0;
+  }
 }
 
 export class DemolishCommand implements Command {
@@ -72,6 +79,12 @@ export class DemolishCommand implements Command {
     // Trees cut by the original placement stay cut (they were not restored on demolish).
     city._add(city.catalog.get(defId), x, z, this.uid);
   }
+
+  touches(city: City, area: Rect): boolean {
+    if (!this.removed) return false;
+    const { defId, x, z } = this.removed;
+    return rectDistance(area, rectOf(city.catalog.get(defId), x, z)) === 0;
+  }
 }
 
 /** Several commands as one undo step (a dragged road). Applies those that succeed. */
@@ -91,6 +104,10 @@ export class BatchCommand implements Command {
   undo(city: City): void {
     for (let i = this.applied.length - 1; i >= 0; i--) this.applied[i]?.undo(city);
   }
+
+  touches(city: City, area: Rect): boolean {
+    return this.parts.some((command) => command.touches?.(city, area) ?? true);
+  }
 }
 
 /** Undo/redo stack, 50 steps by default. */
@@ -103,7 +120,21 @@ export class History {
   constructor(
     private readonly city: City,
     readonly limit = 50,
-  ) {}
+  ) {
+    city.on((event) => {
+      // Older commands refer to plots and ids replaced by the automatic consolidation.
+      if (event.type !== 'consolidated') return;
+      const { building } = event;
+      const area = rectOf(building.def, building.x, building.z);
+      const untouched = (command: Command): boolean => command.touches?.(city, area) === false;
+      const done = this.done.filter(untouched);
+      const undone = this.undone.filter(untouched);
+      if (done.length === this.done.length && undone.length === this.undone.length) return;
+      this.done = done;
+      this.undone = undone;
+      this.changed();
+    });
+  }
 
   run(cmd: Command): boolean {
     if (!cmd.do(this.city)) {

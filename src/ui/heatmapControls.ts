@@ -1,6 +1,15 @@
-import type { HeatmapOverlay } from '@/render/heatmap';
+import { DEPOSIT_COLORS, type HeatmapOverlay } from '@/render/heatmap';
 import { FIELDS } from '@/sim/catalog';
+import { Resource } from '@/world/biomes';
 import { fmt, t } from './i18n';
+
+const DEPOSITS = [
+  [Resource.Stone, 'stone'],
+  [Resource.Clay, 'clay'],
+  [Resource.Iron, 'iron'],
+  [Resource.Coal, 'coal'],
+  [Resource.FertileSoil, 'fertile'],
+] as const;
 
 /** Field picker + legend. Keys 1–9 and 0 toggle the first ten fields. */
 export function mountHeatmapControls(
@@ -14,9 +23,12 @@ export function mountHeatmapControls(
   el.id = 'mt-heat-controls';
   el.innerHTML = `<label>${t('ui.heatmap')} <select>
       <option value="">${t('ui.heatmapOff')}</option>
-      <option value="resources">⛏️ ${t('ui.resources')}</option>
+      <option value="resources">${t('ui.depositMap')}</option>
       ${FIELDS.map((f, i) => `<option value="${f}">${(i + 1) % 10}: ${t(`field.${f}`)}</option>`).join('')}
-    </select></label><div class="mt-heat-legend" hidden><span class="lo">0</span><i></i><span class="hi"></span></div>`;
+    </select></label><div class="mt-heat-legend" hidden><span class="lo">0</span><i></i><span class="hi"></span></div>
+    <ul class="mt-deposit-legend" hidden>
+      ${DEPOSITS.map(([id, name]) => `<li><i style="background-color:${DEPOSIT_COLORS[id]}" aria-hidden="true"></i>${t(`ui.deposit.${name}`)}</li>`).join('')}
+    </ul>`;
   parent.appendChild(el);
   // A corner button shows or hides the panel; hiding also switches the overlay off.
   const btn = document.createElement('button');
@@ -38,23 +50,51 @@ export function mountHeatmapControls(
     opts.onToggle?.(open);
   };
   btn.addEventListener('click', () => setOpen(!open));
+
+  const deposits = document.createElement('button');
+  deposits.type = 'button';
+  deposits.className = 'mt-deposit-btn';
+  deposits.innerHTML =
+    '<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 4-4h10l4 4-9 12L3 8Zm0 0h18M9 4 7 8l5 12 5-12-2-4"/></svg>';
+  deposits.title = `${t('ui.depositMap')} (G)`;
+  deposits.setAttribute('aria-label', t('ui.depositMap'));
+  deposits.setAttribute('aria-keyshortcuts', 'G');
+  deposits.setAttribute('aria-controls', el.id);
+  deposits.setAttribute('aria-pressed', 'false');
+  const toggleDeposits = (): void => {
+    if (!open) setOpen(true);
+    overlay.set(overlay.current === 'resources' ? null : 'resources');
+  };
+  deposits.addEventListener('pointerdown', (e) => e.stopPropagation());
+  deposits.addEventListener('click', toggleDeposits);
+  toolbar.appendChild(deposits);
+
   el.hidden = !open;
   btn.setAttribute('aria-pressed', String(open));
   el.addEventListener('pointerdown', (e) => e.stopPropagation());
   const select = el.querySelector('select') as HTMLSelectElement;
   const legend = el.querySelector('.mt-heat-legend') as HTMLElement;
+  const depositLegend = el.querySelector('.mt-deposit-legend') as HTMLElement;
   const hi = el.querySelector('.hi') as HTMLElement;
 
   select.addEventListener('change', () => overlay.set(select.value || null));
   overlay.onChange(() => {
     select.value = overlay.current ?? '';
-    legend.hidden = overlay.current === null;
+    const showDeposits = overlay.current === 'resources';
+    legend.hidden = overlay.current === null || showDeposits;
+    depositLegend.hidden = !showDeposits;
+    deposits.setAttribute('aria-pressed', String(showDeposits));
     hi.textContent = fmt(overlay.maxValue);
   });
   window.addEventListener('keydown', (e) => {
     const target = e.target as HTMLElement | null;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
-    if (e.ctrlKey || e.metaKey || e.altKey || !open) return;
+    if (target?.closest('input, textarea, select, [contenteditable]')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+    if (e.code === 'KeyG') {
+      toggleDeposits();
+      return;
+    }
+    if (!open) return;
     const m = /^Digit(\d)$/.exec(e.code);
     if (!m) return;
     const i = (Number(m[1]) + 9) % 10; // 1 → 0 … 0 → 9

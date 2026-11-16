@@ -380,6 +380,11 @@
     },
     "produces": {
       "food": 3.4
+    },
+    "voyage": {
+      "kind": "fish",
+      "ticks": 56,
+      "range": 15
     }
   },
   {

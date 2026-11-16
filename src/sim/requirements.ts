@@ -31,7 +31,9 @@ export interface PlacementCheck {
 
 /** Evaluate one requirement for a building (placed or hypothetical) at rect. */
 export function checkRequirement(
-  city: City,
+  city: Pick<City, 'near' | 'roadDistance' | 'terrain'> & {
+    fields: Pick<City['fields'], 'maxOver'>;
+  },
   req: Requirement,
   rect: Rect,
   selfUid?: number,
@@ -88,17 +90,17 @@ export function checkRequirement(
       };
     }
     case 'road': {
-      const d = city.roadDistance(rect, req.maxDistance);
+      const d = city.roadDistance(rect, req.maxDistance, req.paved);
       if (d === Infinity)
         return {
           ok: false,
-          key: 'req.roadNone',
+          key: req.paved ? 'req.pavedRoadNone' : 'req.roadNone',
           params: { d: req.maxDistance },
           radius: req.maxDistance,
         };
       return {
         ok: true,
-        key: 'req.roadHave',
+        key: req.paved ? 'req.pavedRoadHave' : 'req.roadHave',
         params: { d: req.maxDistance, have: round(d) },
         radius: req.maxDistance,
       };
@@ -148,6 +150,9 @@ export function checkPlacement(city: City, def: BuildingDef, x: number, z: numbe
 
   const cost: CheckResult = { ok: city.canAfford(def.cost), key: 'req.cost', params: { cost: '' } };
   const requires = (def.requires ?? []).map((r) => checkRequirement(city, r, rect));
+  if (def.placementRequires) {
+    for (const rule of def.placementRequires) requires.push(checkRequirement(city, rule, rect));
+  }
   const ok = site.every((c) => c.ok) && cost.ok && requires.every((c) => c.ok);
   return { ok, site, cost, requires, treesToCut };
 }

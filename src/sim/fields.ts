@@ -57,6 +57,15 @@ export class FieldStore {
     return this.raw(x, z, fieldIndex(field)) / FIELD_SCALE;
   }
 
+  /** Sample several fields at one tile with a single chunk lookup and caller-owned storage. */
+  sample(x: number, z: number, fields: readonly number[], into: Float64Array): void {
+    const arr = this.chunk(x, z, false);
+    const { lx, lz } = tileToLocal(x, z);
+    const index = localIndex(lx, lz);
+    for (let i = 0; i < fields.length; i++)
+      into[i] = (arr?.[fields[i]! * CHUNK_AREA + index] ?? 0) / FIELD_SCALE;
+  }
+
   /** Largest value over a footprint (a building benefits from its best tile). */
   maxOver(rect: Rect, field: string): number {
     const fi = fieldIndex(field);

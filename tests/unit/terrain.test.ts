@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { CHUNK_SIZE, localIndex, localToTile } from '@/core/coords';
-import { BIOME_COUNT, Biome, TileFlag } from '@/world/biomes';
+import { BIOME_COUNT, Biome, Resource, TileFlag } from '@/world/biomes';
 import { generateChunk, hashChunk } from '@/world/chunk';
 import { MAX_LEVEL, SEA_LEVEL, sampleTile } from '@/world/terrain';
-import { buildTerrainMesh } from '@/world/terrainMesh';
+import { buildTerrainMesh, landY } from '@/world/terrainMesh';
 
 const SEED = 42;
 
@@ -86,6 +86,52 @@ describe('terrain generation', () => {
 });
 
 describe('terrain mesh', () => {
+  it('distinguishes deposits and hides their geometry under a building without editing the deposit', () => {
+    const c = generateChunk(SEED, 0, 0);
+    c.flags.fill(0);
+    c.resource.fill(Resource.None);
+    c.level.fill(SEA_LEVEL);
+    c.biome.fill(Biome.Temperate);
+    const index = localIndex(5, 5);
+    const plain = buildTerrainMesh(SEED, c).positions.length;
+    const profiles = new Map<number, { height: number; width: number; centerHeight: number }>();
+    for (const resource of [Resource.Stone, Resource.Clay, Resource.Iron]) {
+      c.resource[index] = resource;
+      c.flags[index] = TileFlag.Rock;
+      const exposed = buildTerrainMesh(SEED, c);
+      expect(exposed.positions.length).toBeGreaterThan(plain);
+      let height = 0;
+      let centerHeight = 0;
+      let left = 6;
+      let right = 5;
+      for (let i = 0; i < exposed.positions.length; i += 3) {
+        const x = exposed.positions[i]!;
+        const y = exposed.positions[i + 1]! - landY(SEA_LEVEL);
+        const z = exposed.positions[i + 2]!;
+        if (y < 0.03 || x <= 5 || x >= 6 || z <= 5 || z >= 6) continue;
+        height = Math.max(height, y);
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        if (Math.hypot(x - 5.5, z - 5.5) < 0.12) centerHeight = Math.max(centerHeight, y);
+      }
+      profiles.set(resource, { height, width: right - left, centerHeight });
+
+      c.flags[index] = TileFlag.Rock | TileFlag.Covered;
+      expect(buildTerrainMesh(SEED, c).positions.length).toBe(plain);
+      expect(c.resource[index]).toBe(resource);
+    }
+    const stone = profiles.get(Resource.Stone)!;
+    const clay = profiles.get(Resource.Clay)!;
+    const iron = profiles.get(Resource.Iron)!;
+    expect(stone.height).toBeGreaterThan(0.2);
+    expect(stone.width).toBeGreaterThan(stone.height * 2);
+    expect(clay.height).toBeLessThan(stone.height);
+    expect(clay.width).toBeGreaterThan(0.6);
+    expect(clay.centerHeight).toBeLessThan(clay.height / 2);
+    expect(iron.height).toBeGreaterThan(stone.height * 2);
+    expect(iron.height).toBeGreaterThan(iron.width);
+  });
+
   it('produces consistent buffers', () => {
     const c = generateChunk(SEED, 0, 0);
     const m = buildTerrainMesh(SEED, c);

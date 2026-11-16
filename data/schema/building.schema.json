@@ -99,6 +99,13 @@
         "$ref": "#/$defs/requirement"
       }
     },
+    "placementRequires": {
+      "type": "array",
+      "description": "Rules checked when building a new plot, without imposing upkeep conditions.",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
     "upgrades": {
       "type": "array",
       "description": "Checked in order; the first whose conditions all hold wins.",
@@ -210,6 +217,62 @@
       },
       "uniqueItems": true,
       "description": "Terrain tags every footprint tile must have. Default: [\"land\", \"flat\"]."
+    },
+    "mergeInto": {
+      "type": "array",
+      "description": "Eligible larger homes, in priority order.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["to", "when"],
+        "properties": {
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "when": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/requirement"
+            }
+          }
+        }
+      }
+    },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ticks"],
+      "properties": {
+        "kind": {
+          "enum": ["berries", "grain", "vegetables"]
+        },
+        "ticks": {
+          "type": "integer",
+          "minimum": 4,
+          "multipleOf": 4
+        }
+      }
+    },
+    "voyage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ticks", "range"],
+      "properties": {
+        "kind": {
+          "enum": ["fish", "cargo"]
+        },
+        "ticks": {
+          "type": "integer",
+          "minimum": 4
+        },
+        "range": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 32
+        }
+      }
     }
   },
   "$defs": {
@@ -320,6 +383,9 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 8
+            },
+            "paved": {
+              "type": "boolean"
             }
           }
         }

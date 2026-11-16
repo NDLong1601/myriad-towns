@@ -1,5 +1,3 @@
-import './style.css';
-import './ui/ui.css';
 import { tileToChunk } from '@/core/coords';
 import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
@@ -13,7 +11,7 @@ import { isRoadDef, loadCatalog } from '@/sim/catalog';
 import { City } from '@/sim/city';
 import { DemolishCommand, History, PlaceCommand } from '@/sim/commands';
 import { checkPlacement } from '@/sim/requirements';
-import { GeneratedTerrain } from '@/sim/terrainQuery';
+import { GeneratedTerrain, tileKey } from '@/sim/terrainQuery';
 import { mountBuildMenu } from '@/ui/buildMenu';
 import { BuildTool } from '@/ui/buildTool';
 import { mountDebugOverlay } from '@/ui/debugOverlay';
@@ -29,19 +27,24 @@ import { PlanRenderer } from '@/render/planRenderer';
 import { WARNING_TINT } from '@/render/buildingRenderer';
 import { SimClock, SPEEDS, type Speed } from '@/sim/clock';
 import { PlanStore } from '@/sim/plan';
+import { RegionalTrade } from '@/sim/regionalTrade';
 import { Simulation } from '@/sim/simulation';
 import { mountHeatmapControls } from '@/ui/heatmapControls';
 import { mountNotifications } from '@/ui/notifications';
 import { mountPlanBar } from '@/ui/planBar';
+import { mountProgressAlerts } from '@/ui/progressAlerts';
+import { mountRegionalTrade } from '@/ui/regionalTrade';
 import { mountSimBar } from '@/ui/simBar';
 import { PoiRenderer } from '@/render/poiRenderer';
 import { Goals } from '@/sim/goals';
 import { PoiStore } from '@/sim/poi';
 import { applySandbox, mountGoalsPanel, mountSandboxPanel } from '@/ui/goalsPanel';
 import { type GameSetup, markTutorialDone, readSetup, showNewGame } from '@/ui/newGame';
+import { initialStockMultiplier, startingTile } from '@/ui/gameStart';
+import { mountLighting, showSessionMenu, type LightingMode } from '@/ui/sessionControls';
 import { decodeSave } from '@/io/codec';
 import { type SaveData, applySave } from '@/io/save';
-import { getSlot, listSlots, storageAvailable } from '@/io/store';
+import { getSlot, storageAvailable } from '@/io/store';
 import { SaveSession, showSaveMenu, urlForSlot } from '@/ui/saveMenu';
 import { showSettings } from '@/ui/settingsMenu';
 import { loadSettings, saveSettings } from '@/ui/settingsStore';
@@ -56,7 +59,7 @@ import { ambientMix } from '@/audio/ambientMix';
 import { timeOfDay } from '@/render/dayNight';
 import { CHUNK_SIZE, localIndex } from '@/core/coords';
 import { TileFlag } from '@/world/biomes';
-import { landY, setFlatTerrain, WATER_Y } from '@/world/terrainMesh';
+import { hasDepositModel, landY, setFlatTerrain, WATER_Y } from '@/world/terrainMesh';
 import { BIOME_NAMES, type Biome } from '@/world/biomes';
 import { InlineGenerator, WorkerPoolGenerator } from '@/world/genPool';
 import { sampleTile } from '@/world/terrain';
@@ -122,6 +125,8 @@ interface DebugApi {
   timeOfDay(fixed?: number | null): number | null;
   /** Ground height (world units) at a tile. */
   groundY(x: number, z: number): number;
+  /** Resource and visual flags of the loaded tile for terrain diagnostics. */
+  terrainAt(x: number, z: number): { resource: number; loadedFlags: number | null };
   /** Pedestrians and vehicles currently walking or driving. */
   traffic(): { pedestrians: number; vehicles: number; wantPedestrians: number };
   audio(): { started: boolean; muted: boolean; volume: number; popping: number };
@@ -163,6 +168,7 @@ if (loadId && storageAvailable()) {
   }
 }
 const seedText = loaded?.meta.seed ?? params.get('seed') ?? 'myriad';
+const cityName = loaded?.meta.name ?? (params.get('city')?.trim().slice(0, 40) || seedText);
 const seed = seedFromString(seedText);
 const num = (name: string, fallback: number): number => {
   const v = Number(params.get(name));
@@ -177,19 +183,39 @@ const viewRadius = Math.max(
 
 const terrain = new GeneratedTerrain(seed);
 const city = new City(loadCatalog(), terrain);
+if (!loaded) {
+  const multiplier = initialStockMultiplier(params.get('supplies'));
+  if (multiplier !== 1) {
+    city._addStock(
+      Object.fromEntries(
+        Object.entries(city.stock).map(([resource, n]) => [
+          resource,
+          Math.round(n * multiplier) - n,
+        ]),
+      ),
+      1,
+    );
+  }
+}
 const setup: GameSetup = loaded
   ? { mode: loaded.meta.mode, sandbox: loaded.meta.sandbox, undecided: false, tutorial: false }
   : readSetup(params);
 const history = new History(city);
 const sim = new Simulation(city);
 const pois = new PoiStore(city, seed);
-const towns = new TownStore(city);
+const towns = new TownStore(city, (uid) => sim.residentsOf(uid));
+const regionalTrade = new RegionalTrade(city, towns);
+sim.regionalTrade = regionalTrade;
+towns.policyFor = (town, policy) => regionalTrade.isPolicyActive(town, policy);
 towns.enforceTerritory = setup.mode === 'goals';
 // ?tiers=0 keeps every town fully simulated (for comparisons).
 const tiersOn = params.get('tiers') !== '0';
 sim.tiers = towns;
 const goals = setup.mode === 'goals' ? new Goals(city, sim, pois) : undefined;
-if (goals) goals.townCount = () => towns.all().length;
+if (goals) {
+  goals.townCount = () => towns.all().length;
+  goals.townMetrics = () => towns.all();
+}
 if (setup.mode === 'sandbox') {
   applySandbox(setup.sandbox, city, sim);
   if (!loaded) city._addStock({ charter: 3 }, 1);
@@ -206,6 +232,10 @@ const flatTerrain = params.has('terrain')
 setFlatTerrain(flatTerrain);
 const generator =
   typeof Worker !== 'undefined' ? new WorkerPoolGenerator(flatTerrain) : new InlineGenerator();
+const originTile =
+  loaded || params.has('x') || params.has('z')
+    ? { x: 0, z: 0 }
+    : startingTile(seed, params.get('area'));
 const view = new WorldView(app, {
   seed,
   viewRadius,
@@ -214,8 +244,12 @@ const view = new WorldView(app, {
     parsePreset(params.get('quality')) ?? settings.quality ?? 'medium',
     window.devicePixelRatio,
   ),
-  start: loaded?.camera ?? { x: num('x', 0) + 0.5, z: num('z', 0) + 0.5 },
-  // Cut trees are player edits: re-apply them whenever a chunk is (re)generated.
+  start: loaded?.camera ?? {
+    x: num('x', originTile.x) + 0.5,
+    z: num('z', originTile.z) + 0.5,
+    ...(params.has('area') ? { distance: 38 } : {}),
+  },
+  // Apply persistent tree edits and hide surface decorations underneath buildings.
   patchChunk: (chunk) => {
     let changed = false;
     for (const key of terrain.clearedTrees) {
@@ -228,6 +262,32 @@ const view = new WorldView(app, {
       chunk.flags[i] = before & ~TileFlag.Tree;
       if (chunk.flags[i] !== before) changed = true;
     }
+    const x = chunk.cx * CHUNK_SIZE;
+    const z = chunk.cz * CHUNK_SIZE;
+    for (const b of city.near({ x, z, w: CHUNK_SIZE, d: CHUNK_SIZE }, 0)) {
+      for (
+        let tz = Math.max(z, b.z);
+        tz < Math.min(z + CHUNK_SIZE, b.z + b.def.footprint.d);
+        tz++
+      ) {
+        for (
+          let tx = Math.max(x, b.x);
+          tx < Math.min(x + CHUNK_SIZE, b.x + b.def.footprint.w);
+          tx++
+        ) {
+          const i = localIndex(tx - x, tz - z);
+          const flags = chunk.flags[i] as number;
+          if (
+            !(flags & (TileFlag.Covered | TileFlag.Water)) &&
+            (flags & (TileFlag.Rock | TileFlag.Tree) ||
+              hasDepositModel(chunk.resource[i] as number))
+          ) {
+            chunk.flags[i] = flags | TileFlag.Covered;
+            changed = true;
+          }
+        }
+      }
+    }
     return changed;
   },
 });
@@ -237,12 +297,12 @@ const surfaceY = (x: number, z: number): number => {
   const s = terrain.tile(x, z);
   return s.flags & TileFlag.Water ? WATER_Y : landY(s.level);
 };
-const buildings = new BuildingRenderer(city, view.origin, surfaceY);
+const buildings = new BuildingRenderer(city, view.origin, surfaceY, (uid) => sim.cropStageOf(uid));
 // ?anim=0 turns the placement "pop" off (tests, screenshots).
 buildings.animate = params.get('anim') !== '0';
 // People and vehicles on the roads (?traffic=0 or the settings toggle turns them off).
 const traffic = new TrafficRenderer(city, view.origin, surfaceY, small ? 60 : 160);
-const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16);
+const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16, sim);
 traffic.enabled = params.has('traffic') ? params.get('traffic') !== '0' : settings.traffic;
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
@@ -259,16 +319,46 @@ view.scene.add(
   poiView.group,
   territory.group,
 );
+// One remesh per touched chunk, even when the user draws an entire road at once.
+const terrainRefresh = new Map<string, { x: number; z: number }>();
+const refreshTerrainAt = (x: number, z: number): void => {
+  if (terrainRefresh.size === 0) {
+    queueMicrotask(() => {
+      view.refreshTiles([...terrainRefresh.values()]);
+      terrainRefresh.clear();
+    });
+  }
+  terrainRefresh.set(tileKey(x, z), { x, z });
+};
+city.on((e) => {
+  if (e.type === 'trees') {
+    for (const { x, z } of e.tiles) refreshTerrainAt(x, z);
+  } else if (e.type === 'added' || e.type === 'removed') {
+    const b = e.building;
+    for (let z = b.z; z < b.z + b.def.footprint.d; z++) {
+      for (let x = b.x; x < b.x + b.def.footprint.w; x++) {
+        const flags = view.tileFlagsAt(x, z);
+        if (flags === undefined || flags & TileFlag.Water) continue;
+        const covered = Boolean(flags & TileFlag.Covered);
+        if (covered === Boolean(city.at(x, z))) continue;
+        if (
+          covered ||
+          flags & (TileFlag.Rock | TileFlag.Tree) ||
+          hasDepositModel(terrain.tile(x, z).resource)
+        )
+          refreshTerrainAt(x, z);
+      }
+    }
+  }
+});
 // Restore a saved game now that every system and renderer is listening.
 let missingDefs: string[] = [];
-if (loaded) missingDefs = applySave({ city, sim, towns, pois, goals }, loaded).missing;
+if (loaded)
+  missingDefs = applySave({ city, sim, towns, pois, goals, regionalTrade }, loaded).missing;
 // Warn visibly on the building itself, not only in a toast.
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
   else if (e.type === 'resolved' || (e.type === 'declined' && e.to)) buildings.setTint(e.uid, null);
-});
-city.on((e) => {
-  if (e.type === 'trees') view.refreshTiles(e.tiles);
 });
 
 // Sound: synthesised, starts on the first click or key press (?audio=0 keeps it off).
@@ -295,7 +385,7 @@ towns.on((e) => {
 pois.on(() => audio.play('upgrade'));
 
 // Day and night follow game time (?daynight=0 turns it off, ?time=0..1 fixes the hour).
-const dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
+let dayNightOn = params.has('daynight') ? params.get('daynight') !== '0' : settings.dayNight;
 let fixedTime: number | null = params.has('time') ? num('time', 0.5) : null;
 
 const interfaceLayer = document.createElement('div');
@@ -304,24 +394,10 @@ document.body.appendChild(interfaceLayer);
 const bottom = document.createElement('div');
 bottom.className = 'mt-bottom';
 interfaceLayer.appendChild(bottom);
-const menu = mountBuildMenu(city, history, bottom);
+const menu = mountBuildMenu(city, history, bottom, params.get('tray') !== '0');
 mountEncyclopedia(document.body, city.catalog, menu);
 mountPolicyMenu(city, document.body, menu.tools);
-new BuildTool(
-  view,
-  city,
-  history,
-  preview,
-  new InfoPanel(document.body),
-  menu,
-  sim,
-  plans,
-  (x, z) => {
-    const poi = poiView.at(x, z);
-    return poi ? { poi, explored: pois.isExplored(poi.key) } : undefined;
-  },
-  new DetailPanel(document.body),
-);
+mountRegionalTrade(city, towns, regionalTrade, menu.tools);
 const say = mountNotifications(sim, city, document.body, (x, z) => view.controller.teleport(x, z), {
   goals,
   pois,
@@ -334,8 +410,17 @@ interfaceLayer.prepend(top);
 const left = document.createElement('div');
 left.className = 'mt-left';
 top.appendChild(left);
-const renderSimBar = mountSimBar(sim, clock, top);
-mountResourceBar(city, top, sim);
+const readouts = document.createElement('div');
+readouts.className = 'mt-readouts';
+top.appendChild(readouts);
+mountResourceBar(
+  city,
+  readouts,
+  sim,
+  (x, z) => view.controller.teleport(x, z),
+  (building, resource) =>
+    regionalTrade.operatingStock(towns.townOfBuilding(building), resource) === city.stock,
+);
 left.appendChild(hud);
 const leftPanels = document.createElement('div');
 leftPanels.className = 'mt-left-panels';
@@ -345,6 +430,7 @@ else mountSandboxPanel(setup.sandbox, city, sim, leftPanels);
 const renderTowns = mountTownsPanel(towns, sim, leftPanels, (x, z) =>
   view.controller.teleport(x, z),
 );
+mountProgressAlerts(city, sim, leftPanels, (x, z) => view.controller.teleport(x, z));
 towns.on((e) => {
   if (e.type === 'removed') sim.setDormant(e.town.id, false);
 });
@@ -362,22 +448,27 @@ const tutorial = setup.tutorial
       },
     )
   : undefined;
-const newGameBtn = document.createElement('button');
-newGameBtn.type = 'button';
-newGameBtn.className = 'mt-newgame-btn';
-newGameBtn.textContent = t('ui.newGameButton');
-newGameBtn.addEventListener('click', () => {
-  // Keep the current game before starting another.
-  void session.save(true);
-  showNewGame(document.body, { seed: seedText });
-});
-newGameBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+new BuildTool(
+  view,
+  city,
+  history,
+  preview,
+  new InfoPanel(document.body),
+  menu,
+  sim,
+  plans,
+  (x, z) => {
+    const poi = poiView.at(x, z);
+    return poi ? { poi, explored: pois.isExplored(poi.key) } : undefined;
+  },
+  new DetailPanel(leftPanels),
+);
 
 // Saves: this game's slot (the loaded one, or a new one on first save).
 const session = new SaveSession(
-  { city, sim, towns, pois, goals },
+  { city, sim, towns, pois, goals, regionalTrade },
   loaded?.meta ?? {
-    name: seedText,
+    name: cityName,
     mode: setup.mode,
     seed: seedText,
     sandbox: { ...setup.sandbox },
@@ -413,7 +504,24 @@ const button = (
   bar.appendChild(b);
   return b;
 };
-bar.appendChild(newGameBtn);
+button(
+  '☰',
+  t('launch.mainMenu'),
+  () => {
+    showSessionMenu(
+      () => {
+        void session.save(true);
+        showNewGame(document.body, { seed: seedText });
+      },
+      async () => {
+        if (!(await session.save(true))) return false;
+        window.location.assign(window.location.pathname);
+        return true;
+      },
+    );
+  },
+  true,
+);
 const saveButton = button(
   '💾',
   `${t('save.title')} (Ctrl+S)`,
@@ -446,11 +554,15 @@ button(
       document.body,
       () => {
         // Reload into this game's slot; if saving is impossible, reload as it is.
-        void session
-          .save(true)
-          .then((ok) =>
-            window.location.assign(ok ? urlForSlot(session.slotId) : window.location.href),
+        void session.save(true).then((ok) => {
+          const url = new URL(
+            ok ? urlForSlot(session.slotId) : window.location.href,
+            window.location.href,
           );
+          for (const key of ['lang', 'r', 'quality', 'terrain', 'daynight', 'traffic'])
+            url.searchParams.delete(key);
+          window.location.assign(url);
+        });
       },
       (v) => {
         audio.volume = v;
@@ -465,22 +577,15 @@ window.addEventListener('keydown', (e) => {
     void session.save();
   }
 });
-if (setup.undecided) {
-  // Offer to continue the most recent game, if this browser has one.
-  const latest = storageAvailable() ? await listSlots().catch(() => []) : [];
-  showNewGame(document.body, {
-    seed: seedText,
-    continueSlot: latest[0] ? { name: latest[0].name, url: urlForSlot(latest[0].id) } : undefined,
-  });
-}
 hud.removeAttribute('aria-live');
-hud.innerHTML = `<div class="mt-hud-heading"><strong>Myriad Towns</strong>
+hud.innerHTML = `<div class="mt-hud-heading"><strong></strong>
   <button type="button" class="mt-help" aria-label="${t('ui.help')} (H)" aria-controls="mt-help-details" title="${t('ui.help')} (H)">
     <span>${t('ui.help')}</span> <kbd>H</kbd>
   </button></div>
   <div class="mt-hud-meta"><span class="mt-game-mode">${t(`mode.${setup.mode}`)}</span>
     <span class="mt-game-seed"></span></div>
   <div class="mt-help-details" id="mt-help-details"></div>`;
+hud.querySelector('strong')!.textContent = params.has('city') || loaded ? cityName : 'Myriad Towns';
 const seedLabel = hud.querySelector<HTMLElement>('.mt-game-seed')!;
 seedLabel.textContent = seedText;
 seedLabel.title = `${t('ui.seed')}: ${seedText}`;
@@ -508,11 +613,27 @@ const map = mountMinimap(bottom, seed, view.controller, city, view, {
   open: params.has('minimap') ? params.get('minimap') !== '0' : settings.showMinimap && !small,
   onToggle: savePanel('showMinimap'),
 });
-mountPlanBar(plans, history, map.panels, map.toolbar);
+const renderSimBar = mountSimBar(sim, clock, map.toolbar.parentElement!, readouts);
+mountPlanBar(plans, history, map.panels, map.toolbar, () => view.controller.state);
 mountHeatmapControls(heatmap, map.panels, map.toolbar, {
   open: settings.showHeatmap,
   onToggle: savePanel('showHeatmap'),
 });
+const lightingMode: LightingMode =
+  fixedTime === null
+    ? dayNightOn
+      ? 'cycle'
+      : 'day'
+    : fixedTime >= 0.25 && fixedTime < 0.75
+      ? 'day'
+      : 'night';
+const renderLight = mountLighting(left, lightingMode, (mode) => {
+  dayNightOn = mode === 'cycle';
+  fixedTime = mode === 'day' ? 0.5 : mode === 'night' ? 0 : null;
+  renderLight(fixedTime ?? timeOfDay(sim.tick));
+});
+left.insertBefore(left.lastElementChild!, leftPanels);
+renderLight(fixedTime ?? (dayNightOn ? timeOfDay(sim.tick) : 0.5));
 
 /** Towns far from the camera sleep: a production summary instead of the full tick. */
 const DORMANT_DISTANCE = 96;
@@ -520,7 +641,7 @@ function updateTiers(): void {
   const c = view.controller.state;
   for (const tw of towns.all()) {
     const away = Math.hypot(tw.x - c.x, tw.z - c.z) - towns.radiusOf(tw);
-    sim.setDormant(tw.id, tiersOn && away > DORMANT_DISTANCE);
+    sim.setDormant(tw.id, tiersOn && away > DORMANT_DISTANCE && !regionalTrade.reserve(tw.id));
   }
   renderTowns();
 }
@@ -575,6 +696,7 @@ function refreshTrafficPlan(x: number, z: number): void {
 }
 
 let simHud = 0;
+let cropTick = -1;
 view.onFrame((dt) => {
   tierClock += dt;
   if (tierClock >= 1) {
@@ -596,6 +718,10 @@ view.onFrame((dt) => {
     }
   }
   const s = view.controller.state;
+  if (cropTick !== sim.tick) {
+    cropTick = sim.tick;
+    buildings.updateCrops();
+  }
   heatmap.update(s.x, s.z);
   poiView.update(s.x, s.z);
   buildings.update(dt);
@@ -702,6 +828,10 @@ const api: DebugApi = {
     return view.timeOfDay;
   },
   groundY: (x, z) => surfaceY(x, z),
+  terrainAt: (x, z) => ({
+    resource: terrain.tile(x, z).resource,
+    loadedFlags: view.tileFlagsAt(x, z) ?? null,
+  }),
   traffic: () => ({ ...traffic.counts, wantPedestrians: traffic.planned.pedestrians }),
   audio: () => ({
     started: audio.started,
@@ -741,6 +871,7 @@ view.onFrame((dt) => {
   const fps = Math.round(frames / acc);
   acc = 0;
   frames = 0;
+  renderLight(fixedTime ?? (dayNightOn ? timeOfDay(sim.tick) : 0.5));
   if (!hudOpen) return;
   const s = view.controller.state;
   const tx = Math.floor(s.x);

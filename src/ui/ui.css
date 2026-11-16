@@ -448,8 +448,29 @@
   border-radius: 4px;
   background: linear-gradient(90deg, #440154, #3b528b, #21918c, #5ec962, #fde725);
 }
+.mt-deposit-legend {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.mt-deposit-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.mt-deposit-legend i {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  border: 1px solid var(--hud-border);
+}
 .mt-heat[hidden],
 .mt-heat-legend[hidden],
+.mt-deposit-legend[hidden],
 .mt-planbar[hidden] {
   display: none;
 }

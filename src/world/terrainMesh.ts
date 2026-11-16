@@ -45,6 +45,22 @@ export function meshBuffers(m: MeshArrays): ArrayBuffer[] {
 }
 
 type RGB = readonly [number, number, number];
+type Point = readonly [x: number, y: number, z: number];
+const OCTAGON = [
+  [1, 0],
+  [0.707, 0.707],
+  [0, 1],
+  [-0.707, 0.707],
+  [-1, 0],
+  [-0.707, -0.707],
+  [0, -1],
+  [0.707, -0.707],
+] as const;
+
+function ring(x: number, y: number, z: number, rx: number, rz: number): Point[] {
+  return OCTAGON.map(([dx, dz]) => [x + dx * rx, y, z + dz * rz]);
+}
+
 const BIOME_COLOR: Record<number, RGB> = {
   [Biome.Ocean]: [64, 132, 178],
   [Biome.Beach]: [226, 208, 158],
@@ -61,21 +77,23 @@ const DIRT: RGB = [138, 112, 82];
 const ROCK: RGB = [120, 118, 112];
 const TRUNK: RGB = [110, 80, 52];
 const RESOURCE_COLOR: Partial<Record<number, RGB>> = {
-  [Resource.Iron]: [170, 85, 60],
-  [Resource.Coal]: [45, 45, 50],
-  [Resource.Clay]: [185, 120, 75],
-  [Resource.Stone]: [135, 134, 128],
+  [Resource.Iron]: [127, 82, 78],
+  [Resource.Coal]: [68, 72, 76],
+  [Resource.Clay]: [191, 112, 71],
+  [Resource.Stone]: [161, 160, 149],
   [Resource.FertileSoil]: [115, 150, 78],
 };
 const ORE_ROCK_COLOR: Partial<Record<number, RGB>> = {
-  [Resource.Iron]: [145, 68, 48],
-  [Resource.Coal]: [32, 32, 35],
-  [Resource.Stone]: [120, 118, 112],
+  [Resource.Coal]: [66, 71, 79],
 };
+
+export function hasDepositModel(resource: number): boolean {
+  return resource === Resource.Stone || resource === Resource.Clay || resource === Resource.Iron;
+}
 const LEAF: Record<number, RGB> = {
-  [Biome.Forest]: [58, 116, 62],
-  [Biome.Temperate]: [76, 136, 70],
-  [Biome.Cold]: [52, 96, 78],
+  [Biome.Forest]: [61, 124, 61],
+  [Biome.Temperate]: [88, 150, 67],
+  [Biome.Cold]: [50, 104, 84],
   [Biome.Steppe]: [120, 140, 70],
   [Biome.Ruins]: [96, 120, 74],
 };
@@ -168,6 +186,22 @@ class Builder {
     this.tri(a, d, t, c);
   }
 
+  band(outer: readonly Point[], inner: readonly Point[], color: RGB): void {
+    for (let i = 0; i < outer.length; i++) {
+      const next = (i + 1) % outer.length;
+      const a = outer[i] as Point;
+      const b = inner[i] as Point;
+      const c = inner[next] as Point;
+      this.tri(a, b, c, color);
+      this.tri(a, c, outer[next] as Point, color);
+    }
+  }
+
+  cap(rim: readonly Point[], center: Point, color: RGB): void {
+    for (let i = 0; i < rim.length; i++)
+      this.tri(center, rim[(i + 1) % rim.length] as Point, rim[i] as Point, color);
+  }
+
   finish(): MeshArrays {
     return {
       positions: new Float32Array(this.pos),
@@ -188,6 +222,57 @@ function shade(c: RGB, f: number): RGB {
     Math.min(255, Math.round(c[1] * f)),
     Math.min(255, Math.round(c[2] * f)),
   ];
+}
+
+function stoneDeposit(b: Builder, x: number, y: number, z: number): void {
+  for (const [dx, dz, width, depth, height] of [
+    [-0.13, -0.06, 0.23, 0.22, 0.23],
+    [0.21, 0.09, 0.16, 0.19, 0.145],
+    [-0.15, 0.24, 0.125, 0.125, 0.1],
+  ] as const) {
+    const cx = x + dx;
+    const cz = z + dz;
+    const skirt = ring(cx, y, cz, width * 0.82, depth * 0.82);
+    const body = ring(cx, y + height * 0.44, cz, width, depth);
+    const crown = ring(cx + width * 0.16, y + height, cz - depth * 0.27, width * 0.52, depth * 0.5);
+    b.band(skirt, body, [140, 140, 132]);
+    b.band(body, crown, [185, 184, 170]);
+    b.cap(crown, [cx + width * 0.3, y + height + 0.03, cz - depth * 0.29], [207, 204, 188]);
+  }
+}
+
+function clayDeposit(b: Builder, x: number, y: number, z: number): void {
+  const bank = ring(x, y, z, 0.46, 0.41);
+  const rim = ring(x, y + 0.14, z, 0.35, 0.31);
+  const cut = ring(x - 0.025, y + 0.073, z, 0.27, 0.225);
+  const bed = ring(x - 0.045, y + 0.012, z + 0.01, 0.185, 0.14);
+  b.band(bank, rim, [182, 102, 65]);
+  b.band(rim, cut, [216, 131, 83]);
+  b.band(cut, bed, [162, 81, 53]);
+  b.cap(bed, [x - 0.045, y + 0.012, z + 0.01], [109, 58, 44]);
+}
+
+function ironDeposit(b: Builder, x: number, y: number, z: number): void {
+  for (const [dx, dz, width, depth, height] of [
+    [-0.15, 0.08, 0.105, 0.13, 0.4],
+    [0.015, -0.085, 0.145, 0.19, 0.72],
+    [0.17, 0.12, 0.107, 0.12, 0.51],
+  ] as const) {
+    const cx = x + dx;
+    const cz = z + dz;
+    const foot = ring(cx, y, cz, width, depth);
+    const vein = ring(cx - height * 0.075, y + height * 0.55, cz, width * 0.88, depth * 0.91);
+    const crest = ring(
+      cx - height * 0.19,
+      y + height,
+      cz - depth * 0.25,
+      width * 0.3,
+      depth * 0.46,
+    );
+    b.band(foot, vein, [73, 76, 86]);
+    b.band(vein, crest, [157, 87, 70]);
+    b.cap(crest, [cx - height * 0.19, y + height + 0.09, cz - depth * 0.45], [96, 93, 101]);
+  }
 }
 
 /** Top surface y of a tile; water tiles render at the water surface. */
@@ -328,25 +413,112 @@ export function buildTerrainMesh(seed: number, chunk: ChunkData): MeshArrays {
           side,
         );
 
+      if (water || flags & TileFlag.Covered) continue;
       // Decoration, jittered inside the tile.
       const jx = lx + 0.35 + hashFloat(seed, Purpose.Decoration, x, z, 1) * 0.3;
       const jz = lz + 0.35 + hashFloat(seed, Purpose.Decoration, x, z, 2) * 0.3;
-      if (flags & TileFlag.Tree) {
+      const deposit = hasDepositModel(res);
+      const exposed =
+        deposit &&
+        !(flags & TileFlag.Tree) &&
+        (flags & TileFlag.Rock || hash32(seed, x, z) % 5 === 0);
+      if (exposed) {
+        const cx = lx + 0.5 + (jx - lx - 0.5) * 0.18;
+        const cz = lz + 0.5 + (jz - lz - 0.5) * 0.18;
+        if (res === Resource.Stone) stoneDeposit(b, cx, y, cz);
+        else if (res === Resource.Clay) clayDeposit(b, cx, y, cz);
+        else ironDeposit(b, cx, y, cz);
+      } else if (flags & TileFlag.Tree) {
         const h = 0.9 + hashFloat(seed, Purpose.Trees, x, z, 3) * 0.7;
         const leaf = shade(
           (LEAF[biome] ?? LEAF[Biome.Temperate]) as RGB,
           0.9 + hashFloat(seed, Purpose.Trees, x, z, 4) * 0.2,
         );
-        b.box(jx - 0.06, y, jz - 0.06, jx + 0.06, y + 0.25, jz + 0.06, TRUNK);
-        if (biome === Biome.Cold || biome === Biome.Forest) {
-          b.pyramid(jx, y + 0.2, y + 0.25 + h, jz, 0.32, leaf); // conifer
+        const snowy = biome === Biome.Cold || level >= SNOW_LEVEL;
+        if (
+          snowy ||
+          (biome === Biome.Forest && hashFloat(seed, Purpose.Decoration, x, z, 6) < 0.5)
+        ) {
+          b.box(jx - 0.065, y, jz - 0.065, jx + 0.065, y + h * 0.7, jz + 0.065, TRUNK);
+          for (let tier = 0; tier < 3; tier++) {
+            const half = 0.32 - tier * 0.075;
+            const base = y + h * (0.24 + 0.22 * tier);
+            const top = base + h * 0.25;
+            b.box(
+              jx - half,
+              base,
+              jz - half,
+              jx + half,
+              top,
+              jz + half,
+              shade(leaf, 0.86 + tier * 0.11),
+            );
+            if (snowy) {
+              b.box(
+                jx - half * 0.92,
+                top,
+                jz - half * 0.92,
+                jx + half * 0.92,
+                top + 0.04,
+                jz + half * 0.92,
+                SNOW,
+              );
+            }
+          }
+          b.pyramid(jx, y + h * 0.88, y + h * 1.17, jz, 0.13, snowy ? SNOW : shade(leaf, 1.16));
         } else {
-          b.box(jx - 0.25, y + 0.25, jz - 0.25, jx + 0.25, y + 0.25 + h * 0.6, jz + 0.25, leaf); // broadleaf block
+          b.box(jx - 0.075, y, jz - 0.075, jx + 0.075, y + h * 0.68, jz + 0.075, TRUNK);
+          b.box(jx - 0.26, y + h * 0.48, jz - 0.24, jx + 0.27, y + h * 0.89, jz + 0.26, leaf);
+          b.box(
+            jx - 0.28,
+            y + h * 0.71,
+            jz - 0.17,
+            jx + 0.07,
+            y + h * 1.12,
+            jz + 0.19,
+            shade(leaf, 1.13),
+          );
+          b.box(
+            jx + 0.02,
+            y + h * 0.61,
+            jz - 0.29,
+            jx + 0.31,
+            y + h * 0.97,
+            jz + 0.04,
+            shade(leaf, 0.91),
+          );
         }
       } else if (flags & TileFlag.Rock) {
-        const r = 0.15 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.15;
+        const r = 0.14 + hashFloat(seed, Purpose.Decoration, x, z, 5) * 0.1;
         const rockCol = (res && ORE_ROCK_COLOR[res]) || ROCK;
-        b.box(jx - r, y, jz - r * 0.8, jx + r, y + r * 1.1, jz + r * 0.8, shade(rockCol, 1.1));
+        b.box(jx - r, y, jz - r * 0.7, jx + r, y + r * 1.3, jz + r * 0.7, shade(rockCol, 1.38));
+        b.box(
+          jx - r * 0.6,
+          y + r * 1.3,
+          jz - r * 0.5,
+          jx + r * 0.7,
+          y + r * 1.8,
+          jz + r * 0.52,
+          shade(rockCol, 1.55),
+        );
+        b.box(
+          jx - r * 1.22,
+          y,
+          jz + r * 0.16,
+          jx - r * 0.48,
+          y + r * 0.7,
+          jz + r * 1.14,
+          shade(rockCol, 1.22),
+        );
+        b.box(
+          jx + r * 0.51,
+          y,
+          jz + r * 0.42,
+          jx + r * 1.23,
+          y + r * 0.55,
+          jz + r * 1.24,
+          shade(rockCol, 1.45),
+        );
       }
     }
   }

@@ -9,6 +9,7 @@ import type { City } from './city';
 import type { PoiStore } from './poi';
 import { PACKS } from './progress';
 import type { Simulation } from './simulation';
+import type { Town } from '@/sim/towns';
 
 export type Goal =
   | { type: 'population'; min: number }
@@ -16,11 +17,13 @@ export type Goal =
   | { type: 'stock'; resource: string; min: number }
   | { type: 'production'; resource: string; min: number }
   | { type: 'explore'; min: number }
-  | { type: 'towns'; min: number };
+  | { type: 'towns'; min: number }
+  | { type: 'happyTowns'; min: number; happiness: number; population: number };
 
 export interface Chapter {
   id: string;
   goals: Goal[];
+  alternativeGoals?: Goal[];
   reward?: Amounts;
   packChoice?: boolean;
 }
@@ -47,6 +50,7 @@ export class Goals {
   private busy = false;
   /** Number of towns (set by the game once towns exist; 1 by default). */
   townCount: () => number = () => 1;
+  townMetrics: () => readonly Pick<Town, 'population' | 'happiness'>[] = () => [];
   private listeners: ((e: GoalsEvent) => void)[] = [];
 
   constructor(
@@ -75,20 +79,29 @@ export class Goals {
   }
 
   status(): GoalStatus[] {
-    const ch = this.current;
-    if (!ch) return [];
-    return ch.goals.map((goal) => {
+    return this.measurePath(this.current?.goals ?? []);
+  }
+
+  alternativeStatus(): GoalStatus[] {
+    return this.measurePath(this.current?.alternativeGoals ?? []);
+  }
+
+  private measurePath(path: readonly Goal[]): GoalStatus[] {
+    return path.map((goal) => {
       const have = this.measure(goal);
       return { goal, have, done: have >= goal.min };
     });
   }
 
-  /** Advances when every goal of the current chapter is met (and no pack choice is pending). */
+  /** Advances when one whole path is met and no pack choice is pending. */
   update(): void {
     // Paying a reward emits a stock event, which calls update again: ignore re-entry.
     if (this.busy || this.pending || this.finished) return;
     const ch = this.current as Chapter;
-    if (!this.status().every((s) => s.done)) return;
+    if (!this.status().every((s) => s.done)) {
+      const alternative = this.alternativeStatus();
+      if (!alternative.length || !alternative.every((s) => s.done)) return;
+    }
     this.busy = true;
     try {
       this.complete(ch);
@@ -163,6 +176,10 @@ export class Goals {
         return this.pois.exploredCount;
       case 'towns':
         return this.townCount();
+      case 'happyTowns':
+        return this.townMetrics().filter(
+          (town) => town.population >= g.population && town.happiness >= g.happiness,
+        ).length;
     }
   }
 

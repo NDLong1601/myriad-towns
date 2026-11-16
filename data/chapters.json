@@ -46,6 +46,11 @@
           "min": 1
         }
       ],
+      "alternativeGoals": [
+        { "type": "population", "min": 60 },
+        { "type": "happyTowns", "min": 1, "happiness": 70, "population": 50 },
+        { "type": "stock", "resource": "food", "min": 150 }
+      ],
       "reward": {
         "wood": 120,
         "stone": 80,
@@ -71,6 +76,11 @@
           "min": 150
         }
       ],
+      "alternativeGoals": [
+        { "type": "population", "min": 150 },
+        { "type": "production", "resource": "food", "min": 4 },
+        { "type": "stock", "resource": "food", "min": 300 }
+      ],
       "reward": {
         "wood": 200,
         "stone": 200,
@@ -95,6 +105,11 @@
           "resource": "goods",
           "min": 1
         }
+      ],
+      "alternativeGoals": [
+        { "type": "population", "min": 300 },
+        { "type": "happyTowns", "min": 1, "happiness": 80, "population": 200 },
+        { "type": "stock", "resource": "goods", "min": 100 }
       ],
       "reward": {
         "wood": 300,
@@ -123,6 +138,11 @@
           "resource": "knowledge",
           "min": 1
         }
+      ],
+      "alternativeGoals": [
+        { "type": "population", "min": 600 },
+        { "type": "happyTowns", "min": 2, "happiness": 80, "population": 150 },
+        { "type": "production", "resource": "knowledge", "min": 1 }
       ],
       "reward": {
         "stone": 500,

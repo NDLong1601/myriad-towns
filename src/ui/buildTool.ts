@@ -2,6 +2,7 @@ import { type BuildingDef, type Requirement, isRoadDef } from '@/sim/catalog';
 import { type City, rectOf } from '@/sim/city';
 import { BatchCommand, DemolishCommand, type History, PlaceCommand } from '@/sim/commands';
 import { forTilesInRadius, type Rect } from '@/sim/geometry';
+import { ImpactPreview, type LocalImpact } from '@/sim/impact';
 import { type CheckResult, checkPlacement, checkSustain, checkUpgrades } from '@/sim/requirements';
 import { pickTile } from '@/render/picking';
 import type { PlacementPreview, PreviewTiles } from '@/render/placementPreview';
@@ -20,7 +21,7 @@ const MAX_ROAD = 64;
 
 /**
  * Connects pointer input to the city: hover preview with the requirement checklist,
- * click to place, drag to lay roads, demolish, inspect, and undo/redo shortcuts.
+ * click to place, drag to lay roads and rail, demolish, inspect, and undo/redo shortcuts.
  */
 export class BuildTool {
   private hover: { x: number; z: number } | null = null;
@@ -28,6 +29,9 @@ export class BuildTool {
   private down: { x: number; y: number; tile: { x: number; z: number } | null } | null = null;
   private inspected: number | null = null;
   private readonly ac = new AbortController();
+  private readonly impact: ImpactPreview;
+  private impactRevision = 0;
+  private cachedImpact?: { revision: number; key: string; value: LocalImpact };
 
   constructor(
     private readonly view: WorldView,
@@ -43,6 +47,7 @@ export class BuildTool {
     /** Right-hand panel for the chosen or selected building. */
     private readonly detail?: DetailPanel,
   ) {
+    this.impact = new ImpactPreview(city);
     const canvas = view.renderer.domElement;
     const signal = this.ac.signal;
     canvas.addEventListener('pointermove', (e) => this.onMove(e), { signal });
@@ -59,11 +64,16 @@ export class BuildTool {
     window.addEventListener('keydown', (e) => this.onKey(e), { signal });
     menu.onToolChange((tool) => {
       this.inspected = null;
-      // Roads are drawn by dragging, so left-drag stops panning while the road tool is on.
-      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isRoadTool(tool.defId));
+      // An active route tool assigns left-drag to construction.
+      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isLinearTool(tool.defId));
       this.refresh();
     });
-    city.on(() => this.refresh());
+    city.on((event) => {
+      if (event.type === 'added' || event.type === 'removed' || event.type === 'status') {
+        this.impactRevision++;
+      }
+      this.refresh();
+    });
     history.onChange(() => this.refresh());
     plans?.on(() => this.refresh());
   }
@@ -104,8 +114,8 @@ export class BuildTool {
     this.down = null;
     const tile = this.pick(e);
     const tool = this.tool;
-    if (tool.kind === 'build' && this.isRoadTool(tool.defId)) {
-      if (start && tile) this.layRoad(tool.defId, start, tile);
+    if (tool.kind === 'build' && this.isLinearTool(tool.defId)) {
+      if (start && tile) this.layRoute(tool.defId, start, tile);
     } else if (!moved && tile) {
       this.click(tile);
     }
@@ -146,18 +156,18 @@ export class BuildTool {
     }
   }
 
-  /** Roads, paved roads and bridges are drawn by dragging. */
-  private isRoadTool(defId: string): boolean {
-    return isRoadDef(this.city.catalog.get(defId));
+  /** Roads, bridges and rail are drawn by dragging. */
+  private isLinearTool(defId: string): boolean {
+    return defId === 'rail_track' || isRoadDef(this.city.catalog.get(defId));
   }
 
-  private layRoad(defId: string, a: { x: number; z: number }, b: { x: number; z: number }): void {
+  private layRoute(defId: string, a: { x: number; z: number }, b: { x: number; z: number }): void {
     if (this.planning && this.plans) {
       for (const p of roadPath(a, b)) this.plans.add(defId, p.x, p.z);
       return;
     }
     const parts = roadPath(a, b).map((p) => new PlaceCommand(defId, p.x, p.z));
-    this.history.run(new BatchCommand('road', parts));
+    this.history.run(new BatchCommand(defId, parts));
   }
 
   private onKey(e: KeyboardEvent): void {
@@ -190,6 +200,20 @@ export class BuildTool {
 
   private positionOnly(): void {
     if (this.tool.kind !== 'none' || this.inspected === null) this.refresh();
+  }
+
+  private localImpact(def: BuildingDef, x: number, z: number, uid?: number): LocalImpact {
+    const key = `${def.id}:${x}:${z}:${uid ?? ''}`;
+    if (this.cachedImpact?.key === key && this.cachedImpact.revision === this.impactRevision)
+      return this.cachedImpact.value;
+    const value = this.impact.inspect({
+      def,
+      x,
+      z,
+      ...(uid === undefined ? {} : { removeUid: uid }),
+    });
+    this.cachedImpact = { key, value, revision: this.impactRevision };
+    return value;
   }
 
   /** Recompute preview overlays and the checklist panel. */
@@ -259,10 +283,12 @@ export class BuildTool {
           def: b.def,
           status: this.statusLines(b.uid),
           conditions: sustain.map(line),
-          next: upgrades.map((u) => ({
-            def: this.city.catalog.get(u.to),
-            lines: u.checks.map(line),
-          })),
+          next: upgrades
+            .map((u) => ({
+              def: this.city.catalog.get(u.to),
+              lines: u.checks.map(line),
+            }))
+            .concat(this.mergeOptions(b.def)),
           action: demolishAction,
         });
         return;
@@ -297,13 +323,24 @@ export class BuildTool {
 
     if (tool.kind === 'demolish') {
       this.preview.setGhost(null);
+      const draft = this.planning ? this.plans?.at(this.hover.x, this.hover.z) : undefined;
+      if (draft) {
+        this.preview.setTiles(empty);
+        this.panel.show({ title: t('impact.removeDraft'), sections: [] }, this.screen);
+        return;
+      }
       const b = this.city.at(this.hover.x, this.hover.z);
       if (!b) {
         this.preview.setTiles(empty);
         this.panel.hide();
         return;
       }
-      this.preview.setTiles({ ...empty, footprint: rectTiles(rectOf(b.def, b.x, b.z), false) });
+      const impact = this.localImpact(b.def, b.x, b.z, b.uid);
+      this.preview.setTiles({
+        ...empty,
+        footprint: rectTiles(rectOf(b.def, b.x, b.z), false),
+        markers: impactMarkers(impact),
+      });
       this.panel.show(
         {
           title: `${t('ui.demolish').replace(/ \(.*\)/, '')}: ${buildingName(b.def.id)}`,
@@ -313,6 +350,7 @@ export class BuildTool {
                 { text: t('ui.refund', { cost: formatAmounts(this.city.refundOf(b.def)) || '—' }) },
               ],
             },
+            ...impactSections(this.city.isActive(b.uid) ? b.def : undefined, impact, true),
           ],
         },
         this.screen,
@@ -321,8 +359,8 @@ export class BuildTool {
     }
 
     const def = this.city.catalog.get(tool.defId);
-    if (isRoadDef(def) && this.down?.tile) {
-      // Dragging a road: preview the whole path.
+    if (this.isLinearTool(def.id) && this.down?.tile) {
+      // Preview the whole path during a drag.
       const path = roadPath(this.down.tile, this.hover);
       const fp = path.map((p) => ({ ...p, ok: checkPlacement(this.city, def, p.x, p.z).ok }));
       const okCount = fp.filter((p) => p.ok).length;
@@ -343,12 +381,13 @@ export class BuildTool {
     const c = this.corner(def, this.hover);
     const check = checkPlacement(this.city, def, c.x, c.z);
     const rect = rectOf(def, c.x, c.z);
+    const impact = check.ok ? this.localImpact(def, c.x, c.z) : undefined;
     this.preview.setGhost(def, c.x, c.z, check.ok);
     this.preview.setTiles({
       footprint: rectTiles(rect, check.ok),
       affects: emitTiles(def, rect),
       checks: checkTiles(check.requires, rect),
-      markers: markersFor(this.city, check.requires),
+      markers: [...impactMarkers(impact), ...markersFor(this.city, check.requires)],
     });
     const content: PanelContent = {
       title: buildingName(def.id),
@@ -362,6 +401,7 @@ export class BuildTool {
             ...(check.treesToCut ? [{ text: t('ui.treesCleared') }] : []),
           ],
         },
+        ...impactSections(check.ok || this.planning ? def : undefined, impact, false),
       ],
       verdict: this.planning
         ? {
@@ -378,20 +418,43 @@ export class BuildTool {
     if (!this.detail) return;
     const def = this.city.catalog.get(defId);
     const live = this.hover && !(def.id === 'road' && this.down?.tile);
+    const locked = this.city.progress.lockReason(def);
     const conditions: PanelLine[] = live
       ? (() => {
           const c = this.corner(def, this.hover as { x: number; z: number });
-          return checkPlacement(this.city, def, c.x, c.z).requires.map(line);
+          const check = checkPlacement(this.city, def, c.x, c.z);
+          return [...check.site.filter((item) => !item.ok), ...check.requires].map(line);
         })()
-      : (def.requires ?? []).map((r) => ({ text: describeCheck(placeholder(r)) }));
+      : [
+          ...(locked ? [line({ ok: false, key: locked.key, params: locked.params })] : []),
+          ...[...(def.requires ?? []), ...(def.placementRequires ?? [])].map((r) => ({
+            text: describeCheck(placeholder(r)),
+          })),
+        ];
     this.detail.show({
       def,
       cost: def.cost,
       conditions,
-      next: (def.upgrades ?? []).map((u) => ({
-        def: this.city.catalog.get(u.to),
-        lines: u.when.map((r) => ({ text: describeCheck(placeholder(r)) })),
-      })),
+      next: (def.upgrades ?? [])
+        .map((u) => ({
+          def: this.city.catalog.get(u.to),
+          lines: u.when.map((r): PanelLine => ({ text: describeCheck(placeholder(r)) })),
+        }))
+        .concat(this.mergeOptions(def)),
+    });
+  }
+
+  private mergeOptions(def: BuildingDef): { def: BuildingDef; lines: PanelLine[] }[] {
+    return (def.mergeInto ?? []).map((rule) => {
+      const target = this.city.catalog.get(rule.to);
+      const { w, d } = target.footprint;
+      return {
+        def: target,
+        lines: [
+          { text: t('ui.mergeHomes', { n: w * d, w, d }) },
+          ...rule.when.map((req) => ({ text: describeCheck(placeholder(req)) })),
+        ],
+      };
     });
   }
 
@@ -404,6 +467,20 @@ export class BuildTool {
     const active = this.city.isActive(uid);
     const s = sim.stateOf(uid);
     if (!active) out.push({ ok: false, text: t('status.abandoned') });
+    if (b.def.crop) out.push({ text: t(`crop.stage${sim.cropStageOf(uid)}`) });
+    if (b.def.voyage) {
+      const phase = sim.voyagePhaseOf(uid);
+      if (!sim.voyageRouteOf(uid)?.length) out.push({ ok: false, text: t('voyage.noRoute') });
+      else
+        out.push({
+          text: t(
+            phase === 0 ? 'voyage.docked' : phase < 0.5 ? 'voyage.outbound' : 'voyage.returning',
+            {
+              n: Math.floor(phase * 100),
+            },
+          ),
+        });
+    }
     for (const p of s?.shortages ?? []) out.push({ ok: false, text: problemText(p) });
     const left = sim.declineIn(uid);
     if (left !== undefined) {
@@ -416,12 +493,49 @@ export class BuildTool {
       });
     }
     if (active && out.length === 0) out.push({ ok: true, text: t('status.working') });
+    if (active && b.def.housing)
+      out.push({
+        text: t('status.residents', { n: sim.residentsOf(uid), capacity: b.def.housing }),
+      });
     return out;
   }
 
   dispose(): void {
     this.ac.abort();
   }
+}
+
+function impactMarkers(impact?: LocalImpact): PreviewTiles['markers'] {
+  if (!impact) return [];
+  return [
+    ...impact.atRisk.map(({ x, z }) => ({ x, z, good: false })),
+    ...impact.improved.map(({ x, z }) => ({ x, z, good: true })),
+  ];
+}
+
+function impactSections(
+  def: BuildingDef | undefined,
+  impact: LocalImpact | undefined,
+  remove: boolean,
+): PanelContent['sections'] {
+  const lines: PanelLine[] = [];
+  if (impact?.atRisk.length)
+    lines.push({ ok: false, text: t('impact.atRisk', { n: impact.atRisk.length }) });
+  if (impact?.improved.length)
+    lines.push({ ok: true, text: t('impact.improved', { n: impact.improved.length }) });
+  if (def && Object.keys(def.produces ?? {}).length)
+    lines.push({
+      text: t(remove ? 'impact.losesOutput' : 'impact.gainsOutput', {
+        what: formatAmounts(def.produces),
+      }),
+    });
+  if (def && Object.keys(def.upkeep ?? {}).length)
+    lines.push({
+      text: t(remove ? 'impact.savesInput' : 'impact.needsInput', {
+        what: formatAmounts(def.upkeep),
+      }),
+    });
+  return lines.length ? [{ title: t('impact.title'), lines }] : [];
 }
 
 function problemText(p: Problem): string {
@@ -485,7 +599,11 @@ function placeholder(r: Requirement): CheckResult {
         params: { terrain: r.terrain, r: r.radius, need: r.min ?? 1, have: '…' },
       };
     case 'road':
-      return { ok: false, key: 'req.road', params: { d: r.maxDistance } };
+      return {
+        ok: false,
+        key: r.paved ? 'req.pavedRoad' : 'req.road',
+        params: { d: r.maxDistance },
+      };
   }
 }
 

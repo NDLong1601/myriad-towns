@@ -1,22 +1,63 @@
 import { expect, test } from '@playwright/test';
 
-test('without a game in the URL the new-game dialog opens and starts the chosen mode', async ({
-  page,
-}) => {
-  test.setTimeout(90_000); // boots the game twice
+test('the launcher opens the setup and starts the configured city', async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto('./?speed=0');
+  const launcher = page.locator('.mt-launch');
+  await expect(launcher.getByRole('heading', { level: 1 })).toContainText('MYRIAD');
+  await expect(page.locator('#app canvas')).toHaveCount(0);
+  await expect(launcher.locator('.mt-continue')).toHaveAttribute('aria-disabled', 'true');
+  await launcher.getByRole('button', { name: 'Ván mới' }).click();
   const dialog = page.locator('.mt-newgame');
   await expect(dialog).toBeVisible({ timeout: 30_000 });
   await dialog.locator('label:has(input[value="sandbox"])').click();
   await dialog.locator('input[name="free"]').check();
-  await dialog.locator('input[name="seed"]').fill('e2e-ng');
+  await dialog.locator('input[name="seed"]').fill('myriad');
+  await dialog.locator('input[name="city"]').fill('Bến Gió');
+  await dialog.getByRole('radio', { name: 'Ven sông' }).check();
+  await dialog.getByRole('radio', { name: 'Dồi dào' }).check();
+  await dialog.locator('select[name="surface"]').selectOption('hills');
   await dialog.locator('button[type="submit"]').click();
   await page.waitForURL(/mode=sandbox/);
   await page.waitForFunction(() => window.__MYRIAD__?.ready(), null, { timeout: 30_000 });
   expect(await page.evaluate(() => window.__MYRIAD__!.mode())).toBe('sandbox');
-  expect(page.url()).toContain('seed=e2e-ng');
+  expect(page.url()).toContain('seed=myriad');
   expect(page.url()).toContain('free=1');
+  expect(page.url()).toContain('terrain=hills');
+  await expect(page.locator('#hud strong')).toHaveText('Bến Gió');
+  expect(await page.evaluate(() => window.__MYRIAD__!.stock())).toMatchObject({
+    food: 225,
+    wood: 450,
+    stone: 300,
+  });
+  const camera = await page.evaluate(() => window.__MYRIAD__!.camera());
+  expect(Math.hypot(camera.x - 0.5, camera.z - 0.5)).toBeGreaterThan(1);
+  expect(camera.distance).toBeLessThan(55);
+  await expect(page.locator('.mt-items')).toBeHidden();
+  await page.getByRole('button', { name: 'Ban đêm' }).click();
+  await expect(page.locator('.mt-lighting time')).toHaveText('00:00');
+  await expect.poll(() => page.evaluate(() => window.__MYRIAD__!.timeOfDay())).toBe(0);
+  await page.getByRole('button', { name: 'Ban ngày' }).click();
+  await expect(page.locator('.mt-lighting time')).toHaveText('12:00');
   await expect(page.locator('.mt-newgame')).toHaveCount(0);
+});
+
+test('launcher settings apply and the mobile setup stays within its viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Cài đặt', exact: true }).click();
+  await page.locator('.mt-settings select[name=lang]').selectOption('en');
+  await page.getByRole('button', { name: /Lưu và áp dụng/ }).click();
+  await page.getByRole('button', { name: 'New game', exact: true }).click();
+  const pane = page.locator('.mt-launch-pane');
+  await expect(pane.getByRole('heading', { name: 'New game' })).toBeVisible();
+  const bounds = (await pane.boundingBox())!;
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(375);
+  const play = (await pane.getByRole('button', { name: 'Start' }).boundingBox())!;
+  expect(play.y + play.height).toBeLessThanOrEqual(667);
+  await pane.getByRole('button', { name: 'Back' }).click();
+  await expect(pane).toBeHidden();
 });
 
 test('goals mode: the chapter panel shows, a finished chapter offers two packs', async ({

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { type BuildingDef, isRoadDef } from '@/sim/catalog';
 import type { City } from '@/sim/city';
+import { angleBetween } from '@/render/flightPath';
 import type { FloatingOrigin } from './floatingOrigin';
 import { BRIDGE_LIFT } from './buildingModels';
 import { agentGeometry } from './vehicleModels';
@@ -20,11 +21,18 @@ interface Agent {
   az: number;
   bx: number;
   bz: number;
+  targetKey: string;
+  /** Previous and upcoming tiles, used to join the edges at a corner. */
+  px: number;
+  pz: number;
+  cx: number;
+  cz: number;
   /** Progress along the current step, 0..1. */
   t: number;
   /** Smoothed heading (radians, 0 = +x). */
   yaw: number;
   speed: number;
+  cruiseSpeed: number;
   /** Sideways offset from the tile centre (right-hand traffic; people keep to the verge). */
   lane: number;
   phase: number;
@@ -59,12 +67,17 @@ export class TrafficRenderer {
   private readonly agents: Agent[] = [];
   private readonly roads: { x: number; z: number }[] = [];
   private readonly roadIndex = new Map<string, number>();
+  private readonly busy = new Map<string, number>();
+  private readonly drawCounts = new Map<AgentKind, number>();
+  private readonly nextX = new Int32Array(4);
+  private readonly nextZ = new Int32Array(4);
   private plan: TrafficPlan = trafficPlan(0, 0, 0);
   private spawnClock = 0;
   private dirtyColors = true;
   private readonly m = new THREE.Matrix4();
   private readonly q = new THREE.Quaternion();
   private readonly pos = new THREE.Vector3();
+  private readonly pathPose = { x: 0, z: 0, yaw: 0 };
   private readonly one = new THREE.Vector3(1, 1, 1);
   private readonly up = new THREE.Vector3(0, 1, 0);
   private rnd: () => number;
@@ -169,10 +182,11 @@ export class TrafficRenderer {
     for (let i = this.agents.length - 1; i >= 0; i--) {
       const a = this.agents[i] as Agent;
       const far = Math.hypot(a.ax - cam.x, a.az - cam.z) > maxD;
-      if (far || !this.isRoad(a.ax, a.az)) this.removeAgent(i);
+      if (far || !this.isRoad(a.ax, a.az) || !this.isRoad(a.bx, a.bz)) this.removeAgent(i);
+      else if (!this.isRoad(a.cx, a.cz)) this.chooseNext(a);
     }
     this.spawn(dt, cam, reach);
-    if (!paused && dt > 0) this.step(dt);
+    if (!paused && dt > 0) this.step(Math.min(0.25, dt));
     this.draw();
   }
 
@@ -221,104 +235,151 @@ export class TrafficRenderer {
     return false;
   }
 
-  private neighbours(x: number, z: number, notX: number, notZ: number): [number, number][] {
-    const out: [number, number][] = [];
+  private neighbours(x: number, z: number, notX: number, notZ: number): number {
+    let count = 0;
     for (const [dx, dz] of DIRS) {
       const nx = x + dx;
       const nz = z + dz;
       if (nx === notX && nz === notZ) continue;
-      if (this.isRoad(nx, nz)) out.push([nx, nz]);
+      if (this.isRoad(nx, nz)) {
+        this.nextX[count] = nx;
+        this.nextZ[count++] = nz;
+      }
     }
-    return out;
+    return count;
   }
 
   private addAgent(kind: AgentKind, x: number, z: number): boolean {
     const next = this.neighbours(x, z, Number.NaN, Number.NaN);
-    if (next.length === 0) return false;
-    const [bx, bz] = next[Math.floor(this.rnd() * next.length)] as [number, number];
+    if (!next) return false;
+    const pick = Math.floor(this.rnd() * next);
+    const bx = this.nextX[pick]!;
+    const bz = this.nextZ[pick]!;
     const cap = this.meshes.get(kind)?.instanceMatrix.count ?? 0;
     if (this.agents.filter((a) => a.kind === kind).length >= cap) return false;
-    this.agents.push({
+    const agent: Agent = {
       kind,
       ax: x,
       az: z,
       bx,
       bz,
+      targetKey: keyOf(bx, bz),
+      px: x,
+      pz: z,
+      cx: bx,
+      cz: bz,
       t: 0,
       yaw: Math.atan2(bz - z, bx - x),
-      speed: SPEED[kind] * (0.85 + this.rnd() * 0.3),
+      speed: kind === 'pedestrian' ? SPEED.pedestrian : 0,
+      cruiseSpeed: SPEED[kind] * (0.85 + this.rnd() * 0.3),
       lane: kind === 'pedestrian' ? 0.3 : 0.13,
       phase: this.rnd() * 6.28,
       tint: TINTS[Math.floor(this.rnd() * TINTS.length)] as THREE.Color,
       wait: 0,
-    });
+    };
+    this.chooseNext(agent);
+    this.agents.push(agent);
     this.dirtyColors = true;
     return true;
   }
 
+  private chooseNext(a: Agent): void {
+    const options = this.neighbours(a.bx, a.bz, a.ax, a.az);
+    if (!options) {
+      a.cx = a.ax;
+      a.cz = a.az;
+      return;
+    }
+    const sx = 2 * a.bx - a.ax;
+    const sz = 2 * a.bz - a.az;
+    let straight = -1;
+    for (let i = 0; i < options; i++)
+      if (this.nextX[i] === sx && this.nextZ[i] === sz) straight = i;
+    const pick = straight >= 0 && this.rnd() < 0.7 ? straight : Math.floor(this.rnd() * options);
+    a.cx = this.nextX[pick]!;
+    a.cz = this.nextZ[pick]!;
+  }
+
   private step(dt: number): void {
     // Vehicles keep a tile apart: count who is where, and wait for a free tile ahead.
-    const busy = new Map<string, number>();
+    const busy = this.busy;
+    busy.clear();
     for (const a of this.agents)
-      if (a.kind !== 'pedestrian')
-        busy.set(keyOf(a.bx, a.bz), (busy.get(keyOf(a.bx, a.bz)) ?? 0) + 1);
+      if (a.kind !== 'pedestrian') busy.set(a.targetKey, (busy.get(a.targetKey) ?? 0) + 1);
     for (const a of this.agents) {
-      a.phase += dt * a.speed * 7;
-      if (a.kind !== 'pedestrian' && a.t < 0.15) {
-        const ahead = busy.get(keyOf(a.bx, a.bz)) ?? 0;
-        // Someone else is already entering that tile: wait a moment (at most 2 s).
-        if (ahead > 1 && a.wait < 2) {
-          a.wait += dt;
-          continue;
-        }
-      }
-      a.wait = 0;
-      a.t += (a.speed * dt) / 1;
+      const want = this.roadPose(a).yaw;
+      const turn = angleBetween(a.yaw, want);
+      const driving = a.kind !== 'pedestrian';
+      const congested = driving && a.t <= 0.2 && (busy.get(a.targetKey) ?? 0) > 1;
+      const blocked = congested && a.wait < 2;
+      a.wait = congested ? a.wait + dt : 0;
+      const heading = Math.atan2(a.bz - a.az, a.bx - a.ax);
+      const nextHeading = Math.atan2(a.cz - a.bz, a.cx - a.bx);
+      const upcoming =
+        Math.max(0, (a.t - 0.55) / 0.45) * Math.abs(angleBetween(heading, nextHeading));
+      const curve = Math.max(Math.abs(turn), upcoming);
+      const desired = blocked ? 0 : a.cruiseSpeed * (driving ? 1 - (0.8 * curve) / Math.PI : 1);
+      const previous = a.speed;
+      const rate = desired < previous ? 14 : 4;
+      a.speed += (desired - previous) * (1 - Math.exp(-dt * rate));
+      const travel = (a.speed + previous) * 0.5 * dt;
+      a.t = blocked ? Math.min(0.2, a.t + travel) : a.t + travel;
+      a.phase += a.speed * dt * 7;
+      a.yaw += turn * (1 - Math.exp(-dt * (driving ? 7 : 11)));
       if (a.t >= 1) {
-        const px = a.ax;
-        const pz = a.az;
+        a.px = a.ax;
+        a.pz = a.az;
         a.ax = a.bx;
         a.az = a.bz;
+        a.bx = a.cx;
+        a.bz = a.cz;
+        a.targetKey = keyOf(a.bx, a.bz);
         a.t -= 1;
-        const options = this.neighbours(a.ax, a.az, px, pz);
-        if (options.length === 0) {
-          // Dead end: turn around.
-          a.bx = px;
-          a.bz = pz;
-        } else {
-          // Prefer going straight on, otherwise any way out.
-          const sx = a.ax + (a.ax - px);
-          const sz = a.az + (a.az - pz);
-          const straight = options.find(([x, z]) => x === sx && z === sz);
-          const pick =
-            straight && this.rnd() < 0.7
-              ? straight
-              : (options[Math.floor(this.rnd() * options.length)] as [number, number]);
-          a.bx = pick[0];
-          a.bz = pick[1];
-        }
-        if (!this.isRoad(a.bx, a.bz)) {
-          a.bx = px;
-          a.bz = pz;
-        }
+        this.chooseNext(a);
       }
-      // Turn smoothly towards the direction of travel.
-      const want = Math.atan2(a.bz - a.az, a.bx - a.ax);
-      let d = want - a.yaw;
-      while (d > Math.PI) d -= 2 * Math.PI;
-      while (d < -Math.PI) d += 2 * Math.PI;
-      a.yaw += d * Math.min(1, dt * 9);
     }
   }
 
+  private roadPose(a: Agent): typeof this.pathPose {
+    const out = this.pathPose;
+    const radius = 0.24;
+    if (a.t < radius && (a.px !== a.ax || a.pz !== a.az) && (a.px !== a.bx || a.pz !== a.bz)) {
+      this.curve(a.px, a.pz, a.ax, a.az, a.bx, a.bz, (a.t + radius) / (2 * radius), radius);
+    } else if (a.t > 1 - radius && (a.cx !== a.ax || a.cz !== a.az)) {
+      this.curve(a.ax, a.az, a.bx, a.bz, a.cx, a.cz, (a.t - 1 + radius) / (2 * radius), radius);
+    } else {
+      out.x = a.ax + (a.bx - a.ax) * a.t + 0.5;
+      out.z = a.az + (a.bz - a.az) * a.t + 0.5;
+      out.yaw = Math.atan2(a.bz - a.az, a.bx - a.ax);
+    }
+    return out;
+  }
+
+  private curve(
+    px: number,
+    pz: number,
+    x: number,
+    z: number,
+    nx: number,
+    nz: number,
+    t: number,
+    r: number,
+  ): void {
+    const u = 1 - t;
+    const out = this.pathPose;
+    out.x = x + 0.5 + r * (u * u * (px - x) + t * t * (nx - x));
+    out.z = z + 0.5 + r * (u * u * (pz - z) + t * t * (nz - z));
+    out.yaw = Math.atan2(u * (z - pz) + t * (nz - z), u * (x - px) + t * (nx - x));
+  }
+
   private draw(): void {
-    const counts = new Map<AgentKind, number>();
+    const counts = this.drawCounts;
+    counts.clear();
     for (const a of this.agents) {
       const mesh = this.meshes.get(a.kind) as THREE.InstancedMesh;
       const i = counts.get(a.kind) ?? 0;
       counts.set(a.kind, i + 1);
-      const x = a.ax + (a.bx - a.ax) * a.t + 0.5;
-      const z = a.az + (a.bz - a.az) * a.t + 0.5;
+      const { x, z } = this.roadPose(a);
       // Offset to the right of the heading, using the smoothed yaw so corners stay smooth.
       const rx = -Math.sin(a.yaw) * -a.lane;
       const rz = Math.cos(a.yaw) * -a.lane;
@@ -328,8 +389,7 @@ export class TrafficRenderer {
       const yb = this.surface(a.bx, a.bz);
       let y = ya + (yb - ya) * a.t;
       if (a.kind === 'pedestrian') y += Math.abs(Math.sin(a.phase)) * 0.025;
-      const p = this.origin.toLocal(wx, wz);
-      this.pos.set(p.x, y, p.z);
+      this.pos.set(wx - this.origin.x, y, wz - this.origin.z);
       this.q.setFromAxisAngle(this.up, -a.yaw);
       this.m.compose(this.pos, this.q, this.one);
       mesh.setMatrixAt(i, this.m);

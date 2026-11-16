@@ -1,0 +1,705 @@
+[
+  {
+    "id": "garden_court",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "block",
+      "color": "#d9ccb0",
+      "roof": "#47756c",
+      "height": 1.75
+    },
+    "housing": 64,
+    "upkeep": {
+      "food": 2.56,
+      "goods": 0.32
+    },
+    "produces": {
+      "labor": 16,
+      "skilled": 11
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 12,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 16,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "upgrades": [
+      {
+        "to": "civic_court",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "civic_court",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "block",
+      "color": "#e2ad79",
+      "roof": "#465c64",
+      "height": 2.55
+    },
+    "housing": 88,
+    "upkeep": {
+      "food": 3.52,
+      "goods": 0.44
+    },
+    "produces": {
+      "labor": 22,
+      "skilled": 15,
+      "expert": 6
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 12,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 16,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "decline": {
+      "to": "garden_court"
+    }
+  },
+  {
+    "id": "artisan_row_east",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#d9ccb0",
+      "roof": "#47756c",
+      "height": 1.48
+    },
+    "housing": 32,
+    "upkeep": {
+      "food": 1.28,
+      "goods": 0.16
+    },
+    "produces": {
+      "labor": 8,
+      "skilled": 5
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 6,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 8,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "upgrades": [
+      {
+        "to": "terrace_residence_east",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "terrace_residence_east",
+    "category": "housing",
+    "footprint": {
+      "w": 2,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#e2ad79",
+      "roof": "#465c64",
+      "height": 2.18
+    },
+    "housing": 44,
+    "upkeep": {
+      "food": 1.76,
+      "goods": 0.22
+    },
+    "produces": {
+      "labor": 11,
+      "skilled": 7,
+      "expert": 3
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 6,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 8,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "decline": {
+      "to": "artisan_row_east"
+    }
+  },
+  {
+    "id": "artisan_row_south",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#d9ccb0",
+      "roof": "#47756c",
+      "height": 1.48
+    },
+    "housing": 32,
+    "upkeep": {
+      "food": 1.28,
+      "goods": 0.16
+    },
+    "produces": {
+      "labor": 8,
+      "skilled": 5
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 6,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 8,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "upgrades": [
+      {
+        "to": "terrace_residence_south",
+        "when": [
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "terrace_residence_south",
+    "category": "housing",
+    "footprint": {
+      "w": 1,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#e2ad79",
+      "roof": "#465c64",
+      "height": 2.18
+    },
+    "housing": 44,
+    "upkeep": {
+      "food": 1.76,
+      "goods": 0.22
+    },
+    "produces": {
+      "labor": 11,
+      "skilled": 7,
+      "expert": 3
+    },
+    "emits": [
+      {
+        "field": "density",
+        "amount": 6,
+        "radius": 3
+      },
+      {
+        "field": "urban",
+        "amount": 8,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "commerce",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "education",
+        "min": 1
+      },
+      {
+        "type": "field",
+        "field": "pollution",
+        "max": 0
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      }
+    ],
+    "tags": ["residential", "upgrade_only"],
+    "decline": {
+      "to": "artisan_row_south"
+    }
+  },
+  {
+    "id": "distribution_depot",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1
+    },
+    "storage": {
+      "wood": 1800,
+      "stone": 1800,
+      "ore": 1800,
+      "coal": 1800,
+      "metal": 1800,
+      "goods": 2400
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "near",
+        "building": "stockpile",
+        "radius": 5,
+        "min": 1
+      }
+    ],
+    "visual": {
+      "shape": "hall",
+      "color": "#ad8065",
+      "roof": "#3e6667",
+      "height": 1.65
+    },
+    "tags": ["storage", "logistics", "upgrade_only"],
+    "decline": {
+      "to": "warehouse"
+    }
+  },
+  {
+    "id": "grain_store",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 18,
+      "stone": 12
+    },
+    "visual": {
+      "shape": "hall",
+      "color": "#c79b58",
+      "roof": "#59463e",
+      "height": 0.95
+    },
+    "storage": {
+      "food": 1000
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "near",
+        "building": "berry_field",
+        "radius": 4,
+        "min": 2
+      },
+      {
+        "type": "notNear",
+        "building": "grain_store",
+        "radius": 5
+      }
+    ],
+    "unlock": {
+      "population": 30
+    },
+    "tags": ["storage", "agriculture"]
+  },
+  {
+    "id": "market_garden",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {
+      "wood": 5,
+      "stone": 2
+    },
+    "visual": {
+      "shape": "field",
+      "color": "#76a94e",
+      "height": 0.19
+    },
+    "crop": {
+      "kind": "vegetables",
+      "ticks": 48
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 2.6
+    },
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      }
+    ],
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "unlock": {
+      "population": 36
+    },
+    "tags": ["agriculture"]
+  },
+  {
+    "id": "irrigated_wheat",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "field",
+      "color": "#e2bc4e",
+      "height": 0.22
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 3.6
+    },
+    "placeOn": ["land", "flat", "grass"],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      },
+      {
+        "type": "field",
+        "field": "water_access",
+        "min": 1
+      },
+      {
+        "type": "near",
+        "building": "grain_store",
+        "radius": 5,
+        "min": 1
+      }
+    ],
+    "crop": {
+      "kind": "grain",
+      "ticks": 64
+    },
+    "tags": ["agriculture", "upgrade_only"],
+    "decline": {
+      "to": "wheat_farm"
+    }
+  },
+  {
+    "id": "trade_harbor",
+    "category": "infrastructure",
+    "footprint": {
+      "w": 3,
+      "d": 2
+    },
+    "cost": {},
+    "upkeep": {
+      "labor": 3,
+      "skilled": 2,
+      "wood": 0.45
+    },
+    "storage": {
+      "wood": 1000,
+      "ore": 1000,
+      "metal": 1000,
+      "goods": 1000
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 4,
+        "falloff": "linear"
+      }
+    ],
+    "requires": [
+      {
+        "type": "terrain",
+        "terrain": "water",
+        "radius": 2,
+        "min": 2
+      },
+      {
+        "type": "road",
+        "maxDistance": 2
+      },
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "near",
+        "building": "warehouse",
+        "radius": 6,
+        "min": 1
+      }
+    ],
+    "visual": {
+      "shape": "dock",
+      "color": "#577f80",
+      "roof": "#b38452",
+      "height": 1.45
+    },
+    "tags": ["port", "storage", "industry", "upgrade_only"],
+    "voyage": {
+      "kind": "cargo",
+      "ticks": 72,
+      "range": 24
+    },
+    "produces": {
+      "goods": 2.2,
+      "metal": 0.35
+    },
+    "decline": {
+      "to": "cargo_port"
+    }
+  }
+]

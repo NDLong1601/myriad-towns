@@ -32,6 +32,8 @@ export const TileFlag = {
   River: 1 << 1,
   Tree: 1 << 2,
   Rock: 1 << 3,
+  /** Added by the renderer for occupied tiles. The generator and saves never set it. */
+  Covered: 1 << 4,
 } as const;
 
 /** Natural resource deposit per tile. */

@@ -1,4 +1,5 @@
 import type { Amounts } from '@/sim/catalog';
+import { TICK_HZ } from '@/sim/clock';
 import { thumbnail } from '@/render/thumbnails';
 import type { BuildingDef } from '@/sim/catalog';
 import { buildingName, t } from './i18n';
@@ -46,6 +47,10 @@ export function detailHtml(c: DetailContent): string {
     stats.push(`<li>${amountsHtml(d.produces, '+')} <small>${t('ui.perSecond')}</small></li>`);
   if (d.upkeep)
     stats.push(`<li>${amountsHtml(d.upkeep, '−')} <small>${t('ui.perSecond')}</small></li>`);
+  if (d.storage) stats.push(`<li>${esc(t('ui.storage'))} · ${amountsHtml(d.storage)}</li>`);
+  if (d.crop) stats.push(`<li>${esc(t('crop.cycle'))}</li>`);
+  if (d.voyage)
+    stats.push(`<li>${esc(t('voyage.delivery', { s: d.voyage.ticks / TICK_HZ }))}</li>`);
   for (const e of d.emits ?? []) {
     stats.push(
       `<li>${esc(t('ui.emits'))}: ${esc(t(`field.${e.field}`))} ${e.amount > 0 ? '+' : ''}${e.amount} (r=${e.radius})</li>`,
