@@ -271,6 +271,21 @@ export class Lot {
     this.add(part(g, color, center.x, center.y, center.z));
   }
 
+  /** Custom geometry in world units, positioned at lot fractions (x, z) and height y. */
+  shape(g: THREE.BufferGeometry, color: string, x: number, z: number, y: number, glow = 0): void {
+    this.add(part(g, color, x * this.w, y, z * this.d, glow));
+  }
+
+  /** Width of the lot in world units along x (after any turn). */
+  get spanX(): number {
+    return this.w;
+  }
+
+  /** Depth of the lot in world units along z (after any turn). */
+  get spanZ(): number {
+    return this.d;
+  }
+
   /** A row of small windows on a front-facing wall. */
   windows(x: number, z: number, span: number, y: number, h: number, count: number): void {
     for (let i = 0; i < count; i++) {

@@ -606,5 +606,8 @@
   "building.downdraft_kiln.name": "Downdraft brick kiln",
   "building.kiln_works.name": "Hoffman kiln works",
   "building.tunnel_kiln_works.name": "Tunnel kiln works",
-  "building.ceramics_manufactory.name": "Ceramics manufactory"
+  "building.ceramics_manufactory.name": "Ceramics manufactory",
+  "building.open_air_stage.name": "Open-air stage",
+  "building.playhouse.name": "Playhouse",
+  "building.opera_house.name": "Opera house"
 }

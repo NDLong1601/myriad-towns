@@ -125,6 +125,24 @@ làm; bỏ qua được bất cứ lúc nào.
 
 ![Cùng khu đó về đêm: đèn đường và cửa sổ sáng](docs/images/night.jpg)
 
+### Chuỗi Nhà hát: công trình chi tiết hơn
+
+Nhóm Văn hóa có thêm chuỗi Nhà hát 2×2 ba cấp, dựng chi tiết hơn các nhóm trước: **Sân khấu ngoài trời** → **Nhà hát gạch** → **Nhà hát lớn**. Sân khấu lên Nhà hát gạch khi có đường lát, khu đô thị (≥ 3) và thương mại (≥ 2). Nhà hát gạch lên Nhà hát lớn khi đô thị ≥ 6, giáo dục ≥ 2 và không ô nhiễm. Nếu mất điều kiện, công trình xuống cấp lại.
+
+- Mái hông có hàng ngói và gờ nóc. Cửa sổ lõm vào tường, có khung, song kính, bậu và đá đỉnh vòm.
+- Cột cổ điển, mái đua có hàng răng cưa, tầng trệt đá đẽo rãnh, mái vòm đồng có gân và đèn lồng.
+- Cây nhiều tầng tán, đèn đường, cột quảng cáo và người nhỏ để thấy tỉ lệ.
+- Bóng tiếp đất và màu lệch nhẹ giữa các khối được nung vào màu đỉnh, nên không tốn thêm lượt vẽ.
+
+![Chuỗi Nhà hát trong thị trấn](docs/images/theatre-town.jpg)
+
+| ![Ba cấp Nhà hát](docs/images/theatre-chain.jpg) | ![Nhà hát lớn](docs/images/theatre-opera.jpg) |
+| ------------------------------------------------ | --------------------------------------------- |
+
+![Chuỗi Nhà hát về đêm](docs/images/theatre-night.jpg)
+
+Xem thử một công trình bất kỳ khi chạy `npm run dev`: `/tools/building-preview.html?ids=open_air_stage,playhouse,opera_house&yaw=35` (thêm `&night=1` cho cảnh đêm).
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

@@ -606,5 +606,8 @@
   "building.downdraft_kiln.name": "Lò gạch vòm đôi",
   "building.kiln_works.name": "Xưởng gạch vòm Hoffman",
   "building.tunnel_kiln_works.name": "Xưởng gạch lò đường hầm",
-  "building.ceramics_manufactory.name": "Nhà máy gốm sứ & gạch men"
+  "building.ceramics_manufactory.name": "Nhà máy gốm sứ & gạch men",
+  "building.open_air_stage.name": "Sân khấu ngoài trời",
+  "building.playhouse.name": "Nhà hát gạch",
+  "building.opera_house.name": "Nhà hát lớn"
 }
