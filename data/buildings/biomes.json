@@ -77,7 +77,24 @@
       }
     ],
     "placeOn": ["land", "flat", "steppe"],
-    "tags": ["farm", "steppe"]
+    "tags": ["farm", "steppe"],
+    "upgrades": [
+      {
+        "to": "dairy_farm",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "log_cabin",

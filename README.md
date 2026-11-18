@@ -143,6 +143,33 @@ Nhóm Văn hóa có thêm chuỗi Nhà hát 2×2 ba cấp, dựng chi tiết hơ
 
 Xem thử một công trình bất kỳ khi chạy `npm run dev`: `/tools/building-preview.html?ids=open_air_stage,playhouse,opera_house&yaw=35` (thêm `&night=1` cho cảnh đêm).
 
+### Nhóm 5: Nông nghiệp, Thực phẩm, Chăn nuôi và Ngư nghiệp
+
+Năm chuỗi công trình lương thực được dựng lại theo phong cách sa bàn chi tiết: tường ghép từng tấm ván, từng viên gạch đá, mái lợp từng viên ngói, cửa sổ có chớp và chậu hoa, cùng người, bò, ngựa, hươu, chó săn, thuyền, xe kéo và đạo cụ. Mỗi cấp mở khóa khi khu đô thị xung quanh lên mức cao hơn và xuống cấp lại nếu mất điều kiện.
+
+| Chuỗi                              | Cấp                                                                                                                                                                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nông trại (2×2, 7 cấp)             | Nông trại lúa mì → Ruộng lúa mì tưới tiêu → Trang viên cối xay gió (đô thị ≥ 1) → Nông trang cơ giới hóa (≥ 3) → Đại điền trang hoàng gia (≥ 5) → Tổ hợp nông nghiệp công nghệ cao (≥ 6) → Nông trại thẳng đứng sinh thái (≥ 8) |
+| Vườn quả và rượu vang (2×2, 5 cấp) | Ruộng dâu → Vườn rau ven phố (≥ 1) → Trang viên vườn quả (≥ 3) → Nông trang nho và xưởng rượu (≥ 5) → Lâu đài rượu vang Chateau (≥ 7)                                                                                           |
+| Chăn nuôi (2×2, 5 cấp)             | Đồng cỏ → Trại bò sữa (≥ 2) → Trang trại phô mai (≥ 4) → Trang viên ngựa đua (≥ 6) → Đại điền trang chăn nuôi đế quốc (≥ 8)                                                                                                     |
+| Ngư nghiệp (1×1, 5 cấp)            | Bến cá → Lán cá hun khói (≥ 2) → Cầu tàu cá viễn dương (≥ 4) → Sàn giao dịch thủy sản (≥ 6) → Tổ hợp đồ hộp và dầu cá (≥ 8)                                                                                                     |
+| Săn bắn (1×1, 4 cấp)               | Trại săn → Nhà kiểm lâm (≥ 2) → Trang viên chim ưng (≥ 4) → Hành cung săn bắn hoàng gia (≥ 7)                                                                                                                                   |
+
+Ruộng lúa, rau và dâu vẫn lớn dần theo mùa vụ ngay trên mô hình chi tiết.
+
+![Nhóm 5 trong thị trấn](docs/images/group5-town.jpg)
+
+![Chuỗi Nông trại 7 cấp](docs/images/group5-farm.jpg)
+
+![Chuỗi Vườn quả và rượu vang](docs/images/group5-orchard.jpg)
+
+![Chuỗi Chăn nuôi](docs/images/group5-livestock.jpg)
+
+| ![Chuỗi Ngư nghiệp](docs/images/group5-fishing.jpg)                     | ![Chuỗi Săn bắn](docs/images/group5-hunting.jpg)             |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------ |
+| ![Trang viên cối xay gió](docs/images/group5-windmill.jpg)              | ![Lâu đài rượu vang Chateau](docs/images/group5-chateau.jpg) |
+| ![Nông trại thẳng đứng về đêm](docs/images/group5-hydroponic-night.jpg) | ![Tổ hợp đồ hộp và dầu cá](docs/images/group5-cannery.jpg)   |
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

@@ -558,6 +558,7 @@ export function tinGable(
   y: number,
   h: number,
   color: string,
+  gableColor?: string,
 ): void {
   const half = span / 2 + 0.025;
   const rise = h * (half / (span / 2));
@@ -585,6 +586,17 @@ export function tinGable(
   }
   const cap = new THREE.BoxGeometry(L + 0.01, 0.018, 0.03);
   placeLocal(l, cap, shade(color, 0.75), cx, cz, along, 0, y + h + 0.004, 0);
+  if (!gableColor) return;
+  for (const e of [-1, 1]) {
+    const sh = new THREE.Shape();
+    sh.moveTo(-span / 2, 0);
+    sh.lineTo(span / 2, 0);
+    sh.lineTo(0, h);
+    sh.closePath();
+    const g = new THREE.ShapeGeometry(sh);
+    g.rotateY(e > 0 ? Math.PI / 2 : -Math.PI / 2);
+    placeLocal(l, g, gableColor, cx, cz, along, e * (length / 2 + 0.001), y, 0);
+  }
 }
 
 /** Brick chimney with corbel and pots. */

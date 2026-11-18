@@ -11,6 +11,8 @@ export class Lot {
   readonly wall: string;
   readonly roof: string;
   readonly height: number;
+  /** Crop growth stage 1..4 for field buildings (4 = ripe); always 4 for other buildings. */
+  stage = 4;
   private readonly w: number;
   private readonly d: number;
   private readonly finish: boolean;

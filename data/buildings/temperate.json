@@ -766,7 +766,28 @@
     "crop": {
       "kind": "berries",
       "ticks": 64
-    }
+    },
+    "upgrades": [
+      {
+        "to": "market_garden",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 2
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "wheat_farm",
@@ -860,7 +881,24 @@
       "kind": "fish",
       "ticks": 36,
       "range": 9
-    }
+    },
+    "upgrades": [
+      {
+        "to": "smokery_fishery",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "hunting_lodge",
@@ -894,6 +932,23 @@
         "terrain": "forest",
         "radius": 4,
         "min": 10
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "gamekeeper_lodge",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
       }
     ]
   },

@@ -528,7 +528,7 @@ function addDefaultGeometry(
 
 function makeGeometry(def: BuildingDef, variant: number): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
-  if (!architectureModel(def, parts)) addDefaultGeometry(def, variant, parts);
+  if (!architectureModel(def, parts, variant)) addDefaultGeometry(def, variant, parts);
   const merged = mergeGeometries(parts, false);
   if (!merged) throw new Error(`could not build model for ${def.id}`);
   for (const p of parts) p.dispose();

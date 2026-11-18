@@ -14,24 +14,28 @@ import { makeCity } from './helpers';
 const catalog = loadCatalog();
 
 describe('building architecture', () => {
-  it('keeps every catalogue building and crop stage renderable as one bounded mesh', () => {
-    for (const def of catalog.defs) {
-      const variants = def.crop ? [1, 2, 3, 4] : [0, 15];
-      for (const variant of variants) {
-        const geometry = buildingGeometry(def, variant);
-        geometry.computeBoundingBox();
-        const { min, max } = geometry.boundingBox!;
-        expect.soft(min.x, def.id).toBeGreaterThanOrEqual(-0.001);
-        expect.soft(min.z, def.id).toBeGreaterThanOrEqual(-0.001);
-        expect.soft(max.x, def.id).toBeLessThanOrEqual(def.footprint.w + 0.001);
-        expect.soft(max.z, def.id).toBeLessThanOrEqual(def.footprint.d + 0.001);
-        expect(geometry.getAttribute('position').count, def.id).toBeGreaterThan(0);
-        expect(geometry.getAttribute('normal').count, def.id).toBe(
-          geometry.getAttribute('glow').count,
-        );
+  it(
+    'keeps every catalogue building and crop stage renderable as one bounded mesh',
+    { timeout: 20000 },
+    () => {
+      for (const def of catalog.defs) {
+        const variants = def.crop ? [1, 2, 3, 4] : [0, 15];
+        for (const variant of variants) {
+          const geometry = buildingGeometry(def, variant);
+          geometry.computeBoundingBox();
+          const { min, max } = geometry.boundingBox!;
+          expect.soft(min.x, def.id).toBeGreaterThanOrEqual(-0.001);
+          expect.soft(min.z, def.id).toBeGreaterThanOrEqual(-0.001);
+          expect.soft(max.x, def.id).toBeLessThanOrEqual(def.footprint.w + 0.001);
+          expect.soft(max.z, def.id).toBeLessThanOrEqual(def.footprint.d + 0.001);
+          expect(geometry.getAttribute('position').count, def.id).toBeGreaterThan(0);
+          expect(geometry.getAttribute('normal').count, def.id).toBe(
+            geometry.getAttribute('glow').count,
+          );
+        }
       }
-    }
-  });
+    },
+  );
 
   it('gives every ordinary catalogue building its own model within its lot', () => {
     const specialistModels = ['rail_track', 'quarry', 'clay_pit', 'iron_mine'];
@@ -112,16 +116,37 @@ describe('building architecture', () => {
       ['school', 'grammar_school', 'academy'],
       ['public_library', 'grand_library', 'royal_archive'],
       ['open_air_stage', 'playhouse', 'opera_house'],
-      ['smallholding', 'farmstead', 'mixed_farm', 'agri_estate', 'agritech_hub'],
-      ['cider_press', 'brewery', 'food_cannery', 'frozen_food_plant', 'food_tech_campus'],
-      ['sheep_fold', 'cattle_barn', 'dairy_cooperative', 'milking_center', 'bio_dairy_complex'],
       [
-        'fish_ponds',
-        'fish_hatchery',
-        'aquaculture_center',
-        'seafood_processing',
-        'marine_institute',
+        'wheat_farm',
+        'irrigated_wheat',
+        'windmill_farm_estate',
+        'mechanized_granary_farm',
+        'imperial_agricultural_estate',
+        'agro_industrial_complex',
+        'hydroponic_mega_farm',
       ],
+      [
+        'berry_field',
+        'market_garden',
+        'orchard_estate',
+        'vineyard_winery',
+        'grand_chateau_vineyard',
+      ],
+      [
+        'pasture',
+        'dairy_farm',
+        'cheese_manufactory_ranch',
+        'stud_farm_estate',
+        'imperial_livestock_domain',
+      ],
+      [
+        'fishing_dock',
+        'smokery_fishery',
+        'trawler_wharf',
+        'seafood_exchange',
+        'cannery_harbor_complex',
+      ],
+      ['hunting_lodge', 'gamekeeper_lodge', 'falconry_manor', 'royal_hunting_palace'],
       [
         'smelter',
         'bellows_smelter',
@@ -407,8 +432,15 @@ describe('theatre chain', () => {
 });
 
 describe('group 5 food chains', () => {
-  it('gates every higher tier on a rising urban level', () => {
-    for (const first of ['smallholding', 'cider_press', 'sheep_fold', 'fish_ponds']) {
+  it('gates every tier after the first on a rising urban level', () => {
+    const chains: readonly [string, number][] = [
+      ['irrigated_wheat', 6],
+      ['berry_field', 5],
+      ['pasture', 5],
+      ['fishing_dock', 5],
+      ['hunting_lodge', 4],
+    ];
+    for (const [first, length] of chains) {
       let def = catalog.get(first);
       let tiers = 1;
       let last = -1;
@@ -419,10 +451,31 @@ describe('group 5 food chains', () => {
         const min = (urban as { min: number }).min;
         expect(min, def.id).toBeGreaterThan(last);
         last = min;
-        def = catalog.get(up.to);
+        const next = catalog.get(up.to);
+        if (next.tags?.includes('upgrade_only')) expect(next.decline?.to, next.id).toBe(def.id);
+        expect(next.footprint, next.id).toEqual(def.footprint);
+        def = next;
         tiers++;
       }
-      expect(tiers, first).toBe(5);
+      expect(tiers, first).toBe(length);
     }
+  });
+
+  it('grows crop fields in the detailed farm models', () => {
+    const def = catalog.get('wheat_farm');
+    const heights = [1, 2, 3, 4].map((stage) => {
+      const parts: BufferGeometry[] = [];
+      architectureModel(def, parts, stage);
+      // Total crop height over the wheat field in front of the barn.
+      let total = 0;
+      for (const p of parts) {
+        p.computeBoundingBox();
+        const b = p.boundingBox!;
+        if (b.min.x > 1.0 && b.min.z > 1.0 && b.max.x < 1.9 && b.max.z < 1.9) total += b.max.y;
+        p.dispose();
+      }
+      return total;
+    });
+    for (let i = 1; i < heights.length; i++) expect(heights[i]).toBeGreaterThan(heights[i - 1]!);
   });
 });

@@ -254,7 +254,7 @@ export const livestockDiorama: Recipes = {
     }
     shingleGable(l, sx, sz, 'x', 1.6, 0.3, 0.29, 0.12, slate, '#7a4a2a');
     // Clock tower over the arch.
-    wbox(l, sx, sz, 0.38, 0.12, 0.2, 0.12, white);
+    wbox(l, sx, sz, 0.38, 0.12, 0.32, 0.12, white);
     for (const [dx, dz] of [
       [0, 0.061],
       [0, -0.061],
@@ -270,7 +270,7 @@ export const livestockDiorama: Recipes = {
         '#222222',
       );
     }
-    cupola(l, sx, sz, 0.58, 0.09, slate);
+    cupola(l, sx, sz, 0.7, 0.1, slate);
     // Manor house: rendered walls, slate hipped-gable roof, shuttered windows, porch.
     const mx = 0.8;
     const mz = 0.46;
