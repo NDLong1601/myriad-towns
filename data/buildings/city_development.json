@@ -438,6 +438,12 @@
       "wood": 1,
       "stone": 1
     },
+    "upgrades": [
+      {
+        "to": "iron_rail_track",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [],
     "unlock": {
       "population": 250,

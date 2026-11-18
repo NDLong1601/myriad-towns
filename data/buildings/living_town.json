@@ -2789,5 +2789,124 @@
     ],
     "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "sculpture_park" },
     "tags": ["upgrade_only"]
+  },
+  {
+    "id": "steam_quarry",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 8, "metal": 4 },
+    "visual": { "shape": "mine", "color": "#9a9890", "height": 0.6 },
+    "upkeep": { "labor": 3, "skilled": 1 },
+    "produces": { "stone": 2 },
+    "emits": [
+      { "field": "noise", "amount": 2, "radius": 4 },
+      { "field": "pollution", "amount": 2, "radius": 3 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"],
+    "upgrades": [
+      {
+        "to": "industrial_quarry",
+        "when": [{ "type": "field", "field": "urban", "min": 4 }]
+      }
+    ]
+  },
+  {
+    "id": "industrial_quarry",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 20, "metal": 12, "goods": 6 },
+    "visual": { "shape": "mine", "color": "#7e796e", "height": 0.9 },
+    "upkeep": { "labor": 5, "skilled": 3 },
+    "produces": { "stone": 5 },
+    "emits": [
+      { "field": "noise", "amount": 4, "radius": 5 },
+      { "field": "pollution", "amount": 3, "radius": 4 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "brick_works",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 6, "wood": 4 },
+    "visual": { "shape": "block", "color": "#b5563c", "roof": "#8c3f2b", "height": 0.6 },
+    "upkeep": { "labor": 2, "skilled": 1 },
+    "produces": { "stone": 1.5 },
+    "emits": [
+      { "field": "noise", "amount": 2, "radius": 3 },
+      { "field": "pollution", "amount": 2, "radius": 3 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"],
+    "upgrades": [
+      {
+        "to": "industrial_brickyard",
+        "when": [{ "type": "field", "field": "urban", "min": 4 }]
+      }
+    ]
+  },
+  {
+    "id": "industrial_brickyard",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 16, "metal": 8, "goods": 4 },
+    "visual": { "shape": "block", "color": "#8c3f2b", "roof": "#3d2a19", "height": 1.1 },
+    "upkeep": { "labor": 4, "skilled": 2 },
+    "produces": { "stone": 4 },
+    "emits": [
+      { "field": "noise", "amount": 3, "radius": 4 },
+      { "field": "pollution", "amount": 4, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "shaft_iron_mine",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 12, "stone": 8, "metal": 4 },
+    "visual": { "shape": "mine", "color": "#6d6a70", "height": 0.7 },
+    "upkeep": { "labor": 4, "skilled": 2 },
+    "produces": { "ore": 2 },
+    "emits": [
+      { "field": "noise", "amount": 2, "radius": 4 },
+      { "field": "pollution", "amount": 2, "radius": 3 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"],
+    "upgrades": [
+      {
+        "to": "deep_iron_mine",
+        "when": [{ "type": "field", "field": "urban", "min": 4 }]
+      }
+    ]
+  },
+  {
+    "id": "deep_iron_mine",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 24, "metal": 16, "goods": 8 },
+    "visual": { "shape": "mine", "color": "#32383b", "height": 1.0 },
+    "upkeep": { "labor": 7, "skilled": 4 },
+    "produces": { "ore": 5 },
+    "emits": [
+      { "field": "noise", "amount": 4, "radius": 5 },
+      { "field": "pollution", "amount": 3, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "iron_rail_track",
+    "category": "infrastructure",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "metal": 4, "wood": 2 },
+    "visual": { "shape": "block", "color": "#4a4a52", "height": 0.12 },
+    "upkeep": { "labor": 0.5 },
+    "emits": [{ "field": "connectivity", "amount": 2, "radius": 5 }],
+    "placeOn": ["land"],
+    "tags": ["upgrade_only"]
   }
 ]

@@ -38,7 +38,7 @@ describe('building architecture', () => {
   );
 
   it('gives every ordinary catalogue building its own model within its lot', () => {
-    const specialistModels = ['rail_track', 'quarry', 'clay_pit', 'iron_mine'];
+    const specialistModels: string[] = [];
     for (const def of catalog.defs) {
       if (def.crop || isRoadDef(def) || specialistModels.includes(def.id)) continue;
       const parts: BufferGeometry[] = [];
@@ -192,6 +192,10 @@ describe('building architecture', () => {
       ['lighthouse', 'harbor_beacon_tower', 'imperial_pharos'],
       ['cargo_port', 'trade_harbor', 'imperial_seaport'],
       ['park', 'promenade_park', 'sculpture_park', 'crystal_conservatory_park'],
+      ['quarry', 'steam_quarry', 'industrial_quarry'],
+      ['clay_pit', 'brick_works', 'industrial_brickyard'],
+      ['iron_mine', 'shaft_iron_mine', 'deep_iron_mine'],
+      ['rail_track', 'iron_rail_track'],
     ];
 
     for (const chain of chains) {
@@ -342,6 +346,18 @@ describe('building architecture', () => {
       'promenade_park',
       'sculpture_park',
       'crystal_conservatory_park',
+      // Mining, Extraction & Rail Transit
+      'quarry',
+      'steam_quarry',
+      'industrial_quarry',
+      'clay_pit',
+      'brick_works',
+      'industrial_brickyard',
+      'iron_mine',
+      'shaft_iron_mine',
+      'deep_iron_mine',
+      'rail_track',
+      'iron_rail_track',
     ];
     for (const id of fourSidedIds) {
       const def = catalog.get(id);
