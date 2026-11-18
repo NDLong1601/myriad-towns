@@ -7,6 +7,7 @@ import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
 import { farmDiorama } from './architecture/farmDiorama';
 import { livestockDiorama } from './architecture/livestockDiorama';
+import { industryDiorama } from './architecture/industryDiorama';
 import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
 import { siteDetails } from './architecture/siteDetails';
@@ -27,6 +28,7 @@ const models = new Map<string, Recipe>(
     livestockDiorama,
     coastDiorama,
     miningDiorama,
+    industryDiorama,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -37,6 +39,7 @@ const weathered = new Set([
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
   ...Object.keys(miningDiorama),
+  ...Object.keys(industryDiorama),
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -45,13 +48,16 @@ const dioramas = new Set([
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
   ...Object.keys(miningDiorama),
+  ...Object.keys(industryDiorama),
 ]);
 /**
  * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
  * lot of 2 / zoom units, so its fractional layout and world-unit props keep their proportions
  * while the finished model grows by `zoom`.
  */
-const zoomed = new Map<string, number>(Object.keys(miningDiorama).map((id) => [id, 1.5]));
+const zoomed = new Map<string, number>(
+  [...Object.keys(miningDiorama), ...Object.keys(industryDiorama)].map((id) => [id, 1.5]),
+);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {

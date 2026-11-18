@@ -634,5 +634,12 @@
   "building.cannery_harbor_complex.name": "Cannery harbour complex",
   "building.gamekeeper_lodge.name": "Gamekeeper's lodge",
   "building.falconry_manor.name": "Falconry manor",
-  "building.royal_hunting_palace.name": "Royal hunting palace"
+  "building.royal_hunting_palace.name": "Royal hunting palace",
+  "building.steam_powerhouse.name": "Steam powerhouse",
+  "building.turbine_power_station.name": "Turbine power station",
+  "building.heavy_foundry.name": "Heavy foundry",
+  "building.bessemer_steelworks.name": "Bessemer steelworks",
+  "building.integrated_steel_mill.name": "Integrated steel mill",
+  "building.colliery_headframe.name": "Colliery headframe",
+  "building.deep_shaft_colliery.name": "Deep shaft colliery"
 }

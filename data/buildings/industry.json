@@ -213,6 +213,12 @@
       "roof": "#212121",
       "height": 1
     },
+    "upgrades": [
+      {
+        "to": "colliery_headframe",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "tags": ["mine", "industry"],
     "unlock": {
       "population": 60,
@@ -259,6 +265,12 @@
       "roof": "#bf360c",
       "height": 1.6
     },
+    "upgrades": [
+      {
+        "to": "bessemer_steelworks",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "tags": ["industry"],
     "unlock": {
       "population": 120,

@@ -341,8 +341,8 @@
     "id": "power_plant",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "stone": 30,
@@ -375,6 +375,12 @@
         "radius": 4
       }
     ],
+    "upgrades": [
+      {
+        "to": "steam_powerhouse",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",
@@ -390,8 +396,8 @@
     "id": "foundry",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "stone": 25,
@@ -422,6 +428,12 @@
         "field": "noise",
         "amount": 2,
         "radius": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "heavy_foundry",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
       }
     ],
     "requires": [

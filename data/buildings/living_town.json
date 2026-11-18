@@ -2926,5 +2926,135 @@
     "emits": [{ "field": "connectivity", "amount": 2, "radius": 5 }],
     "placeOn": ["land"],
     "tags": ["upgrade_only"]
+  },
+  {
+    "id": "steam_powerhouse",
+    "category": "production",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "stone": 40, "wood": 20, "metal": 14 },
+    "visual": { "shape": "tower", "color": "#6a6a70", "roof": "#2f2f34", "height": 2.2 },
+    "upkeep": { "labor": 4, "skilled": 2, "coal": 2 },
+    "produces": { "energy": 9 },
+    "emits": [
+      { "field": "pollution", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "noise", "amount": 3, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "power_plant" },
+    "upgrades": [
+      {
+        "to": "turbine_power_station",
+        "when": [{ "type": "field", "field": "urban", "min": 4 }]
+      }
+    ],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "turbine_power_station",
+    "category": "production",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "stone": 60, "metal": 30, "goods": 12 },
+    "visual": { "shape": "tower", "color": "#8a8f94", "roof": "#2f2f34", "height": 2.6 },
+    "upkeep": { "labor": 5, "skilled": 4, "coal": 3 },
+    "produces": { "energy": 16 },
+    "emits": [
+      { "field": "pollution", "amount": 5, "radius": 7, "falloff": "linear" },
+      { "field": "noise", "amount": 3, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "steam_powerhouse" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "heavy_foundry",
+    "category": "production",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "stone": 40, "wood": 12, "metal": 12 },
+    "visual": { "shape": "block", "color": "#6a4a3a", "roof": "#2f2622", "height": 1.5 },
+    "upkeep": { "skilled": 4, "ore": 4, "energy": 2 },
+    "produces": { "metal": 3.5 },
+    "emits": [
+      { "field": "pollution", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "noise", "amount": 3, "radius": 4 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "foundry" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "bessemer_steelworks",
+    "category": "production",
+    "footprint": { "w": 3, "d": 2 },
+    "cost": { "stone": 50, "wood": 16, "metal": 16 },
+    "visual": { "shape": "block", "color": "#455a64", "roof": "#bf360c", "height": 2.0 },
+    "upkeep": { "labor": 3, "skilled": 3, "ore": 4, "coal": 2 },
+    "produces": { "metal": 4.5 },
+    "emits": [
+      { "field": "pollution", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "noise", "amount": 3, "radius": 4 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "steelworks" },
+    "upgrades": [
+      {
+        "to": "integrated_steel_mill",
+        "when": [{ "type": "field", "field": "urban", "min": 5 }]
+      }
+    ],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "integrated_steel_mill",
+    "category": "production",
+    "footprint": { "w": 3, "d": 2 },
+    "cost": { "stone": 80, "metal": 40, "goods": 16 },
+    "visual": { "shape": "block", "color": "#37474f", "roof": "#bf360c", "height": 2.6 },
+    "upkeep": { "labor": 4, "skilled": 6, "ore": 7, "coal": 4, "energy": 3 },
+    "produces": { "metal": 9 },
+    "emits": [
+      { "field": "pollution", "amount": 6, "radius": 8, "falloff": "linear" },
+      { "field": "noise", "amount": 4, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "bessemer_steelworks" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "colliery_headframe",
+    "category": "production",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 30, "stone": 20, "metal": 6 },
+    "visual": { "shape": "mine", "color": "#37474f", "roof": "#212121", "height": 1.5 },
+    "upkeep": { "labor": 4, "skilled": 2 },
+    "produces": { "coal": 4 },
+    "emits": [
+      { "field": "noise", "amount": 3, "radius": 4 },
+      { "field": "pollution", "amount": 3, "radius": 5, "falloff": "linear" }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "coal_mine" },
+    "upgrades": [
+      {
+        "to": "deep_shaft_colliery",
+        "when": [{ "type": "field", "field": "urban", "min": 4 }]
+      }
+    ],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "deep_shaft_colliery",
+    "category": "production",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "stone": 40, "metal": 24, "goods": 10 },
+    "visual": { "shape": "mine", "color": "#263238", "roof": "#212121", "height": 2.0 },
+    "upkeep": { "labor": 7, "skilled": 4 },
+    "produces": { "coal": 7 },
+    "emits": [
+      { "field": "noise", "amount": 4, "radius": 5 },
+      { "field": "pollution", "amount": 4, "radius": 6, "falloff": "linear" }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "colliery_headframe" },
+    "tags": ["upgrade_only"]
   }
 ]

@@ -192,6 +192,30 @@ Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại 
 | ![Chuỗi Đường ray](docs/images/group1-rail.jpg) | ![Nhóm 1 về đêm](docs/images/group1-night.jpg) |
 | ----------------------------------------------- | ---------------------------------------------- |
 
+### Nhóm 2A: Công nghiệp nặng và Năng lượng
+
+Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 2×2 (lò luyện thép 3×2): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
+
+| Chuỗi               | Cấp                                                                       |
+| ------------------- | ------------------------------------------------------------------------- |
+| Nhà máy điện (2×2)  | Nhà máy điện → Nhà máy hơi nước (đô thị ≥ 2) → Nhà máy điện tuabin (≥ 4)  |
+| Xưởng đúc (2×2)     | Xưởng đúc → Xưởng đúc nặng (≥ 2)                                          |
+| Lò luyện thép (3×2) | Lò luyện thép → Lò luyện thép Bessemer (≥ 2) → Tổ hợp thép liên hợp (≥ 5) |
+| Mỏ than (2×2)       | Mỏ than đá → Mỏ than tháp tời (≥ 2) → Mỏ than hầm sâu (≥ 4)               |
+| Nhà máy (2×2)       | Nhà máy mái răng cưa                                                      |
+
+![Nhóm 2A trong thị trấn](docs/images/group2a-town.jpg)
+
+![Chuỗi Nhà máy điện](docs/images/group2a-power.jpg)
+
+![Xưởng đúc và Nhà máy](docs/images/group2a-foundry.jpg)
+
+![Chuỗi Lò luyện thép](docs/images/group2a-steel.jpg)
+
+![Chuỗi Mỏ than](docs/images/group2a-coal.jpg)
+
+![Nhóm 2A về đêm](docs/images/group2a-night.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.
