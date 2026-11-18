@@ -4,6 +4,8 @@ import { civic } from './architecture/civic';
 import { housing } from './architecture/housing';
 import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
+import { farmTiers } from './architecture/farmTiers';
+import { farmUpperTiers } from './architecture/farmUpperTiers';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
@@ -11,10 +13,16 @@ import { weather } from './architecture/weathering';
 import { workplaces } from './architecture/workplaces';
 
 const models = new Map<string, Recipe>(
-  [housing, civic, workplaces, transport, theatreTiers].flatMap((group) => Object.entries(group)),
+  [housing, civic, workplaces, transport, theatreTiers, farmTiers, farmUpperTiers].flatMap(
+    (group) => Object.entries(group),
+  ),
 );
 /** Buildings that get baked contact shadows and tone variation. */
-const weathered = new Set(Object.keys(theatreTiers));
+const weathered = new Set([
+  ...Object.keys(theatreTiers),
+  ...Object.keys(farmTiers),
+  ...Object.keys(farmUpperTiers),
+]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[]): boolean {

@@ -112,6 +112,16 @@ describe('building architecture', () => {
       ['school', 'grammar_school', 'academy'],
       ['public_library', 'grand_library', 'royal_archive'],
       ['open_air_stage', 'playhouse', 'opera_house'],
+      ['smallholding', 'farmstead', 'mixed_farm', 'agri_estate', 'agritech_hub'],
+      ['cider_press', 'brewery', 'food_cannery', 'frozen_food_plant', 'food_tech_campus'],
+      ['sheep_fold', 'cattle_barn', 'dairy_cooperative', 'milking_center', 'bio_dairy_complex'],
+      [
+        'fish_ponds',
+        'fish_hatchery',
+        'aquaculture_center',
+        'seafood_processing',
+        'marine_institute',
+      ],
       [
         'smelter',
         'bellows_smelter',
@@ -393,5 +403,26 @@ describe('theatre chain', () => {
       part.dispose();
     }
     expect(darkened).toBeGreaterThan(0);
+  });
+});
+
+describe('group 5 food chains', () => {
+  it('gates every higher tier on a rising urban level', () => {
+    for (const first of ['smallholding', 'cider_press', 'sheep_fold', 'fish_ponds']) {
+      let def = catalog.get(first);
+      let tiers = 1;
+      let last = -1;
+      while (def.upgrades?.length) {
+        const up = def.upgrades[0]!;
+        const urban = up.when.find((c) => c.type === 'field' && c.field === 'urban');
+        expect(urban, def.id).toBeDefined();
+        const min = (urban as { min: number }).min;
+        expect(min, def.id).toBeGreaterThan(last);
+        last = min;
+        def = catalog.get(up.to);
+        tiers++;
+      }
+      expect(tiers, first).toBe(5);
+    }
   });
 });

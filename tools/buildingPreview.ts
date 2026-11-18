@@ -61,7 +61,8 @@ const gap = 0.6;
 const group = new THREE.Group();
 for (const id of ids) {
   const base =
-    defs.get(id) ?? ({ id, category: 'culture', footprint: { w: 2, d: 2 } } as BuildingDef);
+    defs.get(id) ??
+    ({ id, category: 'food', footprint: { w: 2, d: 2 }, visual: { shape: 'hall' } } as BuildingDef);
   const def = visualDefinition({ ...base, ...extra[id] } as BuildingDef);
   const parts: THREE.BufferGeometry[] = [];
   if (!architectureModel(def, parts)) continue;
