@@ -178,7 +178,7 @@ Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại 
 | ----------------------- | ---------------------------------------------------------------------- |
 | Mỏ đá (2×2, 3 cấp)      | Mỏ đá thủ công → Mỏ đá hơi nước (đô thị ≥ 2) → Mỏ đá công nghiệp (≥ 4) |
 | Hố đất sét (2×2, 3 cấp) | Hố đất sét → Lò gạch thủ công (≥ 2) → Nhà máy gạch công nghiệp (≥ 4)   |
-| Mỏ sắt (2×2, 3 cấp)     | Mỏ sắt thủ công → Mỏ sắt giếng đứng (≥ 2) → Mỏ sắt sâu (≥ 4)           |
+| Mỏ sắt (2×2, 3 cấp)     | Mỏ sắt thủ công → Mỏ sắt tháp tời (≥ 2) → Mỏ sắt sâu (≥ 4)             |
 | Đường ray (1×1, 2 cấp)  | Đường ray gỗ → Đường ray sắt (≥ 2)                                     |
 
 ![Nhóm 1 trong thị trấn](docs/images/group1-town.jpg)
