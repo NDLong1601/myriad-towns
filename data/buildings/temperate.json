@@ -766,7 +766,29 @@
     "crop": {
       "kind": "berries",
       "ticks": 64
-    }
+    },
+    "upgrades": [
+      {
+        "to": "market_garden",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "wheat_farm",
@@ -860,7 +882,24 @@
       "kind": "fish",
       "ticks": 36,
       "range": 9
-    }
+    },
+    "upgrades": [
+      {
+        "to": "smokery_fishery",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "hunting_lodge",
@@ -894,6 +933,23 @@
         "terrain": "forest",
         "radius": 4,
         "min": 10
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "gamekeeper_lodge",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
       }
     ]
   },
@@ -1009,8 +1065,8 @@
     "id": "quarry",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 6
@@ -1039,6 +1095,12 @@
       }
     ],
     "placeOn": ["land"],
+    "upgrades": [
+      {
+        "to": "steam_quarry",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",
@@ -1057,8 +1119,8 @@
     "id": "clay_pit",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 4
@@ -1091,14 +1153,20 @@
         "terrain": "clay",
         "radius": 2
       }
+    ],
+    "upgrades": [
+      {
+        "to": "brick_works",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
     ]
   },
   {
     "id": "iron_mine",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 10,
@@ -1128,6 +1196,12 @@
       }
     ],
     "placeOn": ["land"],
+    "upgrades": [
+      {
+        "to": "shaft_iron_mine",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",

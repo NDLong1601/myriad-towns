@@ -49,7 +49,7 @@ const posters = ['#c8443a', '#2f6e8c', '#e3b43c', '#6f4c8f', '#3f8a5c'] as const
 const pick = <T>(list: readonly T[], i: number): T => list[i % list.length] as T;
 
 /** True hipped roof (two trapezoids + two triangles) with tile courses, ridge and hip caps. */
-function hipRoof(
+export function hipRoof(
   l: Lot,
   x: number,
   z: number,
@@ -125,12 +125,12 @@ function hipRoof(
   l.block(x, z, w + 0.012, d + 0.012, y - 0.016, 0.018, shadeHex(color, 0.6));
 }
 
-function shadeHex(hex: string, f: number): string {
+export function shadeHex(hex: string, f: number): string {
   return `#${new THREE.Color(hex).multiplyScalar(f).getHexString()}`;
 }
 
 /** A recessed window on a wall facing ±z (axis 'z') or ±x (axis 'x'), optionally round-headed. */
-function windowOn(
+export function windowOn(
   l: Lot,
   axis: 'z' | 'x',
   along: number,
@@ -212,7 +212,7 @@ function column(
 }
 
 /** Lamp post: base, fluted iron shaft, lantern that glows at night. */
-function lamp(l: Lot, x: number, z: number, y: number, h = 0.26, double = false): void {
+export function lamp(l: Lot, x: number, z: number, y: number, h = 0.26, double = false): void {
   l.round(x, z, 0.012, 0.016, y, 0.03, iron);
   l.round(x, z, 0.005, 0.007, y + 0.03, h - 0.03, iron);
   const heads: [number, number][] = double
@@ -230,7 +230,7 @@ function lamp(l: Lot, x: number, z: number, y: number, h = 0.26, double = false)
 }
 
 /** Tree with a trunk, a few branches and a lumpy layered canopy. */
-function tree(l: Lot, x: number, z: number, h: number, seed: number): void {
+export function tree(l: Lot, x: number, z: number, h: number, seed: number): void {
   l.round(x, z, 0.008, 0.013, 0.03, h * 0.5, '#6b4e36');
   const blobs = [
     [0, 0.62, 0, 0.22],
@@ -247,7 +247,14 @@ function tree(l: Lot, x: number, z: number, h: number, seed: number): void {
 }
 
 /** A standing person roughly 0.07 tall. */
-function figure(l: Lot, x: number, z: number, y: number, seed: number, seated = false): void {
+export function figure(
+  l: Lot,
+  x: number,
+  z: number,
+  y: number,
+  seed: number,
+  seated = false,
+): void {
   const coat = pick(coats, seed);
   const legs = seated ? 0 : 0.026;
   if (!seated) l.block(x, z, 0.012, 0.008, y, legs, '#2b2a2c');
@@ -278,7 +285,7 @@ function posterColumn(l: Lot, x: number, z: number, y: number, seed: number): vo
   l.dome(x, z, 0.013, 0.013, y + 0.184, 0.03, '#3f5a49');
 }
 
-function bench(l: Lot, x: number, z: number, y: number, along: 'x' | 'z'): void {
+export function bench(l: Lot, x: number, z: number, y: number, along: 'x' | 'z'): void {
   const [w, d] = along === 'x' ? [0.08, 0.022] : [0.022, 0.08];
   l.block(x, z, w, d, y + 0.022, 0.008, plank);
   for (const s of [-1, 1]) {
@@ -288,7 +295,7 @@ function bench(l: Lot, x: number, z: number, y: number, along: 'x' | 'z'): void 
 }
 
 /** Points along a sagging cable, used for festoon lights and bunting. */
-function festoon(
+export function festoon(
   l: Lot,
   a: readonly [number, number, number],
   b: readonly [number, number, number],

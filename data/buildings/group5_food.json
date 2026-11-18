@@ -1,0 +1,1328 @@
+[
+  {
+    "id": "windmill_farm_estate",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#cfc6b4",
+      "roof": "#6e5444",
+      "height": 0.9
+    },
+    "upkeep": {
+      "labor": 3
+    },
+    "produces": {
+      "food": 4.4
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 1
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "mechanized_granary_farm",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "irrigated_wheat"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "mechanized_granary_farm",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#a5452f",
+      "roof": "#a9b0b4",
+      "height": 0.75
+    },
+    "upkeep": {
+      "labor": 3,
+      "goods": 0.2
+    },
+    "produces": {
+      "food": 5.4
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 3
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 3
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "imperial_agricultural_estate",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 5
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "windmill_farm_estate"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "imperial_agricultural_estate",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#efe6d2",
+      "roof": "#5f7280",
+      "height": 0.75
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 1,
+      "goods": 0.2
+    },
+    "produces": {
+      "food": 6.4
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 5
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "agro_industrial_complex",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 6
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "mechanized_granary_farm"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "agro_industrial_complex",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#c8cdd0",
+      "roof": "#7f8a8e",
+      "height": 1.1
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 1,
+      "goods": 0.4
+    },
+    "produces": {
+      "food": 7.6
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 3
+      },
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 6
+      },
+      {
+        "type": "terrain",
+        "terrain": "fertile",
+        "radius": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "hydroponic_mega_farm",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 8
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 2
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "imperial_agricultural_estate"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "hydroponic_mega_farm",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#d8c6ee",
+      "roof": "#3c4246",
+      "height": 1.2
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 2,
+      "goods": 0.4
+    },
+    "produces": {
+      "food": 9.0
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 8
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "agro_industrial_complex"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "orchard_estate",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#efe2c4",
+      "roof": "#8a4a34",
+      "height": 0.55
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 3.4
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "vineyard_winery",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 5
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "market_garden"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "vineyard_winery",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#e3d6b8",
+      "roof": "#b0563c",
+      "height": 0.5
+    },
+    "upkeep": {
+      "labor": 3
+    },
+    "produces": {
+      "food": 2.4,
+      "goods": 0.8
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 3
+      },
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 5
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_chateau_vineyard",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 7
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "orchard_estate"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "grand_chateau_vineyard",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#e3d6b8",
+      "roof": "#2f363c",
+      "height": 1.0
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 1
+    },
+    "produces": {
+      "food": 2.8,
+      "goods": 1.6
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "leisure",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 4
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 7
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "vineyard_winery"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "dairy_farm",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#a8382a",
+      "roof": "#6e5444",
+      "height": 0.75
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 3.0
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 2
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "cheese_manufactory_ranch",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "pasture"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "cheese_manufactory_ranch",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#a7a49c",
+      "roof": "#56606a",
+      "height": 0.8
+    },
+    "upkeep": {
+      "labor": 3
+    },
+    "produces": {
+      "food": 3.8,
+      "goods": 0.3
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 4
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "stud_farm_estate",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 6
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "dairy_farm"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "stud_farm_estate",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#7a4a2a",
+      "roof": "#56606a",
+      "height": 0.8
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 1
+    },
+    "produces": {
+      "food": 4.2,
+      "goods": 0.5
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 3
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 6
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "imperial_livestock_domain",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 8
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "cheese_manufactory_ranch"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "imperial_livestock_domain",
+    "category": "food",
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#ece7dc",
+      "roof": "#5f9b88",
+      "height": 1.0
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 2
+    },
+    "produces": {
+      "food": 5.4,
+      "goods": 0.6
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 8
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "stud_farm_estate"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "smokery_fishery",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#6b4a2c",
+      "roof": "#5a4434",
+      "height": 0.45
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 2.0
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 1,
+        "radius": 1
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 2
+      }
+    ],
+    "placeOn": ["land", "shore"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 36,
+      "range": 9
+    },
+    "upgrades": [
+      {
+        "to": "trawler_wharf",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "fishing_dock"
+    },
+    "tags": ["agriculture", "upgrade_only", "coastal"]
+  },
+  {
+    "id": "trawler_wharf",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#a5452f",
+      "roof": "#56606a",
+      "height": 0.55
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 2.8
+    },
+    "emits": [
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      },
+      {
+        "field": "commerce",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 4
+      }
+    ],
+    "placeOn": ["land", "shore"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 36,
+      "range": 9
+    },
+    "upgrades": [
+      {
+        "to": "seafood_exchange",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 6
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "smokery_fishery"
+    },
+    "tags": ["agriculture", "upgrade_only", "coastal"]
+  },
+  {
+    "id": "seafood_exchange",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#5f9b88",
+      "roof": "#2f4a3f",
+      "height": 0.55
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1
+    },
+    "produces": {
+      "food": 3.4,
+      "goods": 0.2
+    },
+    "emits": [
+      {
+        "field": "commerce",
+        "amount": 2,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 6
+      }
+    ],
+    "placeOn": ["land", "shore"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 36,
+      "range": 9
+    },
+    "upgrades": [
+      {
+        "to": "cannery_harbor_complex",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 8
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "trawler_wharf"
+    },
+    "tags": ["agriculture", "upgrade_only", "coastal"]
+  },
+  {
+    "id": "cannery_harbor_complex",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#a5452f",
+      "roof": "#7f8a8e",
+      "height": 0.9
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 1
+    },
+    "produces": {
+      "food": 4.2,
+      "goods": 0.6
+    },
+    "emits": [
+      {
+        "field": "pollution",
+        "amount": 1,
+        "radius": 2
+      },
+      {
+        "field": "noise",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 8
+      }
+    ],
+    "placeOn": ["land", "shore"],
+    "voyage": {
+      "kind": "fish",
+      "ticks": 36,
+      "range": 9
+    },
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "seafood_exchange"
+    },
+    "tags": ["agriculture", "upgrade_only", "coastal"]
+  },
+  {
+    "id": "gamekeeper_lodge",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#9a958a",
+      "roof": "#8a6a4a",
+      "height": 0.6
+    },
+    "upkeep": {
+      "labor": 1
+    },
+    "produces": {
+      "food": 1.4
+    },
+    "emits": [
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 2
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 2
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 4,
+        "min": 10
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "falconry_manor",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "hunting_lodge"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "falconry_manor",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#c9c2b2",
+      "roof": "#4a535c",
+      "height": 0.65
+    },
+    "upkeep": {
+      "labor": 2
+    },
+    "produces": {
+      "food": 1.8,
+      "goods": 0.2
+    },
+    "emits": [
+      {
+        "field": "leisure",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 4
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 4,
+        "min": 10
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "royal_hunting_palace",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 7
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "gamekeeper_lodge"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  },
+  {
+    "id": "royal_hunting_palace",
+    "category": "food",
+    "footprint": {
+      "w": 1,
+      "d": 1
+    },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#f0ece2",
+      "roof": "#2c3a5a",
+      "height": 0.75
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1
+    },
+    "produces": {
+      "food": 2.2,
+      "goods": 0.4
+    },
+    "emits": [
+      {
+        "field": "leisure",
+        "amount": 2,
+        "radius": 4
+      },
+      {
+        "field": "greenery",
+        "amount": 1,
+        "radius": 3
+      }
+    ],
+    "requires": [
+      {
+        "type": "road",
+        "maxDistance": 1,
+        "paved": true
+      },
+      {
+        "type": "field",
+        "field": "urban",
+        "min": 7
+      },
+      {
+        "type": "terrain",
+        "terrain": "forest",
+        "radius": 4,
+        "min": 10
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "falconry_manor"
+    },
+    "tags": ["agriculture", "upgrade_only"]
+  }
+]

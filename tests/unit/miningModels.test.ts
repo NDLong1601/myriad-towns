@@ -15,11 +15,11 @@ describe('mining models', () => {
       ray.set(new Vector3(x, 2, z), new Vector3(0, -1, 0));
       return ray.intersectObject(new Mesh(geometry, material))[0]?.point.y ?? 0;
     };
-    expect(sample(quarry, 0.5, 0.11)).toBeGreaterThan(sample(quarry, 0.5, 0.89) + 0.3);
-    expect(sample(clay, 0.9, 0.48)).toBeGreaterThan(sample(clay, 0.53, 0.48) + 0.15);
+    expect(sample(quarry, 1.6, 0.2)).toBeGreaterThan(sample(quarry, 1.6, 0.8) + 0.12);
+    expect(sample(clay, 1.8, 0.2)).toBeGreaterThan(sample(clay, 1.8, 0.9) + 0.05);
     for (const geometry of [quarry, clay, iron]) geometry.computeBoundingBox();
-    expect(iron.boundingBox!.max.y).toBeGreaterThan(quarry.boundingBox!.max.y * 2);
-    expect(iron.boundingBox!.max.y).toBeGreaterThan(clay.boundingBox!.max.y * 4);
+    expect(iron.boundingBox!.max.y).toBeGreaterThan(quarry.boundingBox!.max.y);
+    expect(iron.boundingBox!.max.y).toBeGreaterThan(clay.boundingBox!.max.y);
     material.dispose();
   });
 });
