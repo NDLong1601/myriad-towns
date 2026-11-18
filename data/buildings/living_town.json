@@ -2793,7 +2793,10 @@
   {
     "id": "steam_quarry",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "stone": 8, "metal": 4 },
     "visual": { "shape": "mine", "color": "#9a9890", "height": 0.6 },
     "upkeep": { "labor": 3, "skilled": 1 },
@@ -2814,7 +2817,10 @@
   {
     "id": "industrial_quarry",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "stone": 20, "metal": 12, "goods": 6 },
     "visual": { "shape": "mine", "color": "#7e796e", "height": 0.9 },
     "upkeep": { "labor": 5, "skilled": 3 },
@@ -2829,7 +2835,10 @@
   {
     "id": "brick_works",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "stone": 6, "wood": 4 },
     "visual": { "shape": "block", "color": "#b5563c", "roof": "#8c3f2b", "height": 0.6 },
     "upkeep": { "labor": 2, "skilled": 1 },
@@ -2850,7 +2859,10 @@
   {
     "id": "industrial_brickyard",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "stone": 16, "metal": 8, "goods": 4 },
     "visual": { "shape": "block", "color": "#8c3f2b", "roof": "#3d2a19", "height": 1.1 },
     "upkeep": { "labor": 4, "skilled": 2 },
@@ -2865,7 +2877,10 @@
   {
     "id": "shaft_iron_mine",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "wood": 12, "stone": 8, "metal": 4 },
     "visual": { "shape": "mine", "color": "#6d6a70", "height": 0.7 },
     "upkeep": { "labor": 4, "skilled": 2 },
@@ -2886,7 +2901,10 @@
   {
     "id": "deep_iron_mine",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": { "stone": 24, "metal": 16, "goods": 8 },
     "visual": { "shape": "mine", "color": "#32383b", "height": 1.0 },
     "upkeep": { "labor": 7, "skilled": 4 },

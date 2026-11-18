@@ -172,12 +172,12 @@ Ruộng lúa, rau và dâu vẫn lớn dần theo mùa vụ ngay trên mô hình
 
 ### Nhóm 1: Khai khoáng và Đường ray
 
-Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại theo phong cách sa bàn chi tiết: tầng đá cắt từng khối, hố sét có nước, cửa hầm chống gỗ, tháp giếng, ống khói gạch, băng tải, silo thép, xe goòng, xe tải, công nhân và đèn pha. Chuỗi và ngưỡng đô thị do Antigravity thiết kế; mô hình dựng lại để khớp ảnh concept.
+Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại theo phong cách sa bàn chi tiết: tầng đá cắt từng khối, hố sét có nước, cửa hầm chống gỗ, tháp giếng, ống khói gạch, băng tải, silo thép, xe goòng, xe tải, công nhân và đèn pha. Mỏ đá, hố sét và mỏ sắt chiếm 2×2 ô (đường ray vẫn 1×1). Chuỗi và ngưỡng đô thị do Antigravity thiết kế; mô hình dựng lại để khớp ảnh concept.
 
 | Chuỗi                   | Cấp                                                                    |
 | ----------------------- | ---------------------------------------------------------------------- |
 | Mỏ đá (1×1, 3 cấp)      | Mỏ đá thủ công → Mỏ đá hơi nước (đô thị ≥ 2) → Mỏ đá công nghiệp (≥ 4) |
-| Hố đất sét (1×1, 3 cấp) | Hố đất sét → Lò gạch thủ công (≥ 2) → Nhà máy gạch công nghiệp (≥ 4)   |
+| Hố đất sét (2×2, 3 cấp) | Hố đất sét → Lò gạch thủ công (≥ 2) → Nhà máy gạch công nghiệp (≥ 4)   |
 | Mỏ sắt (1×1, 3 cấp)     | Mỏ sắt thủ công → Mỏ sắt giếng đứng (≥ 2) → Mỏ sắt sâu (≥ 4)           |
 | Đường ray (1×1, 2 cấp)  | Đường ray gỗ → Đường ray sắt (≥ 2)                                     |
 

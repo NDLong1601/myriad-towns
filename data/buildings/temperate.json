@@ -1065,8 +1065,8 @@
     "id": "quarry",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 6
@@ -1119,8 +1119,8 @@
     "id": "clay_pit",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 4
@@ -1165,8 +1165,8 @@
     "id": "iron_mine",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 10,

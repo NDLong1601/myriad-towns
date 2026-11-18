@@ -46,15 +46,27 @@ const dioramas = new Set([
   ...Object.keys(coastDiorama),
   ...Object.keys(miningDiorama),
 ]);
+/**
+ * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
+ * lot of 2 / zoom units, so its fractional layout and world-unit props keep their proportions
+ * while the finished model grows by `zoom`.
+ */
+const zoomed = new Map<string, number>(Object.keys(miningDiorama).map((id) => [id, 1.5]));
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {
   const recipe = models.get(def.id);
   if (!recipe) return false;
-  const lot = new Lot(parts, def, southRows.has(def.id));
+  const zoom = def.footprint.w >= 2 ? (zoomed.get(def.id) ?? 1) : 1;
+  const frame =
+    zoom === 1
+      ? def
+      : { ...def, footprint: { w: def.footprint.w / zoom, d: def.footprint.d / zoom } };
+  const lot = new Lot(parts, frame, southRows.has(def.id));
   if (def.crop) lot.stage = variant || 4;
   const from = parts.length;
   recipe(lot);
+  if (zoom !== 1) for (let i = from; i < parts.length; i++) parts[i]!.scale(zoom, zoom, zoom);
   if (weathered.has(def.id)) weather(parts, from, def.id);
   if (!dioramas.has(def.id)) {
     landmarks[def.id]?.(lot);

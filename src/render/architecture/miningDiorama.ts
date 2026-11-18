@@ -357,6 +357,29 @@ function windingWheel(l: Lot, x: number, z: number, y: number, r: number, ry: nu
   l.shape(hub, '#1f2326', x, z, y);
 }
 
+/** Work yard filler for the larger 2x2 lots: crates, barrels, stacks and loose material. */
+function yard(
+  l: Lot,
+  x0: number,
+  z0: number,
+  x1: number,
+  z1: number,
+  kind: 'stone' | 'brick' | 'ore',
+  n: number,
+): void {
+  const mat = { stone: '#cfc9b9', brick: '#bd6a45', ore: '#7a4a3a' }[kind];
+  for (let i = 0; i < n; i++) {
+    const x = x0 + rand() * (x1 - x0);
+    const z = z0 + rand() * (z1 - z0);
+    const r = rand();
+    if (r < 0.34) blockStack(l, x, z, 0.036, 2, 2, 1 + Math.floor(rand() * 3), mat);
+    else if (r < 0.52) crate(l, x, z, 0.036, kind === 'ore' ? '#7a4a3a' : '#8a6a48', rand() * 3);
+    else if (r < 0.66) barrel(l, x, z);
+    else if (r < 0.88) rubble(l, x, z, 0.036, 6, 0.08, mat);
+    else person(l, x, z, 0.036, ['#8a4a3a', '#5a7a9a', '#6a8a5a'][i % 3]!, '#3a3a3c');
+  }
+}
+
 /** Workers (hi-vis or period coats). */
 function workers(
   l: Lot,
@@ -372,6 +395,8 @@ export const miningDiorama: Recipes = {
   // -----------------------------------------------------------------------------------------
   quarry(l) {
     ground(l, 'quarry', '#a39c8c', [0.1, 0.1, 0.92, 0.92]);
+    yard(l, 0.1, 0.5, 0.38, 0.95, 'stone', 9);
+    yard(l, 0.54, 0.5, 0.7, 0.7, 'stone', 5);
     const rock = '#bdb6a6';
     // Two benches cut into the back and left of the lot.
     rockMass(l, 0.06, 0.06, 0.94, 0.26, 0.036, 0.075, rock, grass);
@@ -437,6 +462,8 @@ export const miningDiorama: Recipes = {
 
   steam_quarry(l) {
     ground(l, 'steam_quarry', '#a39d8e', [0.1, 0.1, 0.94, 0.94]);
+    yard(l, 0.56, 0.54, 0.68, 0.72, 'stone', 5);
+    yard(l, 0.36, 0.4, 0.44, 0.95, 'stone', 6);
     const rock = '#c4beae';
     rockMass(l, 0.05, 0.05, 0.95, 0.24, 0.036, 0.07, rock, grass);
     rockMass(l, 0.05, 0.05, 0.95, 0.15, 0.106, 0.06, shade(rock, 0.95), grass);
@@ -498,6 +525,8 @@ export const miningDiorama: Recipes = {
 
   industrial_quarry(l) {
     ground(l, 'industrial_quarry', '#9c978a', [0.08, 0.08, 0.95, 0.95]);
+    yard(l, 0.1, 0.4, 0.2, 0.62, 'stone', 4);
+    yard(l, 0.5, 0.78, 0.62, 0.95, 'stone', 4);
     const rock = '#c9c3b4';
     rockMass(l, 0.05, 0.05, 0.95, 0.22, 0.036, 0.06, rock, grass);
     rockMass(l, 0.05, 0.05, 0.95, 0.15, 0.096, 0.055, shade(rock, 0.95), grass);
@@ -556,6 +585,7 @@ export const miningDiorama: Recipes = {
   // -----------------------------------------------------------------------------------------
   clay_pit(l) {
     ground(l, 'clay_pit', '#b98a62', [0.1, 0.1, 0.92, 0.92]);
+    yard(l, 0.6, 0.5, 0.72, 0.95, 'brick', 6);
     const clay = '#c4724a';
     rockMass(l, 0.06, 0.06, 0.94, 0.24, 0.036, 0.06, clay, grass, 0.055);
     rockMass(l, 0.06, 0.24, 0.2, 0.62, 0.036, 0.06, clay, grass, 0.055);
@@ -627,6 +657,8 @@ export const miningDiorama: Recipes = {
 
   brick_works(l) {
     ground(l, 'brick_works', '#b58a62', [0.08, 0.08, 0.94, 0.94]);
+    yard(l, 0.34, 0.4, 0.4, 0.95, 'brick', 5);
+    yard(l, 0.56, 0.7, 0.72, 0.95, 'brick', 5);
     const clay = '#c4724a';
     rockMass(l, 0.05, 0.05, 0.95, 0.22, 0.036, 0.055, clay, grass, 0.055);
     rockMass(l, 0.05, 0.22, 0.17, 0.5, 0.036, 0.055, clay, grass, 0.055);
@@ -737,6 +769,7 @@ export const miningDiorama: Recipes = {
 
   industrial_brickyard(l) {
     ground(l, 'industrial_brickyard', '#aa8a68', [0.06, 0.06, 0.95, 0.95]);
+    yard(l, 0.4, 0.5, 0.7, 0.58, 'brick', 5);
     const clay = '#c4724a';
     rockMass(l, 0.05, 0.05, 0.95, 0.2, 0.036, 0.05, clay, grass, 0.055);
     rockMass(l, 0.05, 0.2, 0.15, 0.42, 0.036, 0.05, clay, grass, 0.055);
@@ -807,6 +840,8 @@ export const miningDiorama: Recipes = {
   // -----------------------------------------------------------------------------------------
   iron_mine(l) {
     ground(l, 'iron_mine', '#988a6e', [0.1, 0.3, 0.94, 0.94]);
+    yard(l, 0.4, 0.4, 0.6, 0.55, 'ore', 6);
+    yard(l, 0.08, 0.7, 0.24, 0.95, 'ore', 5);
     const rock = '#8d887c';
     // Rocky hillside with the timber-framed adit cut into its face.
     rockMass(l, 0.05, 0.05, 0.62, 0.3, 0.036, 0.1, rock, grass, 0.06);
@@ -866,6 +901,8 @@ export const miningDiorama: Recipes = {
 
   shaft_iron_mine(l) {
     ground(l, 'shaft_iron_mine', '#8f8670', [0.08, 0.28, 0.95, 0.95]);
+    yard(l, 0.4, 0.4, 0.58, 0.55, 'ore', 6);
+    yard(l, 0.08, 0.6, 0.2, 0.95, 'ore', 4);
     const rock = '#8d887c';
     rockMass(l, 0.05, 0.05, 0.5, 0.28, 0.036, 0.09, rock, grass, 0.06);
     rockMass(l, 0.05, 0.05, 0.36, 0.17, 0.126, 0.07, shade(rock, 0.95), grass, 0.06);
@@ -932,6 +969,8 @@ export const miningDiorama: Recipes = {
 
   deep_iron_mine(l) {
     ground(l, 'deep_iron_mine', '#857c6a', [0.06, 0.26, 0.95, 0.95]);
+    yard(l, 0.06, 0.3, 0.16, 0.6, 'ore', 4);
+    yard(l, 0.8, 0.3, 0.94, 0.55, 'ore', 4);
     const rock = '#8a867c';
     rockMass(l, 0.05, 0.05, 0.46, 0.26, 0.036, 0.08, rock, grass, 0.06);
     rockMass(l, 0.05, 0.05, 0.3, 0.16, 0.116, 0.06, shade(rock, 0.95), grass, 0.06);
