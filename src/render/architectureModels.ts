@@ -55,9 +55,14 @@ const dioramas = new Set([
  * lot of 2 / zoom units, so its fractional layout and world-unit props keep their proportions
  * while the finished model grows by `zoom`.
  */
-const zoomed = new Map<string, number>(
-  [...Object.keys(miningDiorama), ...Object.keys(industryDiorama)].map((id) => [id, 1.5]),
-);
+const zoomed = new Map<string, number>([
+  ...Object.keys(miningDiorama).map((id): [string, number] => [id, 1.5]),
+  // Group 2A is drawn at the same 2x2 frame scale but fills 3x3 lots (steelworks 4x3).
+  ...Object.keys(industryDiorama).map((id): [string, number] => [
+    id,
+    id.includes('steel') ? 2 : 2.25,
+  ]),
+]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {

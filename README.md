@@ -194,15 +194,15 @@ Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại 
 
 ### Nhóm 2A: Công nghiệp nặng và Năng lượng
 
-Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 2×2 (lò luyện thép 3×2): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
+Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 3×3 (lò luyện thép 4×3): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
 
 | Chuỗi               | Cấp                                                                       |
 | ------------------- | ------------------------------------------------------------------------- |
-| Nhà máy điện (2×2)  | Nhà máy điện → Nhà máy hơi nước (đô thị ≥ 2) → Nhà máy điện tuabin (≥ 4)  |
-| Xưởng đúc (2×2)     | Xưởng đúc → Xưởng đúc nặng (≥ 2)                                          |
-| Lò luyện thép (3×2) | Lò luyện thép → Lò luyện thép Bessemer (≥ 2) → Tổ hợp thép liên hợp (≥ 5) |
-| Mỏ than (2×2)       | Mỏ than đá → Mỏ than tháp tời (≥ 2) → Mỏ than hầm sâu (≥ 4)               |
-| Nhà máy (2×2)       | Nhà máy mái răng cưa                                                      |
+| Nhà máy điện (3×3)  | Nhà máy điện → Nhà máy hơi nước (đô thị ≥ 2) → Nhà máy điện tuabin (≥ 4)  |
+| Xưởng đúc (3×3)     | Xưởng đúc → Xưởng đúc nặng (≥ 2)                                          |
+| Lò luyện thép (4×3) | Lò luyện thép → Lò luyện thép Bessemer (≥ 2) → Tổ hợp thép liên hợp (≥ 5) |
+| Mỏ than (3×3)       | Mỏ than đá → Mỏ than tháp tời (≥ 2) → Mỏ than hầm sâu (≥ 4)               |
+| Nhà máy (3×3)       | Nhà máy mái răng cưa                                                      |
 
 ![Nhóm 2A trong thị trấn](docs/images/group2a-town.jpg)
 

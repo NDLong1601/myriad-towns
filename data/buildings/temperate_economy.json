@@ -340,10 +340,7 @@
   {
     "id": "power_plant",
     "category": "production",
-    "footprint": {
-      "w": 2,
-      "d": 2
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "stone": 30,
       "wood": 20,
@@ -395,10 +392,7 @@
   {
     "id": "foundry",
     "category": "production",
-    "footprint": {
-      "w": 2,
-      "d": 2
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "stone": 25,
       "wood": 10
@@ -457,10 +451,7 @@
   {
     "id": "factory",
     "category": "production",
-    "footprint": {
-      "w": 2,
-      "d": 2
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "stone": 30,
       "wood": 20,

@@ -2930,7 +2930,7 @@
   {
     "id": "steam_powerhouse",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": { "stone": 40, "wood": 20, "metal": 14 },
     "visual": { "shape": "tower", "color": "#6a6a70", "roof": "#2f2f34", "height": 2.2 },
     "upkeep": { "labor": 4, "skilled": 2, "coal": 2 },
@@ -2952,7 +2952,7 @@
   {
     "id": "turbine_power_station",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": { "stone": 60, "metal": 30, "goods": 12 },
     "visual": { "shape": "tower", "color": "#8a8f94", "roof": "#2f2f34", "height": 2.6 },
     "upkeep": { "labor": 5, "skilled": 4, "coal": 3 },
@@ -2968,7 +2968,7 @@
   {
     "id": "heavy_foundry",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": { "stone": 40, "wood": 12, "metal": 12 },
     "visual": { "shape": "block", "color": "#6a4a3a", "roof": "#2f2622", "height": 1.5 },
     "upkeep": { "skilled": 4, "ore": 4, "energy": 2 },
@@ -2984,7 +2984,7 @@
   {
     "id": "bessemer_steelworks",
     "category": "production",
-    "footprint": { "w": 3, "d": 2 },
+    "footprint": { "w": 4, "d": 3 },
     "cost": { "stone": 50, "wood": 16, "metal": 16 },
     "visual": { "shape": "block", "color": "#455a64", "roof": "#bf360c", "height": 2.0 },
     "upkeep": { "labor": 3, "skilled": 3, "ore": 4, "coal": 2 },
@@ -3006,7 +3006,7 @@
   {
     "id": "integrated_steel_mill",
     "category": "production",
-    "footprint": { "w": 3, "d": 2 },
+    "footprint": { "w": 4, "d": 3 },
     "cost": { "stone": 80, "metal": 40, "goods": 16 },
     "visual": { "shape": "block", "color": "#37474f", "roof": "#bf360c", "height": 2.6 },
     "upkeep": { "labor": 4, "skilled": 6, "ore": 7, "coal": 4, "energy": 3 },
@@ -3022,7 +3022,7 @@
   {
     "id": "colliery_headframe",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": { "wood": 30, "stone": 20, "metal": 6 },
     "visual": { "shape": "mine", "color": "#37474f", "roof": "#212121", "height": 1.5 },
     "upkeep": { "labor": 4, "skilled": 2 },
@@ -3044,7 +3044,7 @@
   {
     "id": "deep_shaft_colliery",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": { "stone": 40, "metal": 24, "goods": 10 },
     "visual": { "shape": "mine", "color": "#263238", "roof": "#212121", "height": 2.0 },
     "upkeep": { "labor": 7, "skilled": 4 },

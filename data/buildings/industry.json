@@ -173,10 +173,7 @@
   {
     "id": "coal_mine",
     "category": "production",
-    "footprint": {
-      "w": 2,
-      "d": 2
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "wood": 30,
       "stone": 15
@@ -228,10 +225,7 @@
   {
     "id": "steelworks",
     "category": "production",
-    "footprint": {
-      "w": 3,
-      "d": 2
-    },
+    "footprint": { "w": 4, "d": 3 },
     "cost": {
       "stone": 40,
       "wood": 20
