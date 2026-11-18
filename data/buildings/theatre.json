@@ -1,0 +1,78 @@
+[
+  {
+    "id": "open_air_stage",
+    "category": "culture",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 16, "stone": 4 },
+    "visual": { "shape": "hall", "color": "#d6cbb3", "roof": "#c8473b", "height": 0.6 },
+    "upkeep": { "labor": 2, "food": 0.2 },
+    "emits": [
+      { "field": "leisure", "amount": 2, "radius": 6 },
+      { "field": "noise", "amount": 1, "radius": 3 }
+    ],
+    "requires": [{ "type": "road", "maxDistance": 1 }],
+    "unlock": { "population": 80, "revealAt": 50 },
+    "upgrades": [
+      {
+        "to": "playhouse",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "commerce", "min": 2 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "playhouse",
+    "category": "culture",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#a65038", "roof": "#4b5a67", "height": 0.9 },
+    "upkeep": { "labor": 2, "skilled": 1, "food": 0.3, "goods": 0.1 },
+    "emits": [
+      { "field": "leisure", "amount": 3, "radius": 7 },
+      { "field": "commerce", "amount": 1, "radius": 4 },
+      { "field": "noise", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "commerce", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "opera_house",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "open_air_stage" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "opera_house",
+    "category": "culture",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#e6dcc7", "roof": "#4b5a67", "height": 1.25 },
+    "upkeep": { "labor": 3, "skilled": 2, "food": 0.5, "goods": 0.25 },
+    "emits": [
+      { "field": "leisure", "amount": 5, "radius": 9 },
+      { "field": "commerce", "amount": 2, "radius": 5 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 6 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "playhouse" },
+    "tags": ["upgrade_only"]
+  }
+]

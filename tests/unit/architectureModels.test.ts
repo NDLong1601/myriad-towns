@@ -111,6 +111,7 @@ describe('building architecture', () => {
       ['clinic', 'infirmary', 'medical_hall'],
       ['school', 'grammar_school', 'academy'],
       ['public_library', 'grand_library', 'royal_archive'],
+      ['open_air_stage', 'playhouse', 'opera_house'],
       [
         'smelter',
         'bellows_smelter',
@@ -372,5 +373,25 @@ describe('building architecture', () => {
     expect(restored?.def.id).toBe('grammar_school');
     expect(restored?.rot).toBe(1);
     expect(loadedCity.at(2, 4)?.uid).toBe(restored?.uid);
+  });
+});
+
+describe('theatre chain', () => {
+  it('bakes contact shadows into walls but keeps windows at full glow colour', () => {
+    const def = catalog.get('opera_house');
+    const parts: BufferGeometry[] = [];
+    architectureModel(def, parts);
+    let darkened = 0;
+    for (const part of parts) {
+      const glow = part.getAttribute('glow');
+      const color = part.getAttribute('color');
+      const pos = part.getAttribute('position');
+      for (let i = 0; i < pos.count; i++) {
+        if (glow.getX(i) > 0) expect(color.getX(i) + color.getY(i)).toBeGreaterThan(1);
+        else if (pos.getY(i) < 0.05 && color.getX(i) < 0.75) darkened++;
+      }
+      part.dispose();
+    }
+    expect(darkened).toBeGreaterThan(0);
   });
 });
