@@ -1,4 +1,5 @@
 import { type Lot, type Recipes } from './lot';
+import { miningTiers } from './miningTiers';
 import { productionTiers } from './productionTiers';
 
 const yard = '#908777';
@@ -47,6 +48,7 @@ function surroundWorkWindows(
 
 export const workplaces: Recipes = {
   ...productionTiers,
+  ...miningTiers,
   woodcutter(l) {
     l.base('#789761');
     l.roofed(0.29, 0.33, 0.43, 0.37, 0.04, 0.28, 'x', timber, '#6f5c47');

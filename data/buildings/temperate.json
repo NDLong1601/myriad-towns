@@ -1039,6 +1039,12 @@
       }
     ],
     "placeOn": ["land"],
+    "upgrades": [
+      {
+        "to": "steam_quarry",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",
@@ -1091,6 +1097,12 @@
         "terrain": "clay",
         "radius": 2
       }
+    ],
+    "upgrades": [
+      {
+        "to": "brick_works",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
     ]
   },
   {
@@ -1128,6 +1140,12 @@
       }
     ],
     "placeOn": ["land"],
+    "upgrades": [
+      {
+        "to": "shaft_iron_mine",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",
