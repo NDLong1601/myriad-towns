@@ -1,6 +1,36 @@
 import { STOCK_RESOURCES, type Amounts } from '@/sim/catalog';
 import { fmt, t } from './i18n';
 
+const HUD_PATHS = {
+  demolish: 'm15 4 5 5-3 3-5-5 3-3ZM13 8 4 17l3 3 9-9M12 5l5-2 4 4-2 5',
+  undo: 'M9 6 4 11l5 5M4 11h10a5 5 0 0 1 5 5v2',
+  redo: 'm15 6 5 5-5 5m5-5H10a5 5 0 0 0-5 5v2',
+  previous: 'm14 6-6 6 6 6',
+  next: 'm10 6 6 6-6 6',
+  lock: 'M7 10V8a5 5 0 0 1 10 0v2m-12 0h14v10H5zM12 14v2',
+  warning: 'M12 4 3 20h18L12 4Zm0 6v4m0 3h.01',
+  info: 'M21 12a9 9 0 1 1-18 0 9 9 0 1 1 18 0ZM12 11v5m0-8h.01',
+  check: 'm5 12 4 4L19 6',
+  go: 'M4 12h15m-6-6 6 6-6 6',
+  cycle: 'M20 9a8 8 0 0 0-14-3L4 8m0-4v4h4m-4 7a8 8 0 0 0 14 3l2-2m0 4v-4h-4',
+  day: 'M16 12a4 4 0 1 1-8 0 4 4 0 1 1 8 0ZM12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1',
+  night: 'M20 15a9 9 0 1 1-11-11 8 8 0 0 0 11 11Z',
+  trade: 'M4 8h16m-4-4 4 4-4 4m4 4H4m4-4-4 4 4 4',
+  menu: 'M5 6h14M5 12h14M5 18h14',
+  save: 'M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6',
+  soundOn: 'M4 9h4l5-4v14l-5-4H4zm12 0a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10',
+  soundOff: 'M4 9h4l5-4v14l-5-4H4zm12 1 4 4m0-4-4 4',
+  settings: 'M4 6h16M4 12h16M4 18h16M8 4v4m8 2v4m-6 2v4',
+} as const;
+
+export function strokeIcon(path: string, size = 20): string {
+  return `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>`;
+}
+
+export function hudIcon(name: keyof typeof HUD_PATHS, size?: number): string {
+  return strokeIcon(HUD_PATHS[name], size);
+}
+
 /** Workforce icons stay visually distinct from stockpile items. */
 const SHAPES: Record<string, string> = {
   labor:

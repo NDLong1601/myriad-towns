@@ -1,5 +1,5 @@
 import type { BuildingDef, Requirement } from './catalog';
-import { type City, rectOf } from './city';
+import { type BuildingRotation, type City, rectOf } from './city';
 import { type Rect, forTilesInRadius } from './geometry';
 import { hasTag } from './terrainQuery';
 import { TileFlag } from '@/world/biomes';
@@ -109,16 +109,22 @@ export function checkRequirement(
 }
 
 /** Everything that decides whether `def` can be placed with its corner at (x, z). */
-export function checkPlacement(city: City, def: BuildingDef, x: number, z: number): PlacementCheck {
-  const rect = rectOf(def, x, z);
+export function checkPlacement(
+  city: City,
+  def: BuildingDef,
+  x: number,
+  z: number,
+  rot: BuildingRotation = 0,
+): PlacementCheck {
+  const rect = rectOf(def, x, z, rot);
   const site: CheckResult[] = [];
 
   let occupied = false;
   let treesToCut = 0;
   let level: number | undefined;
   let flat = true;
-  for (let tz = z; tz < z + def.footprint.d; tz++) {
-    for (let tx = x; tx < x + def.footprint.w; tx++) {
+  for (let tz = z; tz < z + rect.d; tz++) {
+    for (let tx = x; tx < x + rect.w; tx++) {
       if (city.at(tx, tz)) occupied = true;
       const t = city.terrain.tile(tx, tz);
       if (t.flags & TileFlag.Tree) treesToCut++;
@@ -140,9 +146,8 @@ export function checkPlacement(city: City, def: BuildingDef, x: number, z: numbe
     if (tag === 'flat') ok = flat;
     else {
       ok = true;
-      for (let tz = z; tz < z + def.footprint.d && ok; tz++) {
-        for (let tx = x; tx < x + def.footprint.w && ok; tx++)
-          ok = hasTag(city.terrain, tx, tz, tag);
+      for (let tz = z; tz < z + rect.d && ok; tz++) {
+        for (let tx = x; tx < x + rect.w && ok; tx++) ok = hasTag(city.terrain, tx, tz, tag);
       }
     }
     site.push({ ok, key: 'req.footprint', params: { what: `terrain.${tag}` } });
@@ -164,7 +169,7 @@ export function checkUpgrades(
 ): { to: string; checks: CheckResult[]; ok: boolean }[] {
   const b = city.get(uid);
   if (!b) return [];
-  const rect = rectOf(b.def, b.x, b.z);
+  const rect = rectOf(b.def, b.x, b.z, b.rot);
   return (b.def.upgrades ?? []).map((u) => {
     const checks = u.when.map((r) => checkRequirement(city, r, rect, uid));
     return { to: u.to, checks, ok: checks.every((c) => c.ok) };
@@ -175,7 +180,7 @@ export function checkUpgrades(
 export function checkSustain(city: City, uid: number): CheckResult[] {
   const b = city.get(uid);
   if (!b) return [];
-  const rect = rectOf(b.def, b.x, b.z);
+  const rect = rectOf(b.def, b.x, b.z, b.rot);
   return (b.def.requires ?? []).map((r) => checkRequirement(city, r, rect, uid));
 }
 

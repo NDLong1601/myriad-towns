@@ -1,4 +1,4 @@
-import { type City, rectOf } from './city';
+import { type BuildingRotation, type City, rectOf } from './city';
 import { type Rect, rectDistance } from './geometry';
 import { checkPlacement } from './requirements';
 
@@ -22,17 +22,18 @@ export class PlaceCommand implements Command {
     private readonly defId: string,
     private readonly x: number,
     private readonly z: number,
+    private readonly rot: BuildingRotation = 0,
   ) {
     this.label = `place ${defId} @${x},${z}`;
   }
 
   do(city: City): boolean {
     const def = city.catalog.get(this.defId);
-    if (!checkPlacement(city, def, this.x, this.z).ok) return false;
+    if (!checkPlacement(city, def, this.x, this.z, this.rot).ok) return false;
     this.paid = city.freeBuild ? {} : { ...def.cost };
     city._addStock(this.paid, -1);
     // Redo reuses the same uid so later commands that refer to it stay valid.
-    const { building, cut } = city._add(def, this.x, this.z, this.uid);
+    const { building, cut } = city._add(def, this.x, this.z, this.uid, this.rot);
     this.uid = building.uid;
     this.cut = cut;
     return true;
@@ -49,14 +50,15 @@ export class PlaceCommand implements Command {
   }
 
   touches(city: City, area: Rect): boolean {
-    return rectDistance(area, rectOf(city.catalog.get(this.defId), this.x, this.z)) === 0;
+    return rectDistance(area, rectOf(city.catalog.get(this.defId), this.x, this.z, this.rot)) === 0;
   }
 }
 
 export class DemolishCommand implements Command {
   readonly label: string;
   private removed:
-    { defId: string; x: number; z: number; refund: Record<string, number> } | undefined;
+    | { defId: string; x: number; z: number; rot: BuildingRotation; refund: Record<string, number> }
+    | undefined;
 
   constructor(private readonly uid: number) {
     this.label = `demolish #${uid}`;
@@ -68,22 +70,22 @@ export class DemolishCommand implements Command {
     const refund = city.refundOf(b.def);
     city._remove(this.uid);
     city._addStock(refund, 1);
-    this.removed = { defId: b.def.id, x: b.x, z: b.z, refund };
+    this.removed = { defId: b.def.id, x: b.x, z: b.z, rot: b.rot ?? 0, refund };
     return true;
   }
 
   undo(city: City): void {
     if (!this.removed) return;
-    const { defId, x, z, refund } = this.removed;
+    const { defId, x, z, rot, refund } = this.removed;
     city._addStock(refund, -1);
     // Trees cut by the original placement stay cut (they were not restored on demolish).
-    city._add(city.catalog.get(defId), x, z, this.uid);
+    city._add(city.catalog.get(defId), x, z, this.uid, rot);
   }
 
   touches(city: City, area: Rect): boolean {
     if (!this.removed) return false;
-    const { defId, x, z } = this.removed;
-    return rectDistance(area, rectOf(city.catalog.get(defId), x, z)) === 0;
+    const { defId, x, z, rot } = this.removed;
+    return rectDistance(area, rectOf(city.catalog.get(defId), x, z, rot)) === 0;
   }
 }
 

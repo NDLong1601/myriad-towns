@@ -162,6 +162,38 @@
         "maxDistance": 2
       }
     ],
+    "upgrades": [
+      {
+        "to": "aqueduct_reservoir",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 6
+          },
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "pump_house"
+    },
     "unlock": {
       "population": 120,
       "revealAt": 60
@@ -284,6 +316,22 @@
         "maxDistance": 2
       }
     ],
+    "upgrades": [
+      {
+        "to": "smock_windmill",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "unlock": {
       "population": 100,
       "revealAt": 60
@@ -380,7 +428,9 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "smelter",
@@ -435,7 +485,9 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "workshop",

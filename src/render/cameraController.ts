@@ -42,6 +42,8 @@ export class CameraController {
   groundY = 2.5;
   /** Left-drag pans the map. Tools that drag (roads) turn this off while active. */
   panWithLeftButton = true;
+  /** While placing a building, mouse wheel and R key rotate the building instead of zooming/tilting. */
+  wheelRotatesBuilding = false;
 
   constructor(
     private readonly camera: THREE.PerspectiveCamera,
@@ -86,7 +88,7 @@ export class CameraController {
     if (this.keys.has('KeyA') || this.keys.has('ArrowLeft')) fx -= 1;
     if (this.keys.has('KeyD') || this.keys.has('ArrowRight')) fx += 1;
     if (fx || fz) this.panScreen(fx * speed * dt, fz * speed * dt);
-    if (this.keys.has('KeyR')) this.goal.pitch += 1.2 * dt;
+    if (!this.wheelRotatesBuilding && this.keys.has('KeyR')) this.goal.pitch += 1.2 * dt;
     if (this.keys.has('KeyF')) this.goal.pitch -= 1.2 * dt;
     this.clampGoal();
 
@@ -189,6 +191,7 @@ export class CameraController {
     el.addEventListener(
       'wheel',
       (e) => {
+        if (this.wheelRotatesBuilding && !e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         this.goal.distance *= Math.exp(e.deltaY * 0.0012);
         this.clampGoal();

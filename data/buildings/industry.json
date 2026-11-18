@@ -60,6 +60,28 @@
       "roof": "#bcaaa4",
       "height": 1.4
     },
+    "upgrades": [
+      {
+        "to": "elevator_granary",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          }
+        ]
+      }
+    ],
     "tags": ["storage"],
     "unlock": {
       "population": 30,

@@ -28,7 +28,7 @@ export class PlanRenderer {
   }
 
   private rebuild(): void {
-    const byDef = new Map<string, { x: number; z: number }[]>();
+    const byDef = new Map<string, { x: number; z: number; rot?: number }[]>();
     for (const p of this.plans.all()) {
       let list = byDef.get(p.defId);
       if (!list) byDef.set(p.defId, (list = []));
@@ -43,6 +43,7 @@ export class PlanRenderer {
       }
     }
     for (const [id, list] of byDef) {
+      const def = this.catalog.get(id);
       let mesh = this.meshes.get(id);
       if (!mesh || mesh.instanceMatrix.count < list.length) {
         if (mesh) {
@@ -51,7 +52,7 @@ export class PlanRenderer {
           mesh.dispose();
         }
         mesh = new THREE.InstancedMesh(
-          buildingGeometry(this.catalog.get(id)),
+          buildingGeometry(def),
           this.material,
           Math.max(16, list.length * 2),
         );
@@ -61,8 +62,15 @@ export class PlanRenderer {
         this.group.add(mesh);
       }
       list.forEach((p, i) => {
+        const rot = p.rot ?? 0;
+        const w0 = def.footprint.w;
+        const d0 = def.footprint.d;
+        const ox = rot === 1 ? d0 : rot === 2 ? w0 : 0;
+        const oz = rot === 2 ? d0 : rot === 3 ? w0 : 0;
         const l = this.origin.toLocal(p.x, p.z);
-        this.m.makeTranslation(l.x, this.heightAt(p.x, p.z) + 0.02, l.z);
+        this.m
+          .makeRotationY((-rot * Math.PI) / 2)
+          .setPosition(l.x + ox, this.heightAt(p.x, p.z) + 0.02, l.z + oz);
         mesh.setMatrixAt(i, this.m);
       });
       mesh.count = list.length;

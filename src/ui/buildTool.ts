@@ -1,5 +1,5 @@
 import { type BuildingDef, type Requirement, isRoadDef } from '@/sim/catalog';
-import { type City, rectOf } from '@/sim/city';
+import { type BuildingRotation, type City, footprintOf, rectOf } from '@/sim/city';
 import { BatchCommand, DemolishCommand, type History, PlaceCommand } from '@/sim/commands';
 import { forTilesInRadius, type Rect } from '@/sim/geometry';
 import { ImpactPreview, type LocalImpact } from '@/sim/impact';
@@ -28,6 +28,7 @@ export class BuildTool {
   private screen = { x: 0, y: 0 };
   private down: { x: number; y: number; tile: { x: number; z: number } | null } | null = null;
   private inspected: number | null = null;
+  private rotation: BuildingRotation = 0;
   private readonly ac = new AbortController();
   private readonly impact: ImpactPreview;
   private impactRevision = 0;
@@ -62,10 +63,27 @@ export class BuildTool {
       { signal },
     );
     window.addEventListener('keydown', (e) => this.onKey(e), { signal });
+    canvas.addEventListener(
+      'wheel',
+      (e) => {
+        if (
+          this.tool.kind === 'build' &&
+          !this.isLinearTool(this.tool.defId) &&
+          !e.ctrlKey &&
+          !e.metaKey
+        ) {
+          e.preventDefault();
+          this.rotate(e.deltaY > 0 ? 1 : -1);
+        }
+      },
+      { signal, passive: false },
+    );
     menu.onToolChange((tool) => {
       this.inspected = null;
+      const linear = tool.kind === 'build' && this.isLinearTool(tool.defId);
       // An active route tool assigns left-drag to construction.
-      view.controller.panWithLeftButton = !(tool.kind === 'build' && this.isLinearTool(tool.defId));
+      view.controller.panWithLeftButton = !linear;
+      view.controller.wheelRotatesBuilding = tool.kind === 'build' && !linear;
       this.refresh();
     });
     city.on((event) => {
@@ -126,13 +144,22 @@ export class BuildTool {
     return !!this.plans?.mode;
   }
 
+  get currentRotation(): BuildingRotation {
+    return this.rotation;
+  }
+
+  rotate(steps = 1): void {
+    this.rotation = ((((this.rotation + steps) % 4) + 4) % 4) as BuildingRotation;
+    this.refresh();
+  }
+
   private click(tile: { x: number; z: number }): void {
     const tool = this.tool;
     if (this.planning && this.plans) {
       if (tool.kind === 'build') {
         const def = this.city.catalog.get(tool.defId);
         const c = this.corner(def, tile);
-        this.plans.add(def.id, c.x, c.z);
+        this.plans.add(def.id, c.x, c.z, this.rotation);
         return;
       }
       if (tool.kind === 'demolish') {
@@ -146,7 +173,7 @@ export class BuildTool {
     if (tool.kind === 'build') {
       const def = this.city.catalog.get(tool.defId);
       const c = this.corner(def, tile);
-      this.history.run(new PlaceCommand(def.id, c.x, c.z));
+      this.history.run(new PlaceCommand(def.id, c.x, c.z, this.rotation));
     } else if (tool.kind === 'demolish') {
       const b = this.city.at(tile.x, tile.z);
       if (b) this.history.run(new DemolishCommand(b.uid));
@@ -187,14 +214,23 @@ export class BuildTool {
       this.plans.setMode(!this.plans.mode);
     } else if (e.code === 'KeyX' && !mod) {
       this.menu.setTool(this.tool.kind === 'demolish' ? { kind: 'none' } : { kind: 'demolish' });
+    } else if (
+      e.code === 'KeyR' &&
+      !mod &&
+      this.tool.kind === 'build' &&
+      !this.isLinearTool(this.tool.defId)
+    ) {
+      e.preventDefault();
+      this.rotate(e.shiftKey ? -1 : 1);
     }
   }
 
   /** Footprint corner so the cursor sits on the building's centre tile. */
   private corner(def: BuildingDef, tile: { x: number; z: number }): { x: number; z: number } {
+    const fp = footprintOf(def, this.rotation);
     return {
-      x: tile.x - Math.floor((def.footprint.w - 1) / 2),
-      z: tile.z - Math.floor((def.footprint.d - 1) / 2),
+      x: tile.x - Math.floor((fp.w - 1) / 2),
+      z: tile.z - Math.floor((fp.d - 1) / 2),
     };
   }
 
@@ -202,14 +238,21 @@ export class BuildTool {
     if (this.tool.kind !== 'none' || this.inspected === null) this.refresh();
   }
 
-  private localImpact(def: BuildingDef, x: number, z: number, uid?: number): LocalImpact {
-    const key = `${def.id}:${x}:${z}:${uid ?? ''}`;
+  private localImpact(
+    def: BuildingDef,
+    x: number,
+    z: number,
+    uid?: number,
+    rot: BuildingRotation = 0,
+  ): LocalImpact {
+    const key = `${def.id}:${x}:${z}:${rot}:${uid ?? ''}`;
     if (this.cachedImpact?.key === key && this.cachedImpact.revision === this.impactRevision)
       return this.cachedImpact.value;
     const value = this.impact.inspect({
       def,
       x,
       z,
+      rot,
       ...(uid === undefined ? {} : { removeUid: uid }),
     });
     this.cachedImpact = { key, value, revision: this.impactRevision };
@@ -230,7 +273,10 @@ export class BuildTool {
         const hovered = this.hover ? this.city.at(this.hover.x, this.hover.z) : undefined;
         this.preview.setTiles(
           hovered
-            ? { ...empty, footprint: rectTiles(rectOf(hovered.def, hovered.x, hovered.z), true) }
+            ? {
+                ...empty,
+                footprint: rectTiles(rectOf(hovered.def, hovered.x, hovered.z, hovered.rot), true),
+              }
             : empty,
         );
         const poi = !hovered && this.hover ? this.poiAt?.(this.hover.x, this.hover.z) : undefined;
@@ -257,7 +303,7 @@ export class BuildTool {
         this.detail?.hide();
         return;
       }
-      const rect = rectOf(b.def, b.x, b.z);
+      const rect = rectOf(b.def, b.x, b.z, b.rot);
       const sustain = checkSustain(this.city, b.uid);
       const upgrades = checkUpgrades(this.city, b.uid);
       const all = [...sustain, ...upgrades.flatMap((u) => u.checks)];
@@ -335,10 +381,10 @@ export class BuildTool {
         this.panel.hide();
         return;
       }
-      const impact = this.localImpact(b.def, b.x, b.z, b.uid);
+      const impact = this.localImpact(b.def, b.x, b.z, b.uid, b.rot);
       this.preview.setTiles({
         ...empty,
-        footprint: rectTiles(rectOf(b.def, b.x, b.z), false),
+        footprint: rectTiles(rectOf(b.def, b.x, b.z, b.rot), false),
         markers: impactMarkers(impact),
       });
       this.panel.show(
@@ -379,10 +425,10 @@ export class BuildTool {
     }
 
     const c = this.corner(def, this.hover);
-    const check = checkPlacement(this.city, def, c.x, c.z);
-    const rect = rectOf(def, c.x, c.z);
-    const impact = check.ok ? this.localImpact(def, c.x, c.z) : undefined;
-    this.preview.setGhost(def, c.x, c.z, check.ok);
+    const check = checkPlacement(this.city, def, c.x, c.z, this.rotation);
+    const rect = rectOf(def, c.x, c.z, this.rotation);
+    const impact = check.ok ? this.localImpact(def, c.x, c.z, undefined, this.rotation) : undefined;
+    this.preview.setGhost(def, c.x, c.z, check.ok, this.rotation);
     this.preview.setTiles({
       footprint: rectTiles(rect, check.ok),
       affects: emitTiles(def, rect),
@@ -395,6 +441,7 @@ export class BuildTool {
         {
           lines: [
             { ok: check.cost.ok, text: `${t('ui.cost')}: ${formatAmounts(def.cost) || '—'}` },
+            { text: t('ui.rotateHint', { dir: t(`ui.dir.${this.rotation}`) }) },
             ...check.site.filter((s) => !s.ok || s.key !== 'req.footprint').map(line),
             ...check.site.filter((s) => s.ok && s.key === 'req.footprint').map(line),
             ...check.requires.map(line),
@@ -422,7 +469,7 @@ export class BuildTool {
     const conditions: PanelLine[] = live
       ? (() => {
           const c = this.corner(def, this.hover as { x: number; z: number });
-          const check = checkPlacement(this.city, def, c.x, c.z);
+          const check = checkPlacement(this.city, def, c.x, c.z, this.rotation);
           return [...check.site.filter((item) => !item.ok), ...check.requires].map(line);
         })()
       : [

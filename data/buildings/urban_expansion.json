@@ -41,6 +41,28 @@
         "max": 6
       }
     ],
+    "upgrades": [
+      {
+        "to": "master_miner_lodge",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
@@ -66,7 +88,7 @@
       "shape": "house",
       "color": "#90a4ae",
       "roof": "#37474f",
-      "height": 0.6
+      "height": 0.72
     },
     "housing": 6,
     "upkeep": {
@@ -94,6 +116,28 @@
         "min": 1
       }
     ],
+    "upgrades": [
+      {
+        "to": "harbor_inn_house",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
@@ -118,7 +162,7 @@
       "shape": "house",
       "color": "#8d6e63",
       "roof": "#4e342e",
-      "height": 0.6
+      "height": 0.72
     },
     "housing": 6,
     "upkeep": {
@@ -139,6 +183,28 @@
       {
         "type": "road",
         "maxDistance": 2
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "forester_manor",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          }
+        ]
       }
     ],
     "decline": {
@@ -206,6 +272,43 @@
         "min": 1
       }
     ],
+    "upgrades": [
+      {
+        "to": "boulevard_mansion",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "health",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "leisure",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 5
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      }
+    ],
     "decline": {
       "warnAtTicks": 20,
       "graceTicks": 60,
@@ -248,6 +351,28 @@
         "maxDistance": 1
       }
     ],
+    "upgrades": [
+      {
+        "to": "tram_pavilion",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "tags": ["transit"],
     "unlock": {
       "population": 40,
@@ -288,6 +413,28 @@
       {
         "type": "road",
         "maxDistance": 2
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "central_metro_plaza",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 5
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 2
+          }
+        ]
       }
     ],
     "tags": ["transit"],
@@ -352,6 +499,36 @@
       }
     ],
     "upgrades": [
+      {
+        "to": "grand_condominium",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "connectivity",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "health",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      },
       {
         "to": "skyscraper",
         "when": [

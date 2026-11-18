@@ -11,6 +11,7 @@ import {
 } from '@/sim/regionalTrade';
 import type { TownStore } from '@/sim/towns';
 import { buildingName, fmt, t } from '@/ui/i18n';
+import { hudIcon } from '@/ui/icons';
 import { townName } from '@/ui/townsPanel';
 import '@/ui/panels/regionalTrade.css';
 
@@ -23,7 +24,9 @@ export function mountRegionalTrade(
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'mt-regional-button';
-  button.textContent = t('trade.title');
+  button.innerHTML = hudIcon('trade');
+  button.title = t('trade.title');
+  button.setAttribute('aria-label', button.title);
   button.setAttribute('aria-haspopup', 'dialog');
   parent.appendChild(button);
 

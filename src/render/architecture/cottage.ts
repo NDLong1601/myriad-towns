@@ -242,16 +242,56 @@ export function cottage(l: Lot): void {
     l.block(winX + 0.018, wz + 0.038, 0.025, 0.022, wallY + 0.058, 0.018, flowerWhite);
   }
 
-  // The secondary elevations retain the same timber and inset glazing.
+  // The secondary elevations (-Z North and -X West) retain full dormer, timber, flower-box, and rear-porch detail.
   const rearZ = hz - hd / 2 - 0.012;
   const westX = hx - hw / 2 - 0.012;
   l.block(hx, rearZ, hw, 0.023, roofBaseY - 0.018, 0.022, timber);
-  l.block(hx, rearZ, 0.1, 0.022, wallY + 0.057, 0.123, timberDark);
-  l.block(hx, rearZ - 0.005, 0.073, 0.016, wallY + 0.071, 0.096, windowLit, 1);
-  l.block(westX, hz - 0.025, 0.025, 0.115, wallY + 0.057, 0.123, timberDark);
-  l.block(westX - 0.006, hz - 0.025, 0.016, 0.088, wallY + 0.071, 0.096, windowLit, 1);
+  // West (-X) roof slope Dormer matching the East slope
+  const westDormerX = hx - 0.155;
+  const westDormerZ = hz - 0.04;
+  l.block(westDormerX, westDormerZ, dormerW, dormerD, dormerY, dormerH, plaster);
+  l.block(westDormerX - dormerW / 2, westDormerZ, 0.022, dormerD, dormerY, dormerH, timber);
+  l.block(
+    westDormerX - dormerW / 2 - 0.012,
+    westDormerZ,
+    0.018,
+    0.076,
+    dormerY + 0.035,
+    0.082,
+    windowLit,
+    1,
+  );
+  l.ridge(
+    westDormerX,
+    westDormerZ,
+    dormerW + 0.04,
+    dormerD + 0.04,
+    dormerRoofY,
+    0.095,
+    'x',
+    dormerShingle,
+  );
+  // Two framed windows with flower boxes on West (-X) wall
+  for (const wz of [hz - 0.14, hz + 0.15]) {
+    l.block(westX, wz, 0.022, 0.096, wallY + 0.055, 0.123, timberDark);
+    l.block(westX - 0.005, wz, 0.016, 0.084, wallY + 0.065, 0.105, windowLit, 1);
+    l.block(westX - 0.015, wz, 0.028, 0.102, wallY + 0.035, 0.024, timber);
+    l.block(westX - 0.017, wz - 0.025, 0.022, 0.03, wallY + 0.056, 0.018, flowerYellow);
+    l.block(westX - 0.017, wz + 0.02, 0.022, 0.03, wallY + 0.056, 0.018, flowerPink);
+  }
+  // Rear (-Z) upper gable window, ground window with flower box, back kitchen door & terracotta awning
+  l.block(hx, rearZ, 0.09, 0.02, roofBaseY + 0.1, 0.11, timberDark);
+  l.block(hx, rearZ - 0.004, 0.074, 0.016, roofBaseY + 0.11, 0.092, windowLit, 1);
+  l.block(hx + 0.11, rearZ, 0.096, 0.022, wallY + 0.057, 0.123, timberDark);
+  l.block(hx + 0.11, rearZ - 0.005, 0.076, 0.016, wallY + 0.071, 0.096, windowLit, 1);
+  l.block(hx + 0.11, rearZ - 0.015, 0.102, 0.028, wallY + 0.035, 0.024, timber);
+  l.block(hx + 0.11, rearZ - 0.017, 0.06, 0.022, wallY + 0.056, 0.018, flowerPink);
+  l.block(hx - 0.08, rearZ, 0.084, 0.018, wallY, 0.175, timberDark);
+  l.ridge(hx - 0.08, rearZ - 0.035, 0.14, 0.08, wallY + 0.18, 0.06, 'z', roofOrangeEave);
   l.beam([westX, wallY + 0.026, hz + 0.19], [westX, roofBaseY - 0.026, hz + 0.071], 0.019, timber);
+  l.beam([westX, wallY + 0.026, hz - 0.19], [westX, roofBaseY - 0.026, hz - 0.071], 0.019, timber);
   l.beam([hx - 0.16, wallY + 0.03, rearZ], [hx - 0.075, roofBaseY - 0.024, rearZ], 0.02, timber);
+  l.beam([hx + 0.16, wallY + 0.03, rearZ], [hx + 0.075, roofBaseY - 0.024, rearZ], 0.02, timber);
 
   // 7. Covered Front Porch with Steps & Front Door
   const porchX = hx - 0.02;

@@ -3,6 +3,7 @@ import { TICK_HZ } from '@/sim/clock';
 import type { Problem, Simulation } from '@/sim/simulation';
 import { describeCheck } from '@/ui/describe';
 import { buildingName, t } from '@/ui/i18n';
+import { hudIcon } from '@/ui/icons';
 import '@/ui/panels/progressAlerts.css';
 
 interface Alert {
@@ -70,7 +71,10 @@ export function mountProgressAlerts(
   parent.appendChild(panel);
   panel.addEventListener('pointerdown', (event) => event.stopPropagation());
 
-  const rows = new Map<string, { item: HTMLLIElement; button: HTMLButtonElement }>();
+  const rows = new Map<
+    string,
+    { item: HTMLLIElement; title: HTMLElement; action: HTMLElement; advice: HTMLElement }
+  >();
   let alerts = new Map<string, Alert>();
   let lastTick = -TICK_HZ;
   let previous = new Set<string>();
@@ -120,20 +124,36 @@ export function mountProgressAlerts(
         const item = document.createElement('li');
         const button = document.createElement('button');
         button.type = 'button';
+        const title = document.createElement('strong');
+        const action = document.createElement('span');
+        const link = document.createElement('span');
+        link.className = 'mt-alert-action';
+        link.innerHTML = hudIcon('go', 14);
+        link.append(action);
+        button.append(title, link);
         button.addEventListener('click', () => {
           const current = alerts.get(key);
           const b = current && city.get(current.building.uid);
           if (b) focus(b.x + b.def.footprint.w / 2, b.z + b.def.footprint.d / 2, b.uid);
         });
-        item.append(button);
+        const details = document.createElement('details');
+        const toggle = document.createElement('summary');
+        toggle.title = t('alert.advice');
+        toggle.setAttribute('aria-label', toggle.title);
+        toggle.innerHTML = hudIcon('info', 17);
+        const advice = document.createElement('p');
+        details.append(toggle, advice);
+        item.append(button, details);
         list.append(item);
-        row = { item, button };
+        row = { item, title, action, advice };
         rows.set(key, row);
       }
       const title = t('alert.affected', { n: alert.count, reason: reasonOf(alert.problem) });
       const action = t('alert.view', { building: buildingName(alert.building.def.id) });
-      const text = `${title}\n${adviceOf(alert.problem, hungry)}\n${action}`;
-      if (row.button.textContent !== text) row.button.textContent = text;
+      const advice = adviceOf(alert.problem, hungry);
+      if (row.title.textContent !== title) row.title.textContent = title;
+      if (row.action.textContent !== action) row.action.textContent = action;
+      if (row.advice.textContent !== advice) row.advice.textContent = advice;
     }
   }
 

@@ -486,6 +486,16 @@
       "height": 1.65
     },
     "tags": ["storage", "logistics", "upgrade_only"],
+    "upgrades": [
+      {
+        "to": "automated_logistics_hub",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "urban", "min": 4 }
+        ]
+      }
+    ],
     "decline": {
       "to": "warehouse"
     }
@@ -698,8 +708,2047 @@
       "goods": 2.2,
       "metal": 0.35
     },
+    "upgrades": [
+      {
+        "to": "imperial_seaport",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "connectivity", "min": 1 },
+          { "type": "field", "field": "commerce", "min": 2 }
+        ]
+      }
+    ],
     "decline": {
       "to": "cargo_port"
     }
+  },
+  {
+    "id": "covered_market",
+    "category": "service",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#e2bf82",
+      "roof": "#b84e35",
+      "height": 1.15
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 1,
+      "food": 0.4,
+      "goods": 0.1
+    },
+    "emits": [
+      { "field": "commerce", "amount": 3, "radius": 7 },
+      { "field": "leisure", "amount": 1, "radius": 4 },
+      { "field": "noise", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "education", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_bazaar",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "market"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "grand_bazaar",
+    "category": "service",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#dfd4be",
+      "roof": "#3f6e72",
+      "height": 1.65
+    },
+    "upkeep": {
+      "labor": 2,
+      "skilled": 2,
+      "food": 0.6,
+      "goods": 0.25
+    },
+    "produces": {
+      "goods": 0.3
+    },
+    "emits": [
+      { "field": "commerce", "amount": 5, "radius": 8 },
+      { "field": "leisure", "amount": 2, "radius": 5 },
+      { "field": "noise", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 6 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "covered_market"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "guild_tavern",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "house",
+      "color": "#eadcc5",
+      "roof": "#782b29",
+      "height": 1.05
+    },
+    "upkeep": {
+      "labor": 1,
+      "skilled": 1,
+      "food": 0.5,
+      "goods": 0.1
+    },
+    "emits": [
+      { "field": "leisure", "amount": 2, "radius": 6 },
+      { "field": "commerce", "amount": 1, "radius": 4 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_inn",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "tavern"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "grand_inn",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#efe5d1",
+      "roof": "#3c505e",
+      "height": 1.35
+    },
+    "upkeep": {
+      "skilled": 2,
+      "food": 0.8,
+      "goods": 0.2
+    },
+    "emits": [
+      { "field": "leisure", "amount": 3, "radius": 7 },
+      { "field": "commerce", "amount": 2, "radius": 5 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "commerce", "min": 3 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "guild_tavern"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "civic_hall",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#dfd3bc",
+      "roof": "#425f77",
+      "height": 1.65
+    },
+    "upkeep": {
+      "skilled": 2,
+      "goods": 0.15
+    },
+    "emits": [
+      { "field": "commerce", "amount": 2, "radius": 7 },
+      { "field": "urban", "amount": 2, "radius": 5 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 4 },
+      { "type": "field", "field": "education", "min": 1 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "magistrate_palace",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 8 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "town_hall"
+    },
+    "tags": ["town", "upgrade_only"]
+  },
+  {
+    "id": "magistrate_palace",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#ebe2cf",
+      "roof": "#497d74",
+      "height": 2.15
+    },
+    "upkeep": {
+      "skilled": 2,
+      "expert": 2,
+      "goods": 0.35,
+      "energy": 0.5
+    },
+    "produces": {
+      "knowledge": 0.5
+    },
+    "emits": [
+      { "field": "commerce", "amount": 4, "radius": 9 },
+      { "field": "urban", "amount": 4, "radius": 6 },
+      { "field": "education", "amount": 1, "radius": 6 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 8 },
+      { "type": "field", "field": "commerce", "min": 3 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "civic_hall"
+    },
+    "tags": ["town", "upgrade_only"]
+  },
+  {
+    "id": "parish_church",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "tower",
+      "color": "#e3d2b0",
+      "roof": "#3a4552",
+      "height": 1.95
+    },
+    "upkeep": {
+      "labor": 1,
+      "skilled": 1,
+      "goods": 0.08
+    },
+    "emits": [
+      { "field": "faith", "amount": 2, "radius": 8 },
+      { "field": "leisure", "amount": 2, "radius": 5 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "greenery", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "sanctuary_chapel",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "greenery", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 },
+          { "type": "field", "field": "noise", "max": 1 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "chapel"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "sanctuary_chapel",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "tower",
+      "color": "#f0ece1",
+      "roof": "#497d73",
+      "height": 2.35
+    },
+    "upkeep": {
+      "skilled": 1,
+      "expert": 1,
+      "goods": 0.2
+    },
+    "emits": [
+      { "field": "faith", "amount": 3, "radius": 9 },
+      { "field": "leisure", "amount": 3, "radius": 6 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 6 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "greenery", "min": 2 },
+      { "type": "field", "field": "pollution", "max": 0 },
+      { "type": "field", "field": "noise", "max": 1 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "parish_church"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "infirmary",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "block",
+      "color": "#f2ede0",
+      "roof": "#688c6c",
+      "height": 1.05
+    },
+    "upkeep": {
+      "skilled": 2,
+      "goods": 0.08
+    },
+    "emits": [{ "field": "health", "amount": 2, "radius": 7 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "greenery", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "medical_hall",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 2 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "clinic"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "medical_hall",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "tall",
+      "color": "#f6f5ef",
+      "roof": "#4f857b",
+      "height": 1.35
+    },
+    "upkeep": {
+      "skilled": 2,
+      "expert": 1,
+      "goods": 0.2,
+      "energy": 0.5
+    },
+    "emits": [{ "field": "health", "amount": 3, "radius": 8 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 2 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "infirmary"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "grammar_school",
+    "category": "service",
+    "footprint": { "w": 2, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#c96c53",
+      "roof": "#495f75",
+      "height": 1.15
+    },
+    "upkeep": {
+      "skilled": 2,
+      "goods": 0.08
+    },
+    "emits": [{ "field": "education", "amount": 2, "radius": 8 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "noise", "max": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "academy",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 },
+          { "type": "field", "field": "noise", "max": 1 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "school"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "academy",
+    "category": "service",
+    "footprint": { "w": 2, "d": 1 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#d6775c",
+      "roof": "#3c5469",
+      "height": 1.45
+    },
+    "upkeep": {
+      "skilled": 2,
+      "expert": 1,
+      "goods": 0.15
+    },
+    "produces": {
+      "knowledge": 0.6
+    },
+    "emits": [{ "field": "education", "amount": 3, "radius": 9 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 6 },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 },
+      { "type": "field", "field": "noise", "max": 1 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "grammar_school"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "grand_library",
+    "category": "service",
+    "footprint": { "w": 3, "d": 3 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#e6d8bd",
+      "roof": "#558c7c",
+      "height": 1.65
+    },
+    "upkeep": {
+      "labor": 3,
+      "skilled": 2,
+      "goods": 0.25
+    },
+    "produces": {
+      "knowledge": 2.0
+    },
+    "emits": [
+      { "field": "education", "amount": 3, "radius": 8 },
+      { "field": "leisure", "amount": 2, "radius": 6 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 4 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "royal_archive",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 7 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "public_library"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "royal_archive",
+    "category": "service",
+    "footprint": { "w": 3, "d": 3 },
+    "cost": {},
+    "visual": {
+      "shape": "hall",
+      "color": "#efe6d2",
+      "roof": "#498574",
+      "height": 2.05
+    },
+    "upkeep": {
+      "skilled": 3,
+      "expert": 2,
+      "goods": 0.4,
+      "energy": 0.5
+    },
+    "produces": {
+      "knowledge": 3.0
+    },
+    "emits": [
+      { "field": "education", "amount": 4, "radius": 10 },
+      { "field": "leisure", "amount": 3, "radius": 7 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 7 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "commerce", "min": 3 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": {
+      "warnAtTicks": 20,
+      "graceTicks": 60,
+      "to": "grand_library"
+    },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "bellows_smelter",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#736b63", "roof": "#473f39", "height": 1.75 },
+    "upkeep": { "labor": 3, "ore": 1.2, "wood": 0.9 },
+    "produces": { "metal": 0.8 },
+    "emits": [
+      { "field": "pollution", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "noise", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "reverberatory_furnace",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "smelter" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "reverberatory_furnace",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#8f5140", "roof": "#3a3532", "height": 1.9 },
+    "upkeep": { "labor": 2, "skilled": 1, "ore": 1.4, "wood": 0.8 },
+    "produces": { "metal": 1.2 },
+    "emits": [
+      { "field": "pollution", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "noise", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "blast_furnace",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "bellows_smelter" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "blast_furnace",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#7d493a", "roof": "#303538", "height": 2.05 },
+    "upkeep": { "labor": 2, "skilled": 1, "ore": 1.7, "wood": 0.8 },
+    "produces": { "metal": 1.7 },
+    "emits": [
+      { "field": "pollution", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "noise", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "bessemer_converter",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "connectivity", "min": 1 },
+          { "type": "field", "field": "commerce", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "reverberatory_furnace" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "bessemer_converter",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#8c4b3b", "roof": "#424a4f", "height": 2.2 },
+    "upkeep": { "skilled": 2, "ore": 2.0, "energy": 0.3 },
+    "produces": { "metal": 2.3 },
+    "emits": [
+      { "field": "pollution", "amount": 3, "radius": 4, "falloff": "linear" },
+      { "field": "noise", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 4 },
+      { "type": "field", "field": "connectivity", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "electric_arc_smelter",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "education", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "blast_furnace" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "electric_arc_smelter",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#7b8a91", "roof": "#485963", "height": 2.35 },
+    "upkeep": { "skilled": 2, "expert": 1, "ore": 2.2, "energy": 0.7 },
+    "produces": { "metal": 3.1 },
+    "emits": [
+      { "field": "pollution", "amount": 2, "radius": 3, "falloff": "linear" },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "education", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "metallurgical_spire",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 7 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "education", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "bessemer_converter" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "metallurgical_spire",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#c9a66b", "roof": "#497d73", "height": 2.55 },
+    "upkeep": { "skilled": 2, "expert": 2, "ore": 2.4, "energy": 1.0 },
+    "produces": { "metal": 4.0, "knowledge": 0.4 },
+    "emits": [
+      { "field": "pollution", "amount": 1, "radius": 2, "falloff": "linear" },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 7 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "education", "min": 2 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "electric_arc_smelter" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "guild_workshop",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#e2d4bd", "roof": "#8f4936", "height": 1.05 },
+    "upkeep": { "skilled": 2, "metal": 0.25, "wood": 0.55 },
+    "produces": { "goods": 1.5 },
+    "emits": [
+      { "field": "commerce", "amount": 1, "radius": 3 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "waterwheel_workshop",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "commerce", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "workshop" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "waterwheel_workshop",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#d6c8b0", "roof": "#5c4d3e", "height": 1.2 },
+    "upkeep": { "skilled": 2, "metal": 0.3, "wood": 0.6 },
+    "produces": { "goods": 2.1 },
+    "emits": [
+      { "field": "commerce", "amount": 2, "radius": 3 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "commerce", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "steam_manufactory",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "guild_workshop" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "steam_manufactory",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#b85d43", "roof": "#495863", "height": 1.35 },
+    "upkeep": { "skilled": 2, "metal": 0.35, "wood": 0.65 },
+    "produces": { "goods": 2.8 },
+    "emits": [
+      { "field": "commerce", "amount": 2, "radius": 4 },
+      { "field": "noise", "amount": 2, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 4 },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "precision_manufactory",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "education", "min": 1 },
+          { "type": "field", "field": "connectivity", "min": 1 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "waterwheel_workshop" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "precision_manufactory",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#c96c53", "roof": "#5c8084", "height": 1.5 },
+    "upkeep": { "skilled": 2, "expert": 1, "metal": 0.4, "wood": 0.6, "energy": 0.3 },
+    "produces": { "goods": 3.7 },
+    "emits": [
+      { "field": "commerce", "amount": 3, "radius": 4 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "education", "min": 1 },
+      { "type": "field", "field": "connectivity", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_artificery",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 7 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "steam_manufactory" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "grand_artificery",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#dfd4c0", "roof": "#498574", "height": 1.75 },
+    "upkeep": { "skilled": 2, "expert": 2, "metal": 0.45, "wood": 0.6, "energy": 0.6 },
+    "produces": { "goods": 4.8, "knowledge": 0.5 },
+    "emits": [
+      { "field": "commerce", "amount": 4, "radius": 5 },
+      { "field": "noise", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 7 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "commerce", "min": 3 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "precision_manufactory" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "market_bakery",
+    "category": "food",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#e5cfb0", "roof": "#b35536", "height": 0.85 },
+    "upkeep": { "labor": 2, "food": 1.1 },
+    "produces": { "food": 2.6 },
+    "emits": [{ "field": "commerce", "amount": 1, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "guild_bakery",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "urban", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "bakery" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "guild_bakery",
+    "category": "food",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#ede2ce", "roof": "#c25b38", "height": 1.05 },
+    "upkeep": { "labor": 1, "skilled": 1, "food": 1.2 },
+    "produces": { "food": 3.3 },
+    "emits": [{ "field": "commerce", "amount": 2, "radius": 4 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "patisserie_salon",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "market_bakery" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "patisserie_salon",
+    "category": "food",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#ece4d2", "roof": "#465866", "height": 1.25 },
+    "upkeep": { "skilled": 2, "food": 1.35 },
+    "produces": { "food": 4.1, "goods": 0.15 },
+    "emits": [
+      { "field": "commerce", "amount": 2, "radius": 4 },
+      { "field": "leisure", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 4 },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "royal_confectionery",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "leisure", "min": 1 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "guild_bakery" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "royal_confectionery",
+    "category": "food",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#f4efe2", "roof": "#558c7c", "height": 1.5 },
+    "upkeep": { "skilled": 2, "expert": 1, "food": 1.5 },
+    "produces": { "food": 5.2, "goods": 0.35 },
+    "emits": [
+      { "field": "commerce", "amount": 3, "radius": 5 },
+      { "field": "leisure", "amount": 2, "radius": 4 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 6 },
+      { "type": "field", "field": "commerce", "min": 3 },
+      { "type": "field", "field": "leisure", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "patisserie_salon" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "flume_sawmill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#a8825a", "roof": "#5e4938", "height": 0.9 },
+    "upkeep": { "labor": 2, "wood": 1.1 },
+    "produces": { "goods": 0.8, "wood": 0.3 },
+    "emits": [{ "field": "noise", "amount": 2, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "timber_mill",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "sawmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "timber_mill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#dfd4be", "roof": "#465866", "height": 1.05 },
+    "upkeep": { "labor": 1, "skilled": 1, "wood": 1.3 },
+    "produces": { "goods": 1.1, "wood": 0.5 },
+    "emits": [{ "field": "noise", "amount": 2, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "steam_sawmill",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "flume_sawmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "steam_sawmill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#b85d43", "roof": "#465866", "height": 1.2 },
+    "upkeep": { "skilled": 2, "wood": 1.5 },
+    "produces": { "goods": 1.5, "wood": 0.8 },
+    "emits": [{ "field": "noise", "amount": 2, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "lumber_works",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "connectivity", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "timber_mill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "lumber_works",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "block", "color": "#b85d43", "roof": "#5c707a", "height": 1.4 },
+    "upkeep": { "skilled": 2, "wood": 1.6, "energy": 0.3 },
+    "produces": { "goods": 2.1, "wood": 1.2 },
+    "emits": [{ "field": "noise", "amount": 2, "radius": 2 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "connectivity", "min": 2 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "steam_sawmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "smock_windmill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#ebe4d4", "roof": "#6e553e", "height": 1.45 },
+    "upkeep": { "labor": 1 },
+    "produces": { "energy": 1.6, "food": 0.2 },
+    "emits": [{ "field": "noise", "amount": 1, "radius": 2 }],
+    "placeOn": ["land"],
+    "requires": [
+      { "type": "road", "maxDistance": 2 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "stone_windmill",
+        "when": [
+          { "type": "road", "maxDistance": 2, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "commerce", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "windmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "stone_windmill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#d6c8b0", "roof": "#544333", "height": 1.65 },
+    "upkeep": { "labor": 1, "skilled": 1 },
+    "produces": { "energy": 2.3, "food": 0.4 },
+    "emits": [{ "field": "noise", "amount": 1, "radius": 2 }],
+    "placeOn": ["land"],
+    "requires": [
+      { "type": "road", "maxDistance": 2, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "multi_vane_mill",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "commerce", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "smock_windmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "multi_vane_mill",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#dfd4be", "roof": "#8f5140", "height": 1.85 },
+    "upkeep": { "skilled": 2 },
+    "produces": { "energy": 3.2, "food": 0.5 },
+    "emits": [{ "field": "noise", "amount": 1, "radius": 2 }],
+    "placeOn": ["land"],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "commerce", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "wind_turbine_spire",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "education", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "stone_windmill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "wind_turbine_spire",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#ece4d2", "roof": "#558c7c", "height": 2.1 },
+    "upkeep": { "skilled": 1, "expert": 1 },
+    "produces": { "energy": 4.5, "food": 0.6 },
+    "emits": [{ "field": "noise", "amount": 1, "radius": 2 }],
+    "placeOn": ["land"],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "education", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "multi_vane_mill" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "downdraft_kiln",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#b55d42", "roof": "#4f362b", "height": 1.25 },
+    "upkeep": { "labor": 2, "wood": 0.6 },
+    "produces": { "stone": 2.1 },
+    "emits": [{ "field": "pollution", "amount": 1, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "kiln_works",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "brickworks" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "kiln_works",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#b8553b", "roof": "#38302c", "height": 1.45 },
+    "upkeep": { "labor": 2, "skilled": 1, "wood": 0.7 },
+    "produces": { "stone": 2.8 },
+    "emits": [{ "field": "pollution", "amount": 1, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "tunnel_kiln_works",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "downdraft_kiln" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "tunnel_kiln_works",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#b85d43", "roof": "#465866", "height": 1.65 },
+    "upkeep": { "skilled": 2, "wood": 0.6 },
+    "produces": { "stone": 3.6, "goods": 0.2 },
+    "emits": [{ "field": "pollution", "amount": 1, "radius": 3 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "ceramics_manufactory",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 1 },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "connectivity", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "kiln_works" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "ceramics_manufactory",
+    "category": "production",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#c96c53", "roof": "#3f5361", "height": 1.85 },
+    "upkeep": { "skilled": 2, "wood": 0.5, "energy": 0.3 },
+    "produces": { "stone": 4.5, "goods": 0.5 },
+    "emits": [{ "field": "pollution", "amount": 1, "radius": 2 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "connectivity", "min": 2 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "tunnel_kiln_works" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "gable_homestead",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#efe5d2", "roof": "#b85535", "height": 1.15 },
+    "housing": 12,
+    "upkeep": { "food": 0.6, "goods": 0.05 },
+    "produces": { "labor": 4, "skilled": 1 },
+    "emits": [
+      { "field": "density", "amount": 2, "radius": 2 },
+      { "field": "urban", "amount": 2, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "townhouse",
+        "when": [
+          { "type": "field", "field": "education", "min": 1 },
+          { "type": "field", "field": "density", "min": 6 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "cottage" },
+    "tags": ["residential", "upgrade_only"],
+    "unlock": { "population": 100, "revealAt": 60 }
+  },
+  {
+    "id": "worker_dormitory",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#b85d43", "roof": "#3f4e59", "height": 1.25 },
+    "housing": 22,
+    "upkeep": { "food": 0.8, "goods": 0.1 },
+    "produces": { "labor": 8, "skilled": 2 },
+    "emits": [
+      { "field": "density", "amount": 4, "radius": 2 },
+      { "field": "urban", "amount": 2, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 6 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "cottage" },
+    "tags": ["residential", "occupational", "upgrade_only"],
+    "unlock": { "population": 120, "revealAt": 80 }
+  },
+  {
+    "id": "scholar_salon_house",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#eee4d0", "roof": "#4d7d6e", "height": 1.68 },
+    "housing": 20,
+    "upkeep": { "food": 0.9, "goods": 0.25 },
+    "produces": { "labor": 3, "skilled": 4, "expert": 3, "knowledge": 0.3 },
+    "emits": [
+      { "field": "density", "amount": 3, "radius": 2 },
+      { "field": "education", "amount": 1, "radius": 3 },
+      { "field": "leisure", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "leisure", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "townhouse" },
+    "tags": ["residential", "upgrade_only"],
+    "unlock": { "population": 220, "revealAt": 140 }
+  },
+  {
+    "id": "merchant_arcade_house",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#e6d2b5", "roof": "#8c3b32", "height": 1.72 },
+    "housing": 22,
+    "upkeep": { "food": 1.0 },
+    "produces": { "labor": 5, "skilled": 4, "goods": 0.35 },
+    "emits": [
+      { "field": "density", "amount": 4, "radius": 2 },
+      { "field": "commerce", "amount": 2, "radius": 3 },
+      { "field": "leisure", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 2 },
+      { "type": "field", "field": "leisure", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "townhouse" },
+    "tags": ["residential", "upgrade_only"],
+    "unlock": { "population": 220, "revealAt": 140 }
+  },
+  {
+    "id": "boulevard_mansion",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#e8dfcc", "roof": "#558c7c", "height": 2.15 },
+    "housing": 34,
+    "upkeep": { "food": 1.4, "goods": 0.35 },
+    "produces": { "labor": 8, "skilled": 5, "expert": 2 },
+    "emits": [
+      { "field": "density", "amount": 5, "radius": 3 },
+      { "field": "urban", "amount": 4, "radius": 3 },
+      { "field": "commerce", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "connectivity", "min": 1 },
+      { "type": "field", "field": "health", "min": 1 },
+      { "type": "field", "field": "leisure", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "metropolitan_residence",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "water_access", "min": 2 },
+          { "type": "field", "field": "connectivity", "min": 2 },
+          { "type": "field", "field": "health", "min": 2 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "urban", "min": 8 },
+          { "type": "field", "field": "pollution", "max": 0 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "tenement" },
+    "tags": ["residential", "highrise", "upgrade_only"],
+    "unlock": { "population": 380, "revealAt": 240 }
+  },
+  {
+    "id": "metropolitan_residence",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#f2eee4", "roof": "#d9b14a", "height": 2.55 },
+    "housing": 46,
+    "upkeep": { "food": 1.9, "goods": 0.55, "energy": 0.3 },
+    "produces": { "labor": 11, "skilled": 7, "expert": 4 },
+    "emits": [
+      { "field": "density", "amount": 6, "radius": 3 },
+      { "field": "urban", "amount": 6, "radius": 3 },
+      { "field": "commerce", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 2 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "health", "min": 1 },
+      { "type": "field", "field": "education", "min": 2 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "boulevard_mansion" },
+    "tags": ["residential", "highrise", "upgrade_only"],
+    "unlock": { "population": 520, "revealAt": 350 }
+  },
+  {
+    "id": "manor_estate",
+    "category": "housing",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#efe8d8", "roof": "#465866", "height": 1.55 },
+    "housing": 18,
+    "upkeep": { "food": 1.0, "goods": 0.35 },
+    "produces": { "labor": 2, "skilled": 3, "expert": 2 },
+    "emits": [
+      { "field": "greenery", "amount": 2, "radius": 3 },
+      { "field": "urban", "amount": 4, "radius": 3 },
+      { "field": "leisure", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 2, "paved": true },
+      { "type": "field", "field": "greenery", "min": 2 },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 },
+      { "type": "field", "field": "noise", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "apartment_tower",
+        "when": [
+          { "type": "field", "field": "connectivity", "min": 1 },
+          { "type": "field", "field": "urban", "min": 4 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "villa" },
+    "tags": ["residential", "upgrade_only"],
+    "unlock": { "population": 220, "revealAt": 130 }
+  },
+  {
+    "id": "grand_condominium",
+    "category": "housing",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#e8e2d3", "roof": "#4d7d6e", "height": 2.85 },
+    "housing": 54,
+    "upkeep": { "food": 2.0, "goods": 0.55, "energy": 0.3 },
+    "produces": { "labor": 12, "skilled": 6, "expert": 3 },
+    "emits": [
+      { "field": "density", "amount": 5, "radius": 3 },
+      { "field": "urban", "amount": 5, "radius": 3 },
+      { "field": "commerce", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "connectivity", "min": 2 },
+      { "type": "field", "field": "commerce", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 0 }
+    ],
+    "upgrades": [
+      {
+        "to": "skyscraper",
+        "when": [
+          { "type": "field", "field": "connectivity", "min": 3 },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "urban", "min": 6 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "apartment_tower" },
+    "tags": ["residential", "highrise", "upgrade_only"],
+    "unlock": { "population": 450, "revealAt": 300 }
+  },
+  {
+    "id": "harbor_inn_house",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#d8ccb8", "roof": "#465866", "height": 1.05 },
+    "housing": 12,
+    "upkeep": { "food": 0.4, "goods": 0.05 },
+    "produces": { "labor": 4, "skilled": 1, "food": 0.5 },
+    "emits": [
+      { "field": "density", "amount": 2, "radius": 2 },
+      { "field": "leisure", "amount": 1, "radius": 2 },
+      { "field": "commerce", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "maritime_guild_house",
+        "when": [
+          { "type": "field", "field": "education", "min": 1 },
+          { "type": "field", "field": "urban", "min": 3 },
+          { "type": "field", "field": "commerce", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "fisher_cottage" },
+    "tags": ["residential", "occupational", "coastal", "upgrade_only"],
+    "unlock": { "population": 140, "revealAt": 80 }
+  },
+  {
+    "id": "maritime_guild_house",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tall", "color": "#e5dccb", "roof": "#558c7c", "height": 1.38 },
+    "housing": 18,
+    "upkeep": { "food": 0.65, "goods": 0.15 },
+    "produces": { "labor": 5, "skilled": 2, "expert": 1, "food": 0.7 },
+    "emits": [
+      { "field": "density", "amount": 3, "radius": 2 },
+      { "field": "leisure", "amount": 2, "radius": 3 },
+      { "field": "commerce", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 },
+      { "type": "field", "field": "education", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "harbor_inn_house" },
+    "tags": ["residential", "occupational", "coastal", "upgrade_only"],
+    "unlock": { "population": 240, "revealAt": 150 }
+  },
+  {
+    "id": "master_miner_lodge",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#8f8b84", "roof": "#37474f", "height": 1.08 },
+    "housing": 12,
+    "upkeep": { "food": 0.5, "goods": 0.1 },
+    "produces": { "labor": 5, "skilled": 2, "ore": 0.25 },
+    "emits": [
+      { "field": "density", "amount": 3, "radius": 2 },
+      { "field": "urban", "amount": 1, "radius": 2 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "pollution", "max": 6 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "miner_cottage" },
+    "tags": ["residential", "occupational", "upgrade_only"],
+    "unlock": { "population": 140, "revealAt": 80 }
+  },
+  {
+    "id": "forester_manor",
+    "category": "housing",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "house", "color": "#9c7554", "roof": "#4e342e", "height": 1.08 },
+    "housing": 12,
+    "upkeep": { "food": 0.5, "goods": 0.1 },
+    "produces": { "labor": 5, "skilled": 2, "wood": 0.5 },
+    "emits": [
+      { "field": "density", "amount": 2, "radius": 2 },
+      { "field": "greenery", "amount": 2, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "greenery", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "lumberjack_cottage" },
+    "tags": ["residential", "occupational", "upgrade_only"],
+    "unlock": { "population": 140, "revealAt": 80 }
+  },
+  {
+    "id": "cistern_well",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "well", "color": "#dfd4bc", "roof": "#465866", "height": 0.78 },
+    "emits": [{ "field": "water_access", "amount": 2, "radius": 5 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "pump_house",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "commerce", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "well" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "pump_house",
+    "category": "infrastructure",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#b5563c", "roof": "#465866", "height": 1.12 },
+    "upkeep": { "labor": 1 },
+    "emits": [{ "field": "water_access", "amount": 2, "radius": 6, "falloff": "linear" }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 3 }
+    ],
+    "upgrades": [
+      {
+        "to": "water_tower",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "cistern_well" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "aqueduct_reservoir",
+    "category": "infrastructure",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#f2eee4", "roof": "#558c7c", "height": 1.88 },
+    "upkeep": { "skilled": 1, "energy": 0.2 },
+    "emits": [
+      { "field": "water_access", "amount": 3, "radius": 9, "falloff": "linear" },
+      { "field": "leisure", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 5 },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "water_tower" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "automated_logistics_hub",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#b5563c", "roof": "#465866", "height": 1.92 },
+    "upkeep": { "labor": 2, "skilled": 2, "energy": 0.4 },
+    "storage": {
+      "wood": 3200,
+      "stone": 3200,
+      "ore": 3200,
+      "coal": 3200,
+      "metal": 3200,
+      "goods": 3600
+    },
+    "emits": [{ "field": "commerce", "amount": 2, "radius": 5 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "distribution_depot" },
+    "tags": ["storage", "logistics", "upgrade_only"]
+  },
+  {
+    "id": "elevator_granary",
+    "category": "food",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#b86b43", "roof": "#5c6b73", "height": 1.72 },
+    "upkeep": { "labor": 2, "skilled": 1 },
+    "storage": { "food": 2800 },
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "imperial_food_exchange",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "granary" },
+    "tags": ["storage", "upgrade_only"]
+  },
+  {
+    "id": "imperial_food_exchange",
+    "category": "food",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#f2eee4", "roof": "#558c7c", "height": 2.05 },
+    "upkeep": { "labor": 2, "skilled": 2, "goods": 0.2 },
+    "storage": { "food": 4500 },
+    "emits": [{ "field": "commerce", "amount": 2, "radius": 5 }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "commerce", "min": 1 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "elevator_granary" },
+    "tags": ["storage", "upgrade_only"]
+  },
+  {
+    "id": "tram_pavilion",
+    "category": "infrastructure",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "dock", "color": "#7d5a3b", "roof": "#465866", "height": 0.72 },
+    "emits": [{ "field": "connectivity", "amount": 3, "radius": 5, "falloff": "linear" }],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 2 }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_transit_kiosk",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 5 },
+          { "type": "field", "field": "commerce", "min": 2 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "bus_stop" },
+    "tags": ["transit", "upgrade_only"]
+  },
+  {
+    "id": "grand_transit_kiosk",
+    "category": "infrastructure",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#558c7c", "roof": "#d9b14a", "height": 0.98 },
+    "emits": [
+      { "field": "connectivity", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "leisure", "amount": 1, "radius": 3 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 4 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "tram_pavilion" },
+    "tags": ["transit", "upgrade_only"]
+  },
+  {
+    "id": "central_metro_plaza",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#dfd4bc", "roof": "#5c7d85", "height": 1.25 },
+    "upkeep": { "labor": 2, "skilled": 1, "goods": 0.3 },
+    "emits": [
+      { "field": "connectivity", "amount": 5, "radius": 9, "falloff": "linear" },
+      { "field": "commerce", "amount": 1, "radius": 4 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 4 }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_terminus",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 7 },
+          { "type": "field", "field": "commerce", "min": 3 },
+          { "type": "field", "field": "education", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "metro_station" },
+    "tags": ["transit", "upgrade_only"]
+  },
+  {
+    "id": "grand_terminus",
+    "category": "infrastructure",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "hall", "color": "#f2eee4", "roof": "#465866", "height": 1.85 },
+    "upkeep": { "labor": 3, "skilled": 2, "goods": 0.45, "energy": 0.3 },
+    "emits": [
+      { "field": "connectivity", "amount": 7, "radius": 11, "falloff": "linear" },
+      { "field": "commerce", "amount": 2, "radius": 5 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "urban", "min": 6 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "central_metro_plaza" },
+    "tags": ["transit", "upgrade_only"]
+  },
+  {
+    "id": "harbor_beacon_tower",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#dfd4bc", "roof": "#b5563c", "height": 2.45 },
+    "upkeep": { "labor": 1, "skilled": 1 },
+    "emits": [
+      { "field": "commerce", "amount": 2, "radius": 9, "falloff": "linear" },
+      { "field": "leisure", "amount": 1, "radius": 4 }
+    ],
+    "placeOn": ["land", "shore"],
+    "requires": [{ "type": "road", "maxDistance": 2, "paved": true }],
+    "upgrades": [
+      {
+        "to": "imperial_pharos",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "commerce", "min": 2 },
+          { "type": "field", "field": "education", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "lighthouse" },
+    "tags": ["coastal", "upgrade_only"]
+  },
+  {
+    "id": "imperial_pharos",
+    "category": "service",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": {},
+    "visual": { "shape": "tower", "color": "#f2eee4", "roof": "#558c7c", "height": 2.75 },
+    "upkeep": { "skilled": 2, "energy": 0.2 },
+    "emits": [
+      { "field": "commerce", "amount": 3, "radius": 11, "falloff": "linear" },
+      { "field": "leisure", "amount": 2, "radius": 5 }
+    ],
+    "placeOn": ["land", "shore"],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "commerce", "min": 2 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "harbor_beacon_tower" },
+    "tags": ["coastal", "upgrade_only"]
+  },
+  {
+    "id": "imperial_seaport",
+    "category": "infrastructure",
+    "footprint": { "w": 3, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "dock", "color": "#e8dfcc", "roof": "#558c7c", "height": 1.85 },
+    "upkeep": { "labor": 4, "skilled": 3, "wood": 0.5 },
+    "storage": {
+      "wood": 2400,
+      "ore": 2400,
+      "metal": 2400,
+      "goods": 2400
+    },
+    "emits": [{ "field": "commerce", "amount": 3, "radius": 6, "falloff": "linear" }],
+    "requires": [
+      { "type": "terrain", "terrain": "water", "radius": 2, "min": 2 },
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "connectivity", "min": 1 }
+    ],
+    "voyage": { "kind": "cargo", "ticks": 64, "range": 28 },
+    "produces": { "goods": 3.2, "metal": 0.6 },
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "trade_harbor" },
+    "tags": ["port", "storage", "industry", "upgrade_only"]
+  },
+  {
+    "id": "promenade_park",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "park", "color": "#6fa35b", "roof": "#b85535", "height": 0.72 },
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "leisure", "amount": 2, "radius": 4 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upgrades": [
+      {
+        "to": "sculpture_park",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "education", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "park" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "sculpture_park",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "park", "color": "#75ab5e", "roof": "#e8dfcc", "height": 0.96 },
+    "upkeep": { "labor": 1 },
+    "emits": [
+      { "field": "greenery", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "leisure", "amount": 3, "radius": 5 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 3 }
+    ],
+    "upgrades": [
+      {
+        "to": "crystal_conservatory_park",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 6 },
+          { "type": "field", "field": "education", "min": 2 },
+          { "type": "field", "field": "connectivity", "min": 1 }
+        ]
+      }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "promenade_park" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "crystal_conservatory_park",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": {},
+    "visual": { "shape": "park", "color": "#6ca158", "roof": "#d9b14a", "height": 1.38 },
+    "upkeep": { "labor": 1, "skilled": 1 },
+    "emits": [
+      { "field": "greenery", "amount": 5, "radius": 7, "falloff": "linear" },
+      { "field": "leisure", "amount": 5, "radius": 6 }
+    ],
+    "requires": [
+      { "type": "road", "maxDistance": 1, "paved": true },
+      { "type": "field", "field": "water_access", "min": 1 },
+      { "type": "field", "field": "urban", "min": 5 }
+    ],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "sculpture_park" },
+    "tags": ["upgrade_only"]
   }
 ]

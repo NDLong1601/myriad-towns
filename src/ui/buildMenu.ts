@@ -3,6 +3,7 @@ import type { History } from '@/sim/commands';
 import { thumbnail } from '@/render/thumbnails';
 import { buildCategory } from '@/ui/buildCategory';
 import { buildingName, t } from './i18n';
+import { hudIcon, strokeIcon } from './icons';
 
 export type Tool = { kind: 'none' } | { kind: 'build'; defId: string } | { kind: 'demolish' };
 
@@ -24,7 +25,7 @@ const CATEGORY_PATHS: Record<string, string> = {
 };
 
 function categoryIcon(category: string): string {
-  return `<svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="${CATEGORY_PATHS[category] ?? 'M5 5h14v14H5z'}"/></svg>`;
+  return strokeIcon(CATEGORY_PATHS[category] ?? 'M5 5h14v14H5z', 22);
 }
 
 /** Bottom bar: category tabs, buildings of the current category, and tool buttons. */
@@ -37,13 +38,13 @@ export function mountBuildMenu(
   const el = document.createElement('div');
   el.className = 'mt-menu';
   el.innerHTML = `<div class="mt-row"><div class="mt-tabs"></div><div class="mt-tools">
-    <button data-tool="demolish" title="${t('ui.demolish')}" aria-label="${t('ui.demolish')}">⛏ <span>${t('ui.demolish').replace(/ \(.*\)/, '')}</span></button>
-    <button data-tool="undo" title="${t('ui.undo')}">↶</button>
-    <button data-tool="redo" title="${t('ui.redo')}">↷</button>
+    <button type="button" data-tool="demolish" title="${t('ui.demolish')}" aria-label="${t('ui.demolish')}">${hudIcon('demolish')}</button>
+    <button type="button" data-tool="undo" title="${t('ui.undo')}" aria-label="${t('ui.undo')}">${hudIcon('undo')}</button>
+    <button type="button" data-tool="redo" title="${t('ui.redo')}" aria-label="${t('ui.redo')}">${hudIcon('redo')}</button>
   </div></div><div class="mt-tray">
-    <button type="button" data-scroll="-1" aria-label="${t('ui.buildPrevious')}" title="${t('ui.buildPrevious')}">‹</button>
+    <button type="button" data-scroll="-1" aria-label="${t('ui.buildPrevious')}" title="${t('ui.buildPrevious')}">${hudIcon('previous', 17)}</button>
     <div id="mt-build-items" class="mt-items" tabindex="0" role="region" aria-label="${t('ui.buildList')}"></div>
-    <button type="button" data-scroll="1" aria-label="${t('ui.buildNext')}" title="${t('ui.buildNext')}">›</button>
+    <button type="button" data-scroll="1" aria-label="${t('ui.buildNext')}" title="${t('ui.buildNext')}">${hudIcon('next', 17)}</button>
   </div>`;
   parent.appendChild(el);
   const tabs = el.querySelector('.mt-tabs') as HTMLElement;
@@ -101,13 +102,18 @@ export function mountBuildMenu(
         const active = tool.kind === 'build' && tool.defId === d.id ? ' active' : '';
         const url = thumbnail(d);
         const img = url
-          ? `<img class="mt-thumb" src="${url}" alt="" width="44" height="44" draggable="false">`
+          ? `<img class="mt-thumb" src="${url}" alt="" width="64" height="64" draggable="false">`
           : categoryIcon(category);
-        const poor = city.canAfford(d.cost) ? '' : ' poor';
+        const poor = !lock && !city.canAfford(d.cost);
         const size = `${d.footprint.w}×${d.footprint.d}`;
         const name = buildingName(d.id);
-        const needs = lock ? ` · ${t('ui.buildLocked')}` : '';
-        return `<button type="button" class="mt-item${lock ? ' locked' : ''}${active}${poor}" data-def="${d.id}" aria-label="${name}${needs}" aria-pressed="${Boolean(active)}" title="${name} · ${size}${needs}">${img}<span class="mt-item-text">${name}</span>${lock ? '<span class="mt-build-lock" aria-hidden="true">🔒</span>' : poor ? '<span class="mt-build-poor" aria-hidden="true">!</span>' : ''}</button>`;
+        const state = lock ? t('ui.buildLocked') : poor ? t('ui.buildUnaffordable') : '';
+        const needs = state ? ` · ${state}` : '';
+        const status =
+          lock || poor
+            ? `<span class="mt-build-status">${hudIcon(lock ? 'lock' : 'warning', 15)}</span>`
+            : '';
+        return `<button type="button" class="mt-item${lock ? ' locked' : ''}${active}${poor ? ' poor' : ''}" data-def="${d.id}" aria-label="${name}${needs}" aria-pressed="${Boolean(active)}" title="${name} · ${size}${needs}"><span class="mt-item-visual">${img}${status}</span><span class="mt-item-text">${name}</span></button>`;
       })
       .join('');
     if (html !== itemMarkup) {

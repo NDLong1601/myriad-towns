@@ -1,5 +1,5 @@
 import { isRoadDef, type BuildingDef, type Requirement } from '@/sim/catalog';
-import { rectOf, type City, type PlacedBuilding } from '@/sim/city';
+import { rectOf, type BuildingRotation, type City, type PlacedBuilding } from '@/sim/city';
 import { FIELD_SCALE, FieldStore } from '@/sim/fields';
 import { rectDistance } from '@/sim/geometry';
 import { checkRequirement } from '@/sim/requirements';
@@ -9,7 +9,13 @@ export interface LocalImpact {
   atRisk: PlacedBuilding[];
 }
 
-type Change = { def: BuildingDef; x: number; z: number; removeUid?: number };
+type Change = {
+  def: BuildingDef;
+  x: number;
+  z: number;
+  rot?: BuildingRotation;
+  removeUid?: number;
+};
 
 /** Check neighbouring rules against a read-only view of one proposed change. */
 export class ImpactPreview {
@@ -27,13 +33,13 @@ export class ImpactPreview {
 
   inspect(change: Change): LocalImpact {
     const { city } = this;
-    const { def, x, z, removeUid } = change;
-    const rect = rectOf(def, x, z);
+    const { def, x, z, rot = 0, removeUid } = change;
+    const rect = rectOf(def, x, z, rot);
     const removing = removeUid !== undefined;
     const emits = !removing || city.isActive(removeUid) ? (def.emits ?? []) : [];
     const road = isRoadDef(def);
     const reach = Math.max(this.reach, ...emits.map((e) => e.radius));
-    const virtual: PlacedBuilding = { uid: -1, def, x, z };
+    const virtual: PlacedBuilding = rot ? { uid: -1, def, x, z, rot } : { uid: -1, def, x, z };
     const view: Parameters<typeof checkRequirement>[0] = {
       terrain: city.terrain,
       near(target, radius, id, selfUid) {
@@ -71,7 +77,7 @@ export class ImpactPreview {
 
     const result: LocalImpact = { improved: [], atRisk: [] };
     for (const b of city.near(rect, reach, undefined, removeUid)) {
-      const target = rectOf(b.def, b.x, b.z);
+      const target = rectOf(b.def, b.x, b.z, b.rot);
       const distance = rectDistance(rect, target);
       const affected = (req: Requirement): boolean => {
         switch (req.type) {

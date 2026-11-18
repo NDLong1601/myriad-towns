@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { previewColors } from '@/ui/palette';
 import type { BuildingDef } from '@/sim/catalog';
+import type { BuildingRotation } from '@/sim/city';
 import { buildingGeometry } from './buildingModels';
+import { lotFinish } from '@/render/visualPalette';
 import type { FloatingOrigin } from './floatingOrigin';
 
 const MAX_TILES = 4096;
@@ -35,6 +37,7 @@ export class PlacementPreview {
   private readonly c = new THREE.Color();
   private ghostDef: BuildingDef | null = null;
   private ghostAt = { x: 0, z: 0 };
+  private ghostRot: BuildingRotation = 0;
 
   constructor(
     private readonly origin: FloatingOrigin,
@@ -82,21 +85,29 @@ export class PlacementPreview {
   }
 
   /** Show a ghost of `def` with its corner at (x, z), tinted by validity. */
-  setGhost(def: BuildingDef | null, x = 0, z = 0, ok = true): void {
+  setGhost(def: BuildingDef | null, x = 0, z = 0, ok = true, rot: BuildingRotation = 0): void {
     this.ghostDef = def;
     this.ghostAt = { x, z };
+    this.ghostRot = rot;
     this.ghost.visible = def !== null;
     if (!def) return;
     this.ghost.geometry = buildingGeometry(def);
-    this.ghostMat.color.set(ok ? '#ffffff' : previewColors().ghostBad);
+    this.ghostMat.color.copy(lotFinish(def.id, x, z));
+    if (!ok) this.ghostMat.color.multiply(this.c.set(previewColors().ghostBad));
     this.placeGhost();
   }
 
   private placeGhost(): void {
     if (!this.ghostDef) return;
     const { x, z } = this.ghostAt;
+    const rot = this.ghostRot;
+    const w0 = this.ghostDef.footprint.w;
+    const d0 = this.ghostDef.footprint.d;
+    const ox = rot === 1 ? d0 : rot === 2 ? w0 : 0;
+    const oz = rot === 2 ? d0 : rot === 3 ? w0 : 0;
     const p = this.origin.toLocal(x, z);
-    this.ghost.position.set(p.x, this.heightAt(x, z) + 0.02, p.z);
+    this.ghost.rotation.set(0, (-rot * Math.PI) / 2, 0);
+    this.ghost.position.set(p.x + ox, this.heightAt(x, z) + 0.02, p.z + oz);
   }
 
   setTiles(t: PreviewTiles): void {

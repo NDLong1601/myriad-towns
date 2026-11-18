@@ -7,6 +7,7 @@ export default mergeConfig(
     test: {
       include: ['tests/unit/**/*.test.ts'],
       environment: 'node',
+      maxWorkers: 2,
     },
   }),
 );

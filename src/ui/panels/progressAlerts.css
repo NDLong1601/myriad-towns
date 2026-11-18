@@ -11,7 +11,7 @@
   box-shadow: var(--hud-shadow);
   background: var(--hud-bg);
   color: var(--hud-fg);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .mt-progress-alerts > summary {
@@ -34,27 +34,72 @@
   list-style: none;
 }
 
-.mt-progress-alerts li + li {
+.mt-progress-alerts > ul > li {
+  position: relative;
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  background: var(--hud-bg-elevated);
+}
+
+.mt-progress-alerts > ul > li + li {
   margin-block-start: 6px;
 }
 
-.mt-progress-alerts button {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid var(--hud-border);
-  border-radius: 6px;
-  padding: 6px 8px;
+.mt-progress-alerts li > button {
+  display: grid;
+  gap: 3px;
+  padding: 7px 8px;
+  width: calc(100% - 44px);
+  min-height: 48px;
+  border: 0;
+  border-radius: 7px;
   color: var(--hud-fg);
-  background: var(--hud-bg-elevated);
+  background: none;
   font: inherit;
   text-align: start;
-  white-space: pre-line;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
-.mt-progress-alerts button:hover,
-.mt-progress-alerts button:focus-visible {
-  border-color: var(--hud-accent);
+.mt-alert-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--hud-accent);
+}
+
+.mt-alert-action svg {
+  flex-shrink: 0;
+}
+
+.mt-progress-alerts li > details > summary {
+  position: absolute;
+  inset: 2px 0 auto auto;
+  display: grid;
+  width: 44px;
+  min-height: 44px;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--hud-muted);
+  cursor: pointer;
+}
+
+.mt-progress-alerts li > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mt-progress-alerts li > button:hover,
+.mt-progress-alerts li > details > summary:hover,
+.mt-progress-alerts li > details[open] > summary {
+  background: var(--hud-hover);
+}
+
+.mt-progress-alerts li > details > p {
+  border-top: 1px solid var(--hud-border);
+  margin: 0 8px;
+  padding-block: 6px 8px;
+  color: var(--hud-muted);
+  line-height: 1.45;
 }
 
 @media (pointer: coarse) {

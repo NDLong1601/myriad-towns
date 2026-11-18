@@ -6,6 +6,17 @@
     "cost": { "charter": 1, "wood": 60, "stone": 60 },
     "visual": { "shape": "hall", "color": "#d9cbb0", "roof": "#3f5f8a", "height": 1.1 },
     "emits": [{ "field": "commerce", "amount": 1, "radius": 5 }],
+    "upgrades": [
+      {
+        "to": "civic_hall",
+        "when": [
+          { "type": "road", "maxDistance": 1, "paved": true },
+          { "type": "field", "field": "urban", "min": 4 },
+          { "type": "field", "field": "education", "min": 1 },
+          { "type": "field", "field": "water_access", "min": 1 }
+        ]
+      }
+    ],
     "unlock": { "revealAt": 100 },
     "tags": ["town"]
   }

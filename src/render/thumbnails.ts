@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { BuildingDef } from '@/sim/catalog';
+import { DAY_BOUNCE, DAY_FILL, DAY_SUN } from '@/render/visualPalette';
 import { ROAD_E, ROAD_N, ROAD_S, ROAD_W, buildingGeometry } from './buildingModels';
 
 /** Render size in pixels; the UI scales the image with CSS. */
@@ -26,8 +27,8 @@ function setup(): boolean {
     renderer.setSize(SIZE, SIZE, false);
     renderer.setClearColor(0x000000, 0);
     scene = new THREE.Scene();
-    scene.add(new THREE.HemisphereLight('#dceeff', '#5a6b48', 1.5));
-    const sun = new THREE.DirectionalLight('#fff1d6', 2.2);
+    scene.add(new THREE.HemisphereLight(DAY_FILL, DAY_BOUNCE, 1.4));
+    const sun = new THREE.DirectionalLight(DAY_SUN, 1.95);
     sun.position.set(-3, 6, 4);
     scene.add(sun);
     camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
@@ -62,8 +63,8 @@ export function thumbnail(def: BuildingDef, variant?: number): string {
     const group = new THREE.Group();
     // A grass plate so the building does not float.
     const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(w + 0.5, 0.12, d + 0.5),
-      new THREE.MeshLambertMaterial({ color: '#86b25c' }),
+      new THREE.BoxGeometry(w + 0.16, 0.12, d + 0.16),
+      new THREE.MeshLambertMaterial({ color: '#a0ac7e' }),
     );
     plate.position.set(w / 2, -0.06, d / 2);
     group.add(plate, new THREE.Mesh(geo, material));
@@ -71,8 +72,8 @@ export function thumbnail(def: BuildingDef, variant?: number): string {
     // Isometric view from the south-east, framed on the plate and the building height.
     geo.computeBoundingBox();
     const top = geo.boundingBox?.max.y ?? 1;
-    const target = new THREE.Vector3(w / 2, top / 2, d / 2);
-    const radius = Math.max(Math.hypot(w + 0.5, d + 0.5) / 2, top * 0.75, 0.9) * 1.15;
+    const target = new THREE.Vector3(w / 2, top * 0.42, d / 2);
+    const radius = Math.max(Math.hypot(w + 0.16, d + 0.16) / 2, top * 0.75, 0.9) * 1.15;
     camera.left = -radius;
     camera.right = radius;
     camera.top = radius;

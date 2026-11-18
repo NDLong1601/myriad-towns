@@ -15,11 +15,14 @@ import { type Rect, rectDistance } from './geometry';
 import type { CheckResult } from './requirements';
 import { type TerrainQuery, tileKey } from './terrainQuery';
 
+export type BuildingRotation = 0 | 1 | 2 | 3;
+
 export interface PlacedBuilding {
   readonly uid: number;
   readonly def: BuildingDef;
   readonly x: number;
   readonly z: number;
+  readonly rot?: BuildingRotation;
 }
 
 export type CityEvent =
@@ -36,8 +39,15 @@ export type CityEvent =
 /** Largest footprint edge in data; bounds spatial lookups. */
 const MAX_FOOTPRINT = 8;
 
-export function rectOf(def: BuildingDef, x: number, z: number): Rect {
-  return { x, z, w: def.footprint.w, d: def.footprint.d };
+export function footprintOf(def: BuildingDef, rot: BuildingRotation = 0): { w: number; d: number } {
+  return rot & 1
+    ? { w: def.footprint.d, d: def.footprint.w }
+    : { w: def.footprint.w, d: def.footprint.d };
+}
+
+export function rectOf(def: BuildingDef, x: number, z: number, rot: BuildingRotation = 0): Rect {
+  const { w, d } = footprintOf(def, rot);
+  return { x, z, w, d };
 }
 
 /**
@@ -154,7 +164,7 @@ export class City {
         for (const uid of set) {
           const b = this.buildings.get(uid);
           if (!b || uid === excludeUid || (defId !== undefined && b.def.id !== defId)) continue;
-          if (rectDistance(rect, rectOf(b.def, b.x, b.z)) <= r) out.push(b);
+          if (rectDistance(rect, rectOf(b.def, b.x, b.z, b.rot)) <= r) out.push(b);
         }
       }
     }
@@ -217,13 +227,14 @@ export class City {
     x: number,
     z: number,
     uid = this.nextUid++,
+    rot: BuildingRotation = 0,
   ): { building: PlacedBuilding; cut: string[] } {
-    const b: PlacedBuilding = { uid, def, x, z };
+    const b: PlacedBuilding = rot ? { uid, def, x, z, rot } : { uid, def, x, z };
     if (uid >= this.nextUid) this.nextUid = uid + 1;
-    const rect = rectOf(def, x, z);
+    const rect = rectOf(def, x, z, rot);
     const cut: string[] = [];
-    for (let tz = z; tz < z + def.footprint.d; tz++) {
-      for (let tx = x; tx < x + def.footprint.w; tx++) {
+    for (let tz = z; tz < z + rect.d; tz++) {
+      for (let tx = x; tx < x + rect.w; tx++) {
         const key = tileKey(tx, tz);
         if (this.occupancy.has(occKey(tx, tz))) throw new Error(`tile ${key} already occupied`);
         this.occupancy.set(occKey(tx, tz), uid);
@@ -250,8 +261,9 @@ export class City {
   _remove(uid: number, restoreTrees: readonly string[] = []): PlacedBuilding {
     const b = this.buildings.get(uid);
     if (!b) throw new Error(`no building ${uid}`);
-    for (let tz = b.z; tz < b.z + b.def.footprint.d; tz++) {
-      for (let tx = b.x; tx < b.x + b.def.footprint.w; tx++) this.occupancy.delete(occKey(tx, tz));
+    const rect = rectOf(b.def, b.x, b.z, b.rot);
+    for (let tz = b.z; tz < b.z + rect.d; tz++) {
+      for (let tx = b.x; tx < b.x + rect.w; tx++) this.occupancy.delete(occKey(tx, tz));
     }
     this.spatialSet(b).delete(uid);
     this.buildings.delete(uid);
@@ -265,7 +277,7 @@ export class City {
       }
     }
     // An abandoned building's emits were already taken out.
-    if (!this.inactive.delete(uid)) this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, -1);
+    if (!this.inactive.delete(uid)) this.fields.apply(rect, b.def.emits, -1);
     for (const k of restoreTrees) this.terrain.clearedTrees?.delete(k);
     this.emit({ type: 'removed', building: b });
     if (restoreTrees.length) this.emit({ type: 'trees', tiles: restoreTrees.map(parseKey) });
@@ -318,10 +330,12 @@ export class City {
     if (old.def.footprint.w !== def.footprint.w || old.def.footprint.d !== def.footprint.d) {
       throw new Error(`cannot replace ${old.def.id} with ${def.id}: footprints differ`);
     }
-    const rect = rectOf(def, old.x, old.z);
+    const rect = rectOf(def, old.x, old.z, old.rot);
     const active = !this.inactive.has(uid);
     if (active) this.fields.apply(rect, old.def.emits, -1);
-    const b: PlacedBuilding = { uid, def, x: old.x, z: old.z };
+    const b: PlacedBuilding = old.rot
+      ? { uid, def, x: old.x, z: old.z, rot: old.rot }
+      : { uid, def, x: old.x, z: old.z };
     this.buildings.set(uid, b);
     this.perDef.set(old.def.id, this.countOf(old.def.id) - 1);
     this.perDef.set(def.id, this.countOf(def.id) + 1);
@@ -364,7 +378,7 @@ export class City {
         }
       }
     }
-    this.fields.apply(rectOf(b.def, b.x, b.z), b.def.emits, active ? 1 : -1);
+    this.fields.apply(rectOf(b.def, b.x, b.z, b.rot), b.def.emits, active ? 1 : -1);
     this.emit({ type: 'status', building: b, active });
   }
 

@@ -1,3 +1,4 @@
+import { hudIcon } from '@/ui/icons';
 import { tileToChunk } from '@/core/coords';
 import { seedFromString } from '@/core/prng';
 import { GEN_VERSION } from '@/core/version';
@@ -236,14 +237,15 @@ const originTile =
   loaded || params.has('x') || params.has('z')
     ? { x: 0, z: 0 }
     : startingTile(seed, params.get('area'));
+const qualityPreset = parsePreset(params.get('quality')) ?? settings.quality ?? 'medium';
+const waterDetail =
+  qualityPreset !== 'low' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const view = new WorldView(app, {
   seed,
   viewRadius,
   generator,
-  quality: qualitySettings(
-    parsePreset(params.get('quality')) ?? settings.quality ?? 'medium',
-    window.devicePixelRatio,
-  ),
+  quality: qualitySettings(qualityPreset, window.devicePixelRatio),
+  waterDetail,
   start: loaded?.camera ?? {
     x: num('x', originTile.x) + 0.5,
     z: num('z', originTile.z) + 0.5,
@@ -302,7 +304,14 @@ const buildings = new BuildingRenderer(city, view.origin, surfaceY, (uid) => sim
 buildings.animate = params.get('anim') !== '0';
 // People and vehicles on the roads (?traffic=0 or the settings toggle turns them off).
 const traffic = new TrafficRenderer(city, view.origin, surfaceY, small ? 60 : 160);
-const facilityTraffic = new FacilityTraffic(city, view.origin, surfaceY, small ? 6 : 16, sim);
+const facilityTraffic = new FacilityTraffic(
+  city,
+  view.origin,
+  surfaceY,
+  small ? 6 : 16,
+  sim,
+  waterDetail,
+);
 traffic.enabled = params.has('traffic') ? params.get('traffic') !== '0' : settings.traffic;
 const preview = new PlacementPreview(view.origin, surfaceY);
 const heatmap = new HeatmapOverlay(city, view.origin, surfaceY);
@@ -489,7 +498,7 @@ const bar = document.createElement('div');
 bar.className = 'mt-left-buttons';
 bar.addEventListener('pointerdown', (e) => e.stopPropagation());
 const button = (
-  label: string,
+  icon: Parameters<typeof hudIcon>[0],
   title: string,
   onClick: () => void,
   iconOnly = false,
@@ -497,7 +506,7 @@ const button = (
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'mt-newgame-btn';
-  b.textContent = label;
+  b.innerHTML = hudIcon(icon, 16);
   b.title = title;
   if (iconOnly) b.setAttribute('aria-label', title);
   b.addEventListener('click', onClick);
@@ -505,7 +514,7 @@ const button = (
   return b;
 };
 button(
-  '☰',
+  'menu',
   t('launch.mainMenu'),
   () => {
     showSessionMenu(
@@ -523,7 +532,7 @@ button(
   true,
 );
 const saveButton = button(
-  '💾',
+  'save',
   `${t('save.title')} (Ctrl+S)`,
   () => showSaveMenu(document.body, session),
   true,
@@ -532,13 +541,13 @@ const saveLabel = document.createElement('span');
 saveLabel.className = 'mt-save-label';
 saveLabel.textContent = ` ${t('save.button')}`;
 saveButton.appendChild(saveLabel);
-const muteLabel = (): string => (audio.muted ? '🔇' : '🔊');
+const muteIcon = () => (audio.muted ? ('soundOff' as const) : ('soundOn' as const));
 const muteBtn = button(
-  muteLabel(),
+  muteIcon(),
   t('audio.muteShort'),
   () => {
     audio.muted = !audio.muted;
-    muteBtn.textContent = muteLabel();
+    muteBtn.innerHTML = hudIcon(muteIcon(), 16);
     muteBtn.setAttribute('aria-pressed', String(audio.muted));
     saveSettings({ ...loadSettings(), muted: audio.muted });
   },
@@ -547,7 +556,7 @@ const muteBtn = button(
 muteBtn.classList.add('mt-mute');
 muteBtn.setAttribute('aria-pressed', String(audio.muted));
 button(
-  '⚙',
+  'settings',
   t('settings.title'),
   () =>
     showSettings(
@@ -731,8 +740,8 @@ view.onFrame((dt) => {
     refreshTrafficPlan(s.x, s.z);
   }
   traffic.update(dt, s, Math.min(60, Math.max(24, s.distance * 0.9 + 16)), clock.speed === 0);
-  facilityTraffic.update(dt, s, traffic.enabled, clock.speed === 0);
   if (dayNightOn || fixedTime !== null) view.setTimeOfDay(fixedTime ?? timeOfDay(sim.tick));
+  facilityTraffic.update(dt, s, traffic.enabled, clock.speed === 0, view.nightness);
   buildings.setNight(view.nightness);
   if (audio.started) {
     audio.update(dt);

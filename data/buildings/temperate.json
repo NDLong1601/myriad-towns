@@ -233,6 +233,88 @@
         ]
       },
       {
+        "to": "worker_dormitory",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "min": 1
+          },
+          {
+            "type": "near",
+            "building": "smelter",
+            "radius": 4,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "worker_dormitory",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "min": 1
+          },
+          {
+            "type": "near",
+            "building": "foundry",
+            "radius": 4,
+            "min": 1
+          }
+        ]
+      },
+      {
+        "to": "gable_homestead",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      },
+      {
         "to": "townhouse",
         "when": [
           {
@@ -333,6 +415,66 @@
       }
     ],
     "upgrades": [
+      {
+        "to": "scholar_salon_house",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "leisure",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      },
+      {
+        "to": "merchant_arcade_house",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "leisure",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 1
+          }
+        ]
+      },
       {
         "to": "tenement",
         "when": [
@@ -462,6 +604,41 @@
     ],
     "upgrades": [
       {
+        "to": "manor_estate",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 2,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "leisure",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          },
+          {
+            "type": "field",
+            "field": "noise",
+            "max": 0
+          }
+        ]
+      },
+      {
         "to": "apartment_tower",
         "when": [
           {
@@ -525,6 +702,22 @@
         "type": "near",
         "building": "fishing_dock",
         "radius": 6
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "fisher_cottage",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "tags": ["residential", "coastal"],
@@ -739,11 +932,30 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "wheat_farm",
         "radius": 6
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "market_bakery",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "unlock": {
@@ -967,11 +1179,29 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "woodcutter",
         "radius": 6
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "flume_sawmill",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1019,11 +1249,29 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "iron_mine",
         "radius": 8
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "bellows_smelter",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1072,11 +1320,35 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "sawmill",
         "radius": 8
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "guild_workshop",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1119,11 +1391,29 @@
       {
         "type": "road",
         "maxDistance": 1
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "clay_pit",
         "radius": 6
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "downdraft_kiln",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1151,6 +1441,28 @@
         "field": "water_access",
         "amount": 1,
         "radius": 4
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "cistern_well",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          }
+        ]
       }
     ],
     "tags": ["starter"]
@@ -1192,6 +1504,33 @@
       {
         "type": "road",
         "maxDistance": 1
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "covered_market",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 1
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1236,6 +1575,33 @@
         "max": 1
       }
     ],
+    "upgrades": [
+      {
+        "to": "grammar_school",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "noise",
+            "max": 1
+          }
+        ]
+      }
+    ],
     "unlock": {
       "population": 120
     }
@@ -1271,6 +1637,33 @@
       {
         "type": "road",
         "maxDistance": 1
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "infirmary",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
       }
     ],
     "unlock": {
@@ -1316,6 +1709,28 @@
         "maxDistance": 1
       }
     ],
+    "upgrades": [
+      {
+        "to": "guild_tavern",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "unlock": {
       "population": 60
     }
@@ -1357,6 +1772,33 @@
         "maxDistance": 2
       }
     ],
+    "upgrades": [
+      {
+        "to": "parish_church",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 3
+          },
+          {
+            "type": "field",
+            "field": "greenery",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      }
+    ],
     "unlock": {
       "population": 100
     }
@@ -1393,6 +1835,28 @@
       {
         "type": "road",
         "maxDistance": 3
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "promenade_park",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 2
+          }
+        ]
       }
     ]
   }

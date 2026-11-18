@@ -118,6 +118,38 @@
         "amount": 1,
         "radius": 5
       }
+    ],
+    "upgrades": [
+      {
+        "to": "grand_library",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 1,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "urban",
+            "min": 4
+          },
+          {
+            "type": "field",
+            "field": "education",
+            "min": 2
+          },
+          {
+            "type": "field",
+            "field": "water_access",
+            "min": 1
+          },
+          {
+            "type": "field",
+            "field": "pollution",
+            "max": 0
+          }
+        ]
+      }
     ]
   },
   {
@@ -142,7 +174,9 @@
       {
         "type": "road",
         "maxDistance": 2
-      },
+      }
+    ],
+    "placementRequires": [
       {
         "type": "near",
         "building": "public_library",

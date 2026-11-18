@@ -342,6 +342,23 @@
       }
     ],
     "placeOn": ["land", "shore"],
+    "upgrades": [
+      {
+        "to": "harbor_beacon_tower",
+        "when": [
+          {
+            "type": "road",
+            "maxDistance": 2,
+            "paved": true
+          },
+          {
+            "type": "field",
+            "field": "commerce",
+            "min": 1
+          }
+        ]
+      }
+    ],
     "unlock": {
       "population": 80
     },

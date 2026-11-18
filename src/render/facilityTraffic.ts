@@ -1,16 +1,17 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { AirTraffic } from '@/render/airTraffic';
+import { box } from '@/render/buildingModels';
 import { angleBetween } from '@/render/flightPath';
+import type { FloatingOrigin } from '@/render/floatingOrigin';
 import type { City, PlacedBuilding } from '@/sim/city';
 import type { Simulation } from '@/sim/simulation';
 import { waterRoute } from '@/sim/waterRoutes';
 import { TileFlag } from '@/world/biomes';
-import { box } from './buildingModels';
-import type { FloatingOrigin } from './floatingOrigin';
 
 type Kind = 'train' | 'boat' | 'plane' | 'ship' | 'ferry';
 type SurfaceKind = Exclude<Kind, 'plane'>;
+type VesselKind = Exclude<SurfaceKind, 'train'>;
 interface Point {
   x: number;
   y: number;
@@ -22,6 +23,7 @@ interface Service {
   route?: Point[];
   phase: number;
   synced?: boolean;
+  wakeFlow?: number;
 }
 
 const DIRECTIONS = [
@@ -38,6 +40,14 @@ const FACILITIES = new Map<string, SurfaceKind>([
   ['ferry_pier', 'ferry'],
 ]);
 const SPEED: Record<SurfaceKind, number> = { train: 3.2, boat: 1, ship: 1.4, ferry: 1.8 };
+const ROUTE_LIFT = 0.1;
+const WATERLINE_LIFT = 0.006;
+const HULL_BOTTOM: Record<VesselKind, number> = { boat: -0.03, ship: 0, ferry: 0 };
+const WAKE_SCALE: Record<VesselKind, readonly [length: number, width: number]> = {
+  boat: [0.83, 0.9],
+  ship: [1.32, 1.16],
+  ferry: [1.04, 1.05],
+};
 
 function vehicle(kind: Kind): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
@@ -75,7 +85,89 @@ function vehicle(kind: Kind): THREE.BufferGeometry {
   const geometry = mergeGeometries(parts, false);
   for (const part of parts) part.dispose();
   if (!geometry) throw new Error(`could not build ${kind}`);
+  if (kind !== 'train' && kind !== 'plane')
+    geometry.translate(0, WATERLINE_LIFT - ROUTE_LIFT - HULL_BOTTOM[kind], 0);
   return geometry;
+}
+
+/** A soft hull shadow and two tapered foam strokes share one instanced draw. */
+function vesselWake(
+  capacity: number,
+): THREE.InstancedMesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> {
+  const geometry = new THREE.BufferGeometry();
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const foamFlags: number[] = [];
+  const indices: number[] = [];
+  const shadow = new THREE.Color('#17373e');
+  const foam = new THREE.Color('#ddf5ea');
+  const vertex = (x: number, z: number, alpha: number, isFoam: boolean): void => {
+    positions.push(x, WATERLINE_LIFT - ROUTE_LIFT - (isFoam ? 0.001 : 0.002), z);
+    const color = isFoam ? foam : shadow;
+    colors.push(color.r, color.g, color.b, alpha);
+    foamFlags.push(Number(isFoam));
+  };
+
+  vertex(0, 0, 0.52, false);
+  const segments = 12;
+  for (let i = 0; i < segments; i++) {
+    const a = (2 * Math.PI * i) / segments;
+    vertex(Math.cos(a) * 0.58, Math.sin(a) * 0.38, 0, false);
+    indices.push(0, 1 + ((i + 1) % segments), i + 1);
+  }
+  const profile = [
+    // Distance aft, lateral offset, half width, crest opacity.
+    [0.32, 0.16, 0.035, 0],
+    [0.55, 0.23, 0.07, 0.58],
+    [0.91, 0.31, 0.09, 0.42],
+    [1.46, 0.48, 0.1, 0],
+  ] as const;
+  for (const side of [-1, 1]) {
+    const base = positions.length / 3;
+    for (const [x, z, width, alpha] of profile) {
+      vertex(-x, side * z - width, 0, true);
+      vertex(-x, side * z, alpha, true);
+      vertex(-x, side * z + width, 0, true);
+    }
+    for (let i = 0; i < profile.length - 1; i++) {
+      const first = base + i * 3;
+      for (let k = first; k < first + 2; k++) indices.push(k, k + 3, k + 1, k + 1, k + 3, k + 4);
+    }
+  }
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
+  geometry.setAttribute('wakeFoam', new THREE.Float32BufferAttribute(foamFlags, 1));
+  geometry.setAttribute(
+    'wakeFlow',
+    new THREE.InstancedBufferAttribute(new Float32Array(capacity), 1).setUsage(
+      THREE.DynamicDrawUsage,
+    ),
+  );
+  geometry.setIndex(indices);
+  const material = new THREE.MeshBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+  });
+  material.customProgramCacheKey = () => 'vessel-wake';
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nattribute float wakeFoam;\nattribute float wakeFlow;',
+      )
+      .replace(
+        '#include <project_vertex>',
+        `#include <project_vertex>
+vColor.a *= mix(1.0, wakeFlow, wakeFoam) * (1.0 - smoothstep(34.0, 80.0, -mvPosition.z));`,
+      );
+  };
+  const mesh = new THREE.InstancedMesh(geometry, material, capacity);
+  mesh.name = 'vessel-wake';
+  mesh.count = 0;
+  mesh.frustumCulled = false;
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  return mesh;
 }
 
 /** Surface routes stay near their facilities. Route geometry is refreshed after construction. */
@@ -85,6 +177,8 @@ export class FacilityTraffic {
   private readonly meshes: Record<Kind, THREE.InstancedMesh>;
   private readonly matrix = new THREE.Matrix4();
   private readonly airTraffic: AirTraffic;
+  private readonly wake: ReturnType<typeof vesselWake> | undefined;
+  private readonly wakeScale = new THREE.Vector3(1, 1, 1);
   private refreshIn = 0;
   private readonly nearby: Service[] = [];
 
@@ -94,6 +188,7 @@ export class FacilityTraffic {
     private readonly groundY: (x: number, z: number) => number,
     private readonly capacity: number,
     private readonly navigation?: Pick<Simulation, 'voyageRouteOf' | 'voyagePhaseOf'>,
+    waterDetail = false,
   ) {
     const material = new THREE.MeshLambertMaterial({ vertexColors: true });
     const make = (kind: Kind): THREE.InstancedMesh => {
@@ -105,6 +200,10 @@ export class FacilityTraffic {
       this.group.add(mesh);
       return mesh;
     };
+    if (waterDetail) {
+      this.wake = vesselWake(capacity * 3);
+      this.group.add(this.wake);
+    }
     this.meshes = {
       train: make('train'),
       boat: make('boat'),
@@ -131,6 +230,7 @@ export class FacilityTraffic {
               delete service.route;
               service.phase = 0;
               service.synced = false;
+              service.wakeFlow = 0;
             }
           }
         }
@@ -156,7 +256,11 @@ export class FacilityTraffic {
       const route =
         this.navigation?.voyageRouteOf(b.uid) ??
         waterRoute(this.city.terrain, b, b.def.voyage.range);
-      return route.map(({ x, z }) => ({ x: x + 0.5, z: z + 0.5, y: this.groundY(x, z) + 0.1 }));
+      return route.map(({ x, z }) => ({
+        x: x + 0.5,
+        z: z + 0.5,
+        y: this.groundY(x, z) + ROUTE_LIFT,
+      }));
     }
     const isWater = kind === 'boat' || kind === 'ship' || kind === 'ferry';
     const suitable = (x: number, z: number): boolean => {
@@ -197,7 +301,7 @@ export class FacilityTraffic {
     const seen = new Set<string>();
     const y = this.groundY(x, z);
     while (points.length < limit) {
-      points.push({ x: x + 0.5, y: y + 0.1, z: z + 0.5 });
+      points.push({ x: x + 0.5, y: y + ROUTE_LIFT, z: z + 0.5 });
       seen.add(`${x},${z}`);
       const next = DIRECTIONS.find(([dx, dz]) => {
         const nx = x + dx;
@@ -211,9 +315,17 @@ export class FacilityTraffic {
     return points;
   }
 
-  update(dt: number, cam: { x: number; z: number }, enabled: boolean, paused: boolean): void {
+  update(
+    dt: number,
+    cam: { x: number; z: number },
+    enabled: boolean,
+    paused: boolean,
+    nightness = 0,
+  ): void {
     const { train, boat, plane, ship, ferry } = this.meshes;
+    const wake = this.wake;
     train.count = boat.count = plane.count = ship.count = ferry.count = 0;
+    if (wake) wake.count = 0;
     if (!enabled) {
       this.refreshIn = 0;
       return;
@@ -235,6 +347,8 @@ export class FacilityTraffic {
       if (route.length < 2) continue;
       const end = route.length - 1;
       const period = end * 2;
+      const previousPhase = service.phase;
+      const alreadySynced = service.synced;
       if (service.building.def.voyage && this.navigation) {
         const target = this.navigation.voyagePhaseOf(service.building.uid) * period;
         if (!service.synced) {
@@ -245,8 +359,25 @@ export class FacilityTraffic {
           service.phase = (service.phase + delta * (1 - Math.exp(-dt * 7)) + period) % period;
         }
       } else if (!paused) service.phase = (service.phase + dt * SPEED[service.kind]) % period;
-      this.pose(route, service.phase, service.kind === 'train');
+      const turnFade = this.pose(route, service.phase, service.kind === 'train');
       mesh.setMatrixAt(mesh.count++, this.matrix);
+      if (wake && service.kind !== 'train') {
+        if (
+          dt > 0 &&
+          !paused &&
+          (!service.building.def.voyage || !this.navigation || alreadySynced)
+        ) {
+          const phaseDelta = Math.abs(service.phase - previousPhase);
+          const speed = Math.min(phaseDelta, period - phaseDelta) / dt;
+          const target = Math.min(1, speed * 1.6);
+          service.wakeFlow = target + ((service.wakeFlow ?? 0) - target) * Math.exp(-dt * 9);
+        }
+        const [length, width] = WAKE_SCALE[service.kind];
+        wake.setMatrixAt(wake.count, this.matrix.scale(this.wakeScale.set(length, 1, width)));
+        wake.geometry
+          .getAttribute('wakeFlow')
+          .setX(wake.count++, (service.wakeFlow ?? 0) * turnFade);
+      }
     }
     this.airTraffic.update(dt, cam, paused);
     if (train.count) train.instanceMatrix.needsUpdate = true;
@@ -254,9 +385,14 @@ export class FacilityTraffic {
     if (plane.count) plane.instanceMatrix.needsUpdate = true;
     if (ship.count) ship.instanceMatrix.needsUpdate = true;
     if (ferry.count) ferry.instanceMatrix.needsUpdate = true;
+    if (wake?.count) {
+      wake.instanceMatrix.needsUpdate = true;
+      wake.geometry.getAttribute('wakeFlow').needsUpdate = true;
+      wake.material.opacity = 1 - 0.67 * nightness;
+    }
   }
 
-  private pose(route: readonly Point[], phase: number, train: boolean): void {
+  private pose(route: readonly Point[], phase: number, train: boolean): number {
     const end = route.length - 1;
     const outbound = phase < end;
     let distance = outbound ? phase : 2 * end - phase;
@@ -304,5 +440,6 @@ export class FacilityTraffic {
     }
     this.matrix.makeRotationY(-yaw);
     this.matrix.setPosition(x - this.origin.x, y, z - this.origin.z);
+    return Math.min(1, edgeDistance / turnaround);
   }
 }
