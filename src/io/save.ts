@@ -7,7 +7,7 @@
  */
 import { tileToChunk } from '@/core/coords';
 import { GEN_VERSION, SAVE_SCHEMA_VERSION } from '@/core/version';
-import type { City } from '@/sim/city';
+import type { BuildingRotation, City } from '@/sim/city';
 import type { Goals } from '@/sim/goals';
 import type { PoiStore } from '@/sim/poi';
 import type { ProgressSnapshot } from '@/sim/progress';
@@ -102,7 +102,7 @@ export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null):
       chunks.set(key, rec);
     }
     const st = states.get(b.uid) ?? [b.uid, 3, 0, -1];
-    const flags = (st[1] as number) | (city.isActive(b.uid) ? 0 : 4);
+    const flags = (st[1] as number) | (city.isActive(b.uid) ? 0 : 4) | (((b.rot ?? 0) & 3) << 3);
     rec.b.push(b.uid, di, b.x, b.z, flags, st[2] as number, st[3] as number);
   }
   const stock: Record<string, number> = {};
@@ -168,7 +168,14 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   }
   pending.sort((a, b) => (a[0] as number) - (b[0] as number));
   for (const [uid, x, z, flags, unmet, warned, di] of pending as number[][]) {
-    city._add(city.catalog.get(data.defs[di as number] as string), x as number, z as number, uid);
+    const rot = (((flags as number) >> 3) & 3) as BuildingRotation;
+    city._add(
+      city.catalog.get(data.defs[di as number] as string),
+      x as number,
+      z as number,
+      uid,
+      rot,
+    );
     if ((flags as number) & 4) city._setActive(uid as number, false);
     sim.importState(uid as number, (flags as number) & 3, unmet as number, warned as number);
   }

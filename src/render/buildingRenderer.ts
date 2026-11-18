@@ -302,14 +302,23 @@ export class BuildingRenderer {
     const p = this.origin.toLocal(b.x, b.z);
     const y = this.heightAt(b.x, b.z);
     const t = this.pops.get(b.uid);
-    if (t === undefined) {
+    const rot = b.rot ?? 0;
+    if (t === undefined && rot === 0) {
       this.m.makeTranslation(p.x, y, p.z);
     } else {
-      // Scale about the footprint centre: T(p + c - s*c) * S(s).
-      const s = Math.max(0.05, easeOutBack(t / POP_SECONDS));
-      const cx = b.def.footprint.w / 2;
-      const cz = b.def.footprint.d / 2;
-      this.m.makeScale(s, s, s).setPosition(p.x + cx - s * cx, y, p.z + cz - s * cz);
+      const s = t === undefined ? 1 : Math.max(0.05, easeOutBack(t / POP_SECONDS));
+      const w0 = b.def.footprint.w;
+      const d0 = b.def.footprint.d;
+      const rw = rot & 1 ? d0 : w0;
+      const rd = rot & 1 ? w0 : d0;
+      const ox = rot === 1 ? d0 : rot === 2 ? w0 : 0;
+      const oz = rot === 2 ? d0 : rot === 3 ? w0 : 0;
+      const cx = rw / 2;
+      const cz = rd / 2;
+      this.m.makeRotationY((-rot * Math.PI) / 2);
+      if (s !== 1) this.m.multiplyScalar(s);
+      this.m.elements[15] = 1;
+      this.m.setPosition(p.x + cx - s * (cx - ox), y, p.z + cz - s * (cz - oz));
     }
     batch.mesh.setMatrixAt(index, this.m);
     batch.mesh.instanceMatrix.needsUpdate = true;

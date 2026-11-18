@@ -1,5 +1,5 @@
 import { LABOR_TIERS, type Amounts, isRoadDef } from '@/sim/catalog';
-import { type City, rectOf } from '@/sim/city';
+import { type BuildingRotation, type City, rectOf } from '@/sim/city';
 import { BatchCommand, type History, PlaceCommand } from '@/sim/commands';
 import type { Rect } from '@/sim/geometry';
 import { checkPlacement } from '@/sim/requirements';
@@ -10,6 +10,7 @@ export interface PlannedBuilding {
   readonly defId: string;
   readonly x: number;
   readonly z: number;
+  readonly rot?: BuildingRotation;
 }
 
 type BlueprintPiece = Omit<PlannedBuilding, 'id'>;
@@ -215,10 +216,10 @@ export class PlanStore {
    * Adds a plan if its footprint is free (of buildings and other plans) and the ground suits it.
    * Cost and requirements are ignored: a plan is allowed to be ahead of the town.
    */
-  add(defId: string, x: number, z: number): PlannedBuilding | undefined {
-    const rect = this.draftSite(defId, x, z);
+  add(defId: string, x: number, z: number, rot: BuildingRotation = 0): PlannedBuilding | undefined {
+    const rect = this.draftSite(defId, x, z, rot);
     if (!rect) return undefined;
-    const p = this.insert(defId, rect);
+    const p = this.insert(defId, rect, rot);
     this.changed();
     return p;
   }
@@ -241,7 +242,7 @@ export class PlanStore {
     const isRoad = (id: string): number =>
       Number(this.city.catalog.has(id) && isRoadDef(this.city.catalog.get(id)));
     const order = this.all().sort((a, b) => isRoad(b.defId) - isRoad(a.defId) || a.id - b.id);
-    const cmds = order.map((p) => ({ p, cmd: new PlaceCommand(p.defId, p.x, p.z) }));
+    const cmds = order.map((p) => ({ p, cmd: new PlaceCommand(p.defId, p.x, p.z, p.rot ?? 0) }));
     const batch = new BatchCommand(
       'build plan',
       cmds.map((c) => c.cmd),
@@ -251,9 +252,14 @@ export class PlanStore {
     return cmds.filter((c) => c.cmd.placedUid !== undefined).length;
   }
 
-  private draftSite(defId: string, x: number, z: number): Rect | undefined {
+  private draftSite(
+    defId: string,
+    x: number,
+    z: number,
+    rot: BuildingRotation = 0,
+  ): Rect | undefined {
     const def = this.city.catalog.get(defId);
-    const rect = rectOf(def, x, z);
+    const rect = rectOf(def, x, z, rot);
     if (
       !Number.isInteger(x) ||
       !Number.isInteger(z) ||
@@ -264,15 +270,17 @@ export class PlanStore {
     ) {
       return undefined;
     }
-    const { site } = checkPlacement(this.city, def, x, z);
+    const { site } = checkPlacement(this.city, def, x, z, rot);
     if (!site.every((s) => s.ok || s.key === 'req.locked')) return undefined;
     for (let tz = z; tz < z + rect.d; tz++)
       for (let tx = x; tx < x + rect.w; tx++) if (this.tiles.has(tileKey(tx, tz))) return undefined;
     return rect;
   }
 
-  private insert(defId: string, rect: Rect): PlannedBuilding {
-    const p = { id: this.nextId++, defId, x: rect.x, z: rect.z };
+  private insert(defId: string, rect: Rect, rot: BuildingRotation = 0): PlannedBuilding {
+    const p: PlannedBuilding = rot
+      ? { id: this.nextId++, defId, x: rect.x, z: rect.z, rot }
+      : { id: this.nextId++, defId, x: rect.x, z: rect.z };
     this.plans.set(p.id, p);
     for (let z = rect.z; z < rect.z + rect.d; z++)
       for (let x = rect.x; x < rect.x + rect.w; x++) this.tiles.set(tileKey(x, z), p.id);
@@ -282,7 +290,7 @@ export class PlanStore {
   private drop(id: number): boolean {
     const p = this.plans.get(id);
     if (!p) return false;
-    const r = rectOf(this.city.catalog.get(p.defId), p.x, p.z);
+    const r = rectOf(this.city.catalog.get(p.defId), p.x, p.z, p.rot);
     for (let tz = r.z; tz < r.z + r.d; tz++)
       for (let tx = r.x; tx < r.x + r.w; tx++) this.tiles.delete(tileKey(tx, tz));
     this.plans.delete(id);

@@ -1,23 +1,45 @@
 import { type Lot, type Recipes } from './lot';
 
 const wood = '#99794f';
+const timberDark = '#3d2a19';
 const steel = '#718181';
 const concrete = '#a4a396';
-const cargo = ['#a46954', '#587c83', '#c09a5c'] as const;
+const windowWarm = '#f5be42';
 
-function crane(l: Lot, x: number, z: number, reach: number, height: number): void {
-  l.block(x, z, 0.12, 0.17, 0.08, 0.13, steel);
-  l.beam([x, 0.2, z], [x, height, z], 0.092, '#b48b56');
-  l.beam([x, height, z], [x, height + 0.13, reach], 0.073, '#d3a35d');
-  l.beam([x, height - 0.42, z], [x, height + 0.09, z + (reach - z) * 0.63], 0.052, '#92794f');
-  l.beam([x, height + 0.13, reach], [x, height - 0.35, reach], 0.023, '#444c49');
-  l.block(x, reach, 0.045, 0.039, height - 0.38, 0.055, '#665e4b');
+function surroundCabinWindows(
+  l: Lot,
+  hx: number,
+  hz: number,
+  hw: number,
+  hd: number,
+  y: number,
+  h: number,
+  colsZ = 2,
+  colsX = 2,
+): void {
+  const spanX = hw * 0.72;
+  for (let i = 0; i < colsZ; i++) {
+    const wx = hx + (colsZ === 1 ? 0 : ((i + 0.5) / colsZ - 0.5) * spanX);
+    for (const sz of [-1, 1] as const) {
+      l.block(wx, hz + sz * (hd / 2 + 0.004), 0.064, 0.014, y, h, windowWarm, 1);
+      l.block(wx, hz + sz * (hd / 2 + 0.002), 0.076, 0.018, y - 0.006, h + 0.012, timberDark);
+    }
+  }
+  const spanZ = hd * 0.72;
+  for (let i = 0; i < colsX; i++) {
+    const wz = hz + (colsX === 1 ? 0 : ((i + 0.5) / colsX - 0.5) * spanZ);
+    for (const sx of [-1, 1] as const) {
+      l.block(hx + sx * (hw / 2 + 0.004), wz, 0.014, 0.064, y, h, windowWarm, 1);
+      l.block(hx + sx * (hw / 2 + 0.002), wz, 0.018, 0.076, y - 0.006, h + 0.012, timberDark);
+    }
+  }
 }
 
 export const transport: Recipes = {
   fishing_dock(l) {
     l.block(0.42, 0.51, 0.65, 0.94, 0.1, 0.095, wood);
     l.roofed(0.32, 0.26, 0.31, 0.3, 0.195, 0.26, 'z', '#a48460');
+    surroundCabinWindows(l, 0.32, 0.26, 0.31, 0.3, 0.26, 0.11, 1, 1);
     for (const z of [0.4, 0.87]) l.block(0.74, z, 0.07, 0.085, 0, 0.27, '#6a5742');
     l.block(0.47, 0.7, 0.25, 0.19, 0.197, 0.092, '#74796c');
     l.block(0.14, 0.78, 0.042, 0.24, 0.195, 0.16, '#7f6648');
@@ -29,6 +51,7 @@ export const transport: Recipes = {
       for (const z of [0.5, 0.88]) l.block(x + 0.08, z, 0.046, 0.045, 0, 0.29, '#80654d');
     }
     l.roofed(0.3, 0.24, 0.35, 0.28, 0.21, 0.34, 'x', '#b0a083');
+    surroundCabinWindows(l, 0.3, 0.24, 0.35, 0.28, 0.3, 0.12, 2, 1);
     l.beam([0.57, 0.2, 0.34], [0.58, 0.73, 0.34], 0.075, '#74624c');
     l.beam([0.83, 0.2, 0.34], [0.82, 0.73, 0.34], 0.075, '#74624c');
     l.block(0.7, 0.34, 0.26, 0.032, 0.55, 0.067, '#7d6b51');
@@ -37,56 +60,20 @@ export const transport: Recipes = {
   ice_fishery(l) {
     l.round(0.49, 0.49, 0.37, 0.45, 0.025, 0.11, '#c8d9d7');
     l.round(0.52, 0.65, 0.145, 0.156, 0.132, 0.013, '#4c798e');
-    l.ridge(0.42, 0.28, 0.59, 0.33, 0.13, 0.37, 'z', '#b39e81');
+    l.block(0.42, 0.28, 0.52, 0.28, 0.13, 0.2, '#8c7258');
+    surroundCabinWindows(l, 0.42, 0.28, 0.52, 0.28, 0.18, 0.1, 2, 1);
+    l.ridge(0.42, 0.28, 0.59, 0.33, 0.33, 0.22, 'z', '#b39e81');
     l.block(0.73, 0.47, 0.12, 0.19, 0.131, 0.1, wood);
     l.beam([0.71, 0.21, 0.52], [0.54, 0.36, 0.65], 0.032, '#7b6650');
   },
   ferry_pier(l) {
     l.block(0.5, 0.39, 0.93, 0.65, 0.12, 0.095, '#9a8867');
     l.block(0.52, 0.76, 0.39, 0.42, 0.12, 0.095, wood);
-    l.block(0.55, 0.23, 0.62, 0.17, 0.2, 0.33, '#acb5a5');
+    l.block(0.55, 0.23, 0.62, 0.22, 0.2, 0.33, '#acb5a5');
+    surroundCabinWindows(l, 0.55, 0.23, 0.62, 0.22, 0.28, 0.14, 3, 1);
     l.ridge(0.55, 0.32, 0.71, 0.41, 0.56, 0.21, 'x', '#539095');
     for (const x of [0.23, 0.84]) l.block(x, 0.5, 0.035, 0.056, 0.212, 0.36, steel);
     l.block(0.55, 0.47, 0.43, 0.08, 0.27, 0.08, '#b39a6d');
-  },
-  cargo_port(l) {
-    l.block(0.52, 0.49, 0.93, 0.92, 0.08, 0.115, '#93968a');
-    crane(l, 0.74, 0.3, 0.84, 1.37);
-    for (const [i, color] of cargo.entries()) {
-      l.block(0.27, 0.23 + i * 0.21, 0.34, 0.15, 0.195, 0.26, color);
-    }
-    l.block(0.29, 0.44, 0.33, 0.151, 0.455, 0.23, '#829180');
-    l.block(0.83, 0.84, 0.14, 0.11, 0.195, 0.12, '#575b52');
-  },
-  trade_harbor(l) {
-    l.block(0.5, 0.49, 0.96, 0.93, 0.08, 0.14, '#8b978e');
-    for (const x of [0.24, 0.76]) crane(l, x, 0.41, 0.89, 1.58);
-    l.block(0.49, 0.22, 0.37, 0.25, 0.22, 0.44, '#91a49e');
-    l.block(0.5, 0.22, 0.43, 0.31, 0.66, 0.08, '#647f7a');
-    l.windows(0.49, 0.35, 0.31, 0.44, 0.12, 3);
-    l.block(0.5, 0.55, 0.23, 0.15, 0.22, 0.2, cargo[2]);
-    l.block(0.5, 0.55, 0.22, 0.14, 0.42, 0.2, cargo[1]);
-  },
-  warehouse(l) {
-    l.base('#9b9587');
-    l.block(0.49, 0.42, 0.84, 0.62, 0.05, 0.74, '#a2927d');
-    l.ridge(0.49, 0.42, 0.89, 0.72, 0.78, 0.41, 'x', '#657a7d');
-    l.block(0.52, 0.735, 0.7, 0.06, 0.1, 0.43, '#6e7065');
-    l.block(0.52, 0.79, 0.69, 0.19, 0.56, 0.074, '#9b8a6c');
-    for (const x of [0.29, 0.74]) l.block(x, 0.845, 0.17, 0.08, 0.044, 0.1, wood);
-  },
-  distribution_depot(l) {
-    l.base('#a29e8f');
-    l.block(0.48, 0.39, 0.86, 0.54, 0.05, 0.81, '#a5aa9c');
-    l.block(0.48, 0.38, 0.9, 0.6, 0.86, 0.12, '#628381');
-    l.block(0.79, 0.4, 0.25, 0.46, 0.9, 0.48, '#879b90');
-    l.block(0.79, 0.4, 0.29, 0.5, 1.38, 0.085, '#677b74');
-    l.block(0.5, 0.75, 0.88, 0.22, 0.63, 0.07, '#728c86');
-    for (const x of [0.21, 0.5, 0.79]) {
-      l.block(x, 0.663, 0.17, 0.018, 0.057, 0.41, '#585f5a');
-      l.block(x, 0.855, 0.022, 0.16, 0.039, 0.017, '#d9c898');
-      l.block(x + 0.11, 0.825, 0.03, 0.032, 0.05, 0.59, steel);
-    }
   },
   rail_station(l) {
     l.base(concrete);
@@ -99,26 +86,8 @@ export const transport: Recipes = {
       l.block(x, 0.29, 0.032, 0.061, 0.166, 0.51, steel);
     }
     l.vaultedCanopy(0.5, 0.29, 0.89, 0.42, 0.68, 0.245);
-    l.block(0.24, 0.24, 0.23, 0.11, 0.17, 0.18, '#a38261');
-  },
-  bus_stop(l) {
-    l.base('#9da294');
-    l.block(0.44, 0.24, 0.7, 0.064, 0.04, 0.39, '#73959b');
-    for (const x of [0.12, 0.76]) l.block(x, 0.36, 0.044, 0.31, 0.04, 0.37, '#a9bbb4');
-    l.block(0.44, 0.38, 0.76, 0.42, 0.42, 0.065, '#5b8b92');
-    l.block(0.45, 0.32, 0.48, 0.1, 0.1, 0.1, wood);
-    l.block(0.82, 0.77, 0.036, 0.038, 0.039, 0.64, steel);
-    l.block(0.82, 0.77, 0.14, 0.043, 0.63, 0.12, '#b0935b');
-  },
-  metro_station(l) {
-    l.base('#989e92');
-    for (let i = 0; i < 5; i++)
-      l.block(0.47, 0.31 + i * 0.115, 0.5, 0.116, 0.035, 0.035 + i * 0.051, '#7b857f');
-    for (const x of [0.17, 0.77]) l.block(x, 0.55, 0.09, 0.74, 0.035, 0.34, '#bbc5b3');
-    l.block(0.47, 0.25, 0.65, 0.32, 0.52, 0.076, '#688b8f');
-    for (const x of [0.18, 0.76]) l.block(x, 0.34, 0.04, 0.04, 0.34, 0.19, steel);
-    l.block(0.9, 0.7, 0.025, 0.035, 0.035, 0.83, steel);
-    l.block(0.9, 0.7, 0.12, 0.05, 0.85, 0.15, '#a7635b');
+    l.block(0.5, 0.24, 0.36, 0.18, 0.17, 0.34, '#a38261');
+    surroundCabinWindows(l, 0.5, 0.24, 0.36, 0.18, 0.26, 0.14, 2, 1);
   },
   airfield(l) {
     l.base('#87996d');
@@ -126,10 +95,12 @@ export const transport: Recipes = {
     for (const x of [0.16, 0.34, 0.52, 0.7, 0.88])
       l.block(x, 0.53, 0.1, 0.015, 0.094, 0.009, '#ded8ba');
     l.block(0.28, 0.22, 0.42, 0.24, 0.042, 0.39, '#a8ac9e');
+    surroundCabinWindows(l, 0.28, 0.22, 0.42, 0.24, 0.18, 0.14, 2, 2);
     l.dome(0.28, 0.22, 0.22, 0.127, 0.43, 0.3, '#8b9d94');
     l.block(0.28, 0.342, 0.29, 0.012, 0.05, 0.32, '#636e6b');
     l.block(0.74, 0.24, 0.097, 0.12, 0.04, 0.69, '#aaa99a');
     l.block(0.74, 0.24, 0.13, 0.16, 0.73, 0.24, '#779499');
+    surroundCabinWindows(l, 0.74, 0.24, 0.13, 0.16, 0.78, 0.14, 1, 1);
     l.block(0.74, 0.24, 0.15, 0.18, 0.97, 0.06, '#c2beb1');
     l.block(0.75, 0.83, 0.19, 0.11, 0.042, 0.07, concrete);
   },
