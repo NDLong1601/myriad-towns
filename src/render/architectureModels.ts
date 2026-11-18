@@ -7,6 +7,7 @@ import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
 import { farmDiorama } from './architecture/farmDiorama';
 import { livestockDiorama } from './architecture/livestockDiorama';
+import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
@@ -25,6 +26,7 @@ const models = new Map<string, Recipe>(
     orchardDiorama,
     livestockDiorama,
     coastDiorama,
+    miningDiorama,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -34,6 +36,7 @@ const weathered = new Set([
   ...Object.keys(orchardDiorama),
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
+  ...Object.keys(miningDiorama),
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -41,6 +44,7 @@ const dioramas = new Set([
   ...Object.keys(orchardDiorama),
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
+  ...Object.keys(miningDiorama),
 ]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 

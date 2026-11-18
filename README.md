@@ -170,6 +170,28 @@ Ruộng lúa, rau và dâu vẫn lớn dần theo mùa vụ ngay trên mô hình
 | ![Trang viên cối xay gió](docs/images/group5-windmill.jpg)              | ![Lâu đài rượu vang Chateau](docs/images/group5-chateau.jpg) |
 | ![Nông trại thẳng đứng về đêm](docs/images/group5-hydroponic-night.jpg) | ![Tổ hợp đồ hộp và dầu cá](docs/images/group5-cannery.jpg)   |
 
+### Nhóm 1: Khai khoáng và Đường ray
+
+Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại theo phong cách sa bàn chi tiết: tầng đá cắt từng khối, hố sét có nước, cửa hầm chống gỗ, tháp giếng, ống khói gạch, băng tải, silo thép, xe goòng, xe tải, công nhân và đèn pha. Chuỗi và ngưỡng đô thị do Antigravity thiết kế; mô hình dựng lại để khớp ảnh concept.
+
+| Chuỗi                   | Cấp                                                                    |
+| ----------------------- | ---------------------------------------------------------------------- |
+| Mỏ đá (1×1, 3 cấp)      | Mỏ đá thủ công → Mỏ đá hơi nước (đô thị ≥ 2) → Mỏ đá công nghiệp (≥ 4) |
+| Hố đất sét (1×1, 3 cấp) | Hố đất sét → Lò gạch thủ công (≥ 2) → Nhà máy gạch công nghiệp (≥ 4)   |
+| Mỏ sắt (1×1, 3 cấp)     | Mỏ sắt thủ công → Mỏ sắt giếng đứng (≥ 2) → Mỏ sắt sâu (≥ 4)           |
+| Đường ray (1×1, 2 cấp)  | Đường ray gỗ → Đường ray sắt (≥ 2)                                     |
+
+![Nhóm 1 trong thị trấn](docs/images/group1-town.jpg)
+
+![Chuỗi Mỏ đá](docs/images/group1-quarry.jpg)
+
+![Chuỗi Hố đất sét](docs/images/group1-claypit.jpg)
+
+![Chuỗi Mỏ sắt](docs/images/group1-ironmine.jpg)
+
+| ![Chuỗi Đường ray](docs/images/group1-rail.jpg) | ![Nhóm 1 về đêm](docs/images/group1-night.jpg) |
+| ----------------------------------------------- | ---------------------------------------------- |
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.
