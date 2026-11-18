@@ -773,12 +773,13 @@
         "when": [
           {
             "type": "road",
-            "maxDistance": 2
+            "maxDistance": 1,
+            "paved": true
           },
           {
             "type": "field",
             "field": "urban",
-            "min": 1
+            "min": 2
           },
           {
             "type": "field",
