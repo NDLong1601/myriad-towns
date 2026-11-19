@@ -54,7 +54,7 @@ const steel = '#7a8a92';
 const stone = '#8f8a80';
 
 /** Brick chimney stack, tapering, with a dark cap and smoke. */
-function stack(
+export function stack(
   l: Lot,
   x: number,
   z: number,
@@ -82,24 +82,24 @@ function stack(
 }
 
 /** Glowing molten metal: a short emissive disc. */
-function melt(l: Lot, x: number, z: number, y: number, r: number): void {
+export function melt(l: Lot, x: number, z: number, y: number, r: number): void {
   l.shape(new THREE.CylinderGeometry(r, r, 0.006, 14), '#ff9a3a', x, z, y, 1);
 }
 
 /** Glowing opening (furnace mouth) on a +z wall. */
-function mouth(l: Lot, x: number, z: number, y: number, w: number, h: number): void {
+export function mouth(l: Lot, x: number, z: number, y: number, w: number, h: number): void {
   wbox(l, x, z, y, w + 0.012, h + 0.008, 0.008, iron);
   wbox(l, x, z, y + 0.004, w, h, 0.012, hot, 0, 0, 1);
 }
 
 /** Iron bands round a round tower. */
-function bands(l: Lot, x: number, z: number, y: number, h: number, r: number, n: number): void {
+export function bands(l: Lot, x: number, z: number, y: number, h: number, r: number, n: number): void {
   for (let i = 0; i < n; i++)
     wround(l, x, z, r * 1.03, r * 1.03, y + (i + 0.5) * (h / n), 0.007, iron, 16);
 }
 
 /** Heap of dark charcoal or ore built from tilted blocks. */
-function heap(l: Lot, x: number, z: number, r: number, color: string, h = 0.06): void {
+export function heap(l: Lot, x: number, z: number, r: number, color: string, h = 0.06): void {
   l.shape(new THREE.ConeGeometry(r, h, 8), tone(color, 0.15), x, z, 0.034 + h / 2);
   for (let i = 0; i < 6; i++)
     wbox(
@@ -116,7 +116,7 @@ function heap(l: Lot, x: number, z: number, r: number, color: string, h = 0.06):
 }
 
 /** Hand-pumped bellows: two wedge boards with a leather fold and a nozzle towards +x. */
-function bellows(l: Lot, x: number, z: number, y: number, ry = 0): void {
+export function bellows(l: Lot, x: number, z: number, y: number, ry = 0): void {
   wbox(l, x, z, y, 0.1, 0.008, 0.05, '#6b4a2a', ry);
   wbox(l, x, z, y + 0.026, 0.1, 0.008, 0.05, '#7a5a3a', ry, 0.18);
   wbox(l, x, z, y + 0.008, 0.09, 0.02, 0.046, '#5a3a22', ry);
@@ -130,7 +130,7 @@ function bellows(l: Lot, x: number, z: number, y: number, ry = 0): void {
 }
 
 /** Anvil on a stump with a glowing workpiece. */
-function anvil(l: Lot, x: number, z: number, y = 0.034): void {
+export function anvil(l: Lot, x: number, z: number, y = 0.034): void {
   wround(l, x, z, 0.02, 0.024, y, 0.04, '#7a5a3a', 8);
   wbox(l, x, z, y + 0.04, 0.05, 0.012, 0.022, '#2c3134');
   wbox(l, ...off(l, x, z, 0.03, 0), y + 0.044, 0.018, 0.008, 0.01, '#2c3134');
@@ -138,7 +138,7 @@ function anvil(l: Lot, x: number, z: number, y = 0.034): void {
 }
 
 /** Ingot stack of pig iron bars. */
-function ingots(l: Lot, x: number, z: number, y: number, n: number, ry = 0): void {
+export function ingots(l: Lot, x: number, z: number, y: number, n: number, ry = 0): void {
   for (let r = 0; r < n; r++)
     for (let i = 0; i < n - r; i++) {
       const t = (i - (n - r - 1) / 2) * 0.026;
@@ -156,7 +156,7 @@ function ingots(l: Lot, x: number, z: number, y: number, n: number, ry = 0): voi
 }
 
 /** Small lattice pylon with two cross-arms. */
-function pylon(l: Lot, x: number, z: number, h: number): void {
+export function pylon(l: Lot, x: number, z: number, h: number): void {
   for (const [a, b] of [
     [-1, -1],
     [-1, 1],
@@ -186,7 +186,7 @@ function pylon(l: Lot, x: number, z: number, h: number): void {
 }
 
 /** Wooden picket / post-and-rail fence along x. */
-function railing(l: Lot, x0: number, x1: number, z: number, y = 0.034, color = '#6b4a2a'): void {
+export function railing(l: Lot, x0: number, x1: number, z: number, y = 0.034, color = '#6b4a2a'): void {
   const n = Math.max(2, Math.round(((x1 - x0) * l.spanX) / 0.06));
   for (let i = 0; i <= n; i++) wbox(l, x0 + ((x1 - x0) * i) / n, z, y, 0.006, 0.04, 0.006, color);
   wbox(l, (x0 + x1) / 2, z, y + 0.03, (x1 - x0) * l.spanX, 0.005, 0.006, color);
@@ -194,7 +194,7 @@ function railing(l: Lot, x0: number, x1: number, z: number, y = 0.034, color = '
 }
 
 /** Spoked iron flywheel standing in the plane facing +z, bottom at y. */
-function flywheel(l: Lot, x: number, z: number, y: number, r: number): void {
+export function flywheel(l: Lot, x: number, z: number, y: number, r: number): void {
   l.shape(new THREE.TorusGeometry(r, 0.008, 6, 22), '#26292b', x, z, y + r);
   for (let i = 0; i < 6; i++) {
     const sp = new THREE.BoxGeometry(0.006, r * 2, 0.006);
@@ -211,7 +211,7 @@ function flywheel(l: Lot, x: number, z: number, y: number, r: number): void {
 }
 
 /** Low barrel vault: a squashed half-cylinder along x whose base sits at height y. */
-function vault(
+export function vault(
   l: Lot,
   x: number,
   z: number,
