@@ -634,5 +634,12 @@
   "building.cannery_harbor_complex.name": "Tổ hợp đồ hộp và dầu cá",
   "building.gamekeeper_lodge.name": "Nhà kiểm lâm",
   "building.falconry_manor.name": "Trang viên chim ưng",
-  "building.royal_hunting_palace.name": "Hành cung săn bắn hoàng gia"
+  "building.royal_hunting_palace.name": "Hành cung săn bắn hoàng gia",
+  "building.steam_powerhouse.name": "Nhà máy hơi nước",
+  "building.turbine_power_station.name": "Nhà máy điện tuabin",
+  "building.heavy_foundry.name": "Xưởng đúc nặng",
+  "building.bessemer_steelworks.name": "Lò luyện thép Bessemer",
+  "building.integrated_steel_mill.name": "Tổ hợp thép liên hợp",
+  "building.colliery_headframe.name": "Mỏ than tháp tời",
+  "building.deep_shaft_colliery.name": "Mỏ than hầm sâu"
 }

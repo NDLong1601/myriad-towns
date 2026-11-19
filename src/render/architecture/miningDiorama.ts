@@ -46,7 +46,7 @@ type Face = '+z' | '-z' | '+x' | '-x';
 const FACES: readonly Face[] = ['+z', '-z', '+x', '-x'];
 
 /** Lit windows on all four faces of a body (also what the night view reads). */
-function windows4(
+export function windows4(
   l: Lot,
   x: number,
   z: number,
@@ -66,7 +66,7 @@ function windows4(
 }
 
 /** Ground: meadow with a worn floor patch where the work happens. */
-function ground(
+export function ground(
   l: Lot,
   seed: string,
   floor: string,
@@ -96,7 +96,7 @@ function ground(
  * Terrace of individually cut blocks between lot fractions (x0, z0) and (x1, z1). Each cell is
  * built from strata layers; `cap` lays a patchy turf lip on top, `rough` jitters the face.
  */
-function rockMass(
+export function rockMass(
   l: Lot,
   x0: number,
   z0: number,
@@ -136,7 +136,7 @@ function rockMass(
 }
 
 /** Loose rubble: a scatter of small rotated stones. */
-function rubble(
+export function rubble(
   l: Lot,
   x: number,
   z: number,
@@ -162,7 +162,7 @@ function rubble(
 }
 
 /** Dressed stone blocks stacked in a pile (nx by nz, `layers` high). */
-function blockStack(
+export function blockStack(
   l: Lot,
   x: number,
   z: number,
@@ -188,7 +188,7 @@ function blockStack(
 }
 
 /** Narrow-gauge track (sleepers, rails, ballast) between two points on the floor. */
-function railLine(
+export function railLine(
   l: Lot,
   x0: number,
   z0: number,
@@ -233,7 +233,7 @@ function railLine(
 }
 
 /** Ore wagon on rails facing `ry`, loaded with `load` (null = empty). */
-function wagon(
+export function wagon(
   l: Lot,
   x: number,
   z: number,
@@ -259,7 +259,7 @@ function wagon(
 }
 
 /** Timber mine portal: posts, lintel, cap beam and a dark opening with a lantern. */
-function portal(
+export function portal(
   l: Lot,
   x: number,
   z: number,
@@ -284,7 +284,7 @@ function portal(
 }
 
 /** Brick course body helper. */
-function brickBody(
+export function brickBody(
   l: Lot,
   x: number,
   z: number,
@@ -298,7 +298,7 @@ function brickBody(
 }
 
 /** Floodlight mast with a lamp bar. */
-function floodlight(l: Lot, x: number, z: number, h = 0.28): void {
+export function floodlight(l: Lot, x: number, z: number, h = 0.28): void {
   wround(l, x, z, 0.004, 0.006, 0.03, h, steelDark, 6);
   wbox(l, x, z, 0.03 + h, 0.05, 0.012, 0.016, steelDark);
   for (const t of [-0.016, 0, 0.016])
@@ -306,7 +306,7 @@ function floodlight(l: Lot, x: number, z: number, h = 0.28): void {
 }
 
 /** Belt conveyor between two world points ([x, y, z] with x/z as lot fractions). */
-function conveyor(
+export function conveyor(
   l: Lot,
   from: readonly [number, number, number],
   to: readonly [number, number, number],
@@ -333,7 +333,7 @@ function conveyor(
 }
 
 /** Spoked winding wheel (vertical, facing `ry`) on a short axle. */
-function windingWheel(l: Lot, x: number, z: number, y: number, r: number, ry: number): void {
+export function windingWheel(l: Lot, x: number, z: number, y: number, r: number, ry: number): void {
   for (const sd of [-0.012, 0.012]) {
     const rim = new THREE.TorusGeometry(r, 0.005, 5, 20);
     rim.rotateY(ry + Math.PI / 2);
@@ -358,7 +358,7 @@ function windingWheel(l: Lot, x: number, z: number, y: number, r: number, ry: nu
 }
 
 /** Work yard filler for the larger 2x2 lots: crates, barrels, stacks and loose material. */
-function yard(
+export function yard(
   l: Lot,
   x0: number,
   z0: number,
@@ -381,7 +381,7 @@ function yard(
 }
 
 /** Workers (hi-vis or period coats). */
-function workers(
+export function workers(
   l: Lot,
   list: readonly (readonly [number, number, string, string?])[],
   y = 0.036,

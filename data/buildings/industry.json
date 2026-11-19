@@ -173,10 +173,7 @@
   {
     "id": "coal_mine",
     "category": "production",
-    "footprint": {
-      "w": 2,
-      "d": 2
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "wood": 30,
       "stone": 15
@@ -213,6 +210,12 @@
       "roof": "#212121",
       "height": 1
     },
+    "upgrades": [
+      {
+        "to": "colliery_headframe",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "tags": ["mine", "industry"],
     "unlock": {
       "population": 60,
@@ -222,10 +225,7 @@
   {
     "id": "steelworks",
     "category": "production",
-    "footprint": {
-      "w": 3,
-      "d": 2
-    },
+    "footprint": { "w": 4, "d": 3 },
     "cost": {
       "stone": 40,
       "wood": 20
@@ -259,6 +259,12 @@
       "roof": "#bf360c",
       "height": 1.6
     },
+    "upgrades": [
+      {
+        "to": "bessemer_steelworks",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "tags": ["industry"],
     "unlock": {
       "population": 120,
