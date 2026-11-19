@@ -1021,10 +1021,7 @@
   {
     "id": "woodcutter",
     "category": "production",
-    "footprint": {
-      "w": 1,
-      "d": 1
-    },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {
       "wood": 2
     },
@@ -1045,6 +1042,12 @@
         "field": "noise",
         "amount": 1,
         "radius": 2
+      }
+    ],
+    "upgrades": [
+      {
+        "to": "mechanized_lumber_camp",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
       }
     ],
     "requires": [

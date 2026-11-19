@@ -216,6 +216,31 @@ Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than đ
 
 ![Nhóm 2A về đêm](docs/images/group2a-night.jpg)
 
+### Nhóm 2B: Lâm nghiệp, Đẽo đá, Đường sắt, Sân bay và Bến cảng
+
+Trại đốn gỗ, hố sỏi, ga đường sắt, sân bay, bến phà, cảng cá và lều câu băng được dựng lại thành sa bàn chi tiết trên lô lớn hơn (2×2; ga 4×3; sân bay 4×4; bến phà 3×2; cảng cá 3×3). Thêm 5 công trình cấp cao mở theo mức đô thị: trại tiều phu cơ giới, dinh trưởng rừng (tháp canh lửa, vườn ươm kính), xưởng thợ đẽo đá, xưởng chế tác đá cơ khí (máy nghiền, cẩu giàn) và ga mái vòm kính kiểu Victoria.
+
+| Chuỗi                   | Cấp                                                                       |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Lâm nghiệp (2×2, 3 cấp) | Trại đốn gỗ → Trại tiều phu cơ giới (đô thị ≥ 2) → Dinh trưởng rừng (≥ 4) |
+| Đẽo đá (2×2, 3 cấp)     | Hố sỏi → Xưởng thợ đẽo đá (≥ 2) → Xưởng chế tác đá cơ khí (≥ 4)           |
+| Đường sắt (4×3, 2 cấp)  | Ga gỗ thôn dã → Ga đường sắt mái vòm kính (≥ 3)                           |
+| Đứng riêng              | Sân bay nhỏ (4×4), Bến phà (3×2), Cảng đánh bắt (3×3), Lều câu băng (2×2) |
+
+![Nhóm 2B trong thị trấn](docs/images/group2b-town.jpg)
+
+![Chuỗi Lâm nghiệp](docs/images/group2b-forestry.jpg)
+
+![Chuỗi Đẽo đá](docs/images/group2b-masonry.jpg)
+
+![Ga đường sắt](docs/images/group2b-rail.jpg)
+
+![Sân bay nhỏ](docs/images/group2b-airfield.jpg)
+
+![Bến phà, cảng cá và lều câu băng](docs/images/group2b-maritime.jpg)
+
+![Nhóm 2B về đêm](docs/images/group2b-night.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

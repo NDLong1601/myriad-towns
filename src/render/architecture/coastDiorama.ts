@@ -54,7 +54,7 @@ const sea = '#3f8fae';
 const coats = ['#2f5f86', '#8a3b2c', '#3f6b3a', '#c49a3a', '#6a4f86'] as const;
 
 /** Shore: grass at the back, a sand strip, then sea over the front of the lot from `edge`. */
-function shore(l: Lot, edge: number, seed: string, sand = true): void {
+export function shore(l: Lot, edge: number, seed: string, sand = true): void {
   reseed(seed);
   meadow(l, grass, 30);
   if (sand) wbox(l, 0.5, edge - 0.05, 0.03, 0.96, 0.004, 0.1, '#e3d2a2');
@@ -65,7 +65,7 @@ function shore(l: Lot, edge: number, seed: string, sand = true): void {
 }
 
 /** Hanging fishing net on a pole frame. */
-function netFrame(l: Lot, x: number, z: number): void {
+export function netFrame(l: Lot, x: number, z: number): void {
   for (const e of [-1, 1])
     wbox(l, ...off(l, x, z, e * 0.05, 0), 0.03, 0.006, 0.12, 0.006, '#a08a5a');
   wbox(l, x, z, 0.145, 0.11, 0.005, 0.005, '#a08a5a');
@@ -75,7 +75,7 @@ function netFrame(l: Lot, x: number, z: number): void {
 }
 
 /** Bollard with a coil of rope. */
-function bollard(l: Lot, x: number, z: number, y: number): void {
+export function bollard(l: Lot, x: number, z: number, y: number): void {
   wround(l, x, z, 0.007, 0.009, y, 0.02, '#3a3530', 8);
   const coil = new THREE.TorusGeometry(0.012, 0.003, 4, 10);
   coil.rotateX(Math.PI / 2);
@@ -83,7 +83,7 @@ function bollard(l: Lot, x: number, z: number, y: number): void {
 }
 
 /** Basket of fish. */
-function fishBox(l: Lot, x: number, z: number, y: number): void {
+export function fishBox(l: Lot, x: number, z: number, y: number): void {
   wbox(l, x, z, y, 0.03, 0.014, 0.022, '#7a8a90');
   for (let i = 0; i < 3; i++)
     wbox(

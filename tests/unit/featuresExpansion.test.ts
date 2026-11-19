@@ -30,7 +30,7 @@ describe('Advanced Urbek-inspired Features', () => {
       history.run(new PlaceCommand('road', 0, 0));
       history.run(new PlaceCommand('road', 1, 0));
       history.run(new PlaceCommand('road', 2, 0));
-      city._add(city.catalog.get('well'), 1, 1);
+      city._add(city.catalog.get('well'), 2, 2);
       city._add(city.catalog.get('woodcutter'), 0, 1);
       city._add(city.catalog.get('cottage'), 2, 1);
 

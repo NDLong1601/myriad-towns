@@ -373,10 +373,7 @@
   {
     "id": "fishing_harbor",
     "category": "food",
-    "footprint": {
-      "w": 2,
-      "d": 3
-    },
+    "footprint": { "w": 3, "d": 3 },
     "visual": {
       "shape": "dock",
       "color": "#9a7958",
@@ -453,10 +450,7 @@
   {
     "id": "rail_station",
     "category": "infrastructure",
-    "footprint": {
-      "w": 3,
-      "d": 2
-    },
+    "footprint": { "w": 4, "d": 3 },
     "visual": {
       "shape": "hall",
       "color": "#cbbca2",
@@ -468,6 +462,12 @@
       "stone": 26,
       "goods": 6
     },
+    "upgrades": [
+      {
+        "to": "glass_vault_station",
+        "when": [{ "type": "field", "field": "urban", "min": 3 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",

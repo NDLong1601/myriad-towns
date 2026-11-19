@@ -361,10 +361,7 @@
   {
     "id": "ferry_pier",
     "category": "infrastructure",
-    "footprint": {
-      "w": 2,
-      "d": 1
-    },
+    "footprint": { "w": 3, "d": 2 },
     "cost": {
       "wood": 20,
       "stone": 10

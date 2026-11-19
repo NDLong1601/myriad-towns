@@ -52,7 +52,12 @@ const cinder = '#5d5750';
 const hot = '#ff8a2a';
 
 /** Cinder-and-grass ground with a worn floor patch. */
-function site(l: Lot, seed: string, floor: string, patch: [number, number, number, number]): void {
+export function site(
+  l: Lot,
+  seed: string,
+  floor: string,
+  patch: [number, number, number, number],
+): void {
   reseed(seed);
   meadow(l, grass, 22);
   const [x0, z0, x1, z1] = patch;
