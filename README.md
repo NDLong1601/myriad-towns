@@ -194,7 +194,7 @@ Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại 
 
 ### Nhóm 2A: Công nghiệp nặng và Năng lượng
 
-Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 2×2 (lò luyện thép 3×2): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
+Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 2×2 (lò luyện thép 3×2): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Mỗi xưởng còn có mặt tiền gạch chia gian với cửa sổ xưởng cao, gờ mái, máng xối và ống thoát nước, mái hắt sáng thông gió, giàn ống, hàng rào, xe nâng, thùng phuy, pallet, bảng tên, sàn thao tác quanh lò và ống khói có thang. Thêm 7 công trình cấp cao, mở theo mức đô thị.
 
 | Chuỗi               | Cấp                                                                       |
 | ------------------- | ------------------------------------------------------------------------- |
