@@ -7,6 +7,7 @@ import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
 import { farmDiorama } from './architecture/farmDiorama';
 import { livestockDiorama } from './architecture/livestockDiorama';
+import { civicNatureDiorama } from './architecture/civicNatureDiorama';
 import { forestryTransitDiorama } from './architecture/forestryTransitDiorama';
 import { industryDiorama } from './architecture/industryDiorama';
 import { miningDiorama } from './architecture/miningDiorama';
@@ -31,6 +32,7 @@ const models = new Map<string, Recipe>(
     miningDiorama,
     industryDiorama,
     forestryTransitDiorama,
+    civicNatureDiorama,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -43,6 +45,7 @@ const weathered = new Set([
   ...Object.keys(miningDiorama),
   ...Object.keys(industryDiorama),
   ...Object.keys(forestryTransitDiorama),
+  ...Object.keys(civicNatureDiorama),
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -53,6 +56,7 @@ const dioramas = new Set([
   ...Object.keys(miningDiorama),
   ...Object.keys(industryDiorama),
   ...Object.keys(forestryTransitDiorama),
+  ...Object.keys(civicNatureDiorama),
 ]);
 /**
  * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
@@ -65,6 +69,8 @@ const zoomed = new Map<string, number>([
   ...Object.keys(industryDiorama).map((id): [string, number] => [id, 2.6]),
   // Forestry, masonry, rail, air and harbour dioramas are drawn at 1x1 scale on lots twice as wide.
   ...Object.keys(forestryTransitDiorama).map((id): [string, number] => [id, 2]),
+  // Schools, gardens, cabins and markets share the same x2 scale.
+  ...Object.keys(civicNatureDiorama).map((id): [string, number] => [id, 2]),
 ]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();

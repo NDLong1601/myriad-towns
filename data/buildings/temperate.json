@@ -1617,10 +1617,7 @@
   {
     "id": "school",
     "category": "service",
-    "footprint": {
-      "w": 2,
-      "d": 1
-    },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {
       "wood": 12,
       "stone": 10

@@ -646,5 +646,7 @@
   "building.forester_estate.name": "Forester estate",
   "building.stonemason_yard.name": "Stonemason yard",
   "building.mechanical_stoneworks.name": "Mechanical stoneworks",
-  "building.glass_vault_station.name": "Glass-vault railway terminal"
+  "building.glass_vault_station.name": "Glass-vault railway terminal",
+  "building.botanical_garden.name": "Botanical garden",
+  "building.victorian_conservatory.name": "Victorian glass palace"
 }
