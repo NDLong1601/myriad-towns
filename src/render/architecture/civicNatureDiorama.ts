@@ -192,6 +192,247 @@ function glassDome(l: Lot, x: number, z: number, rx: number, y: number, h: numbe
 }
 
 // ---------------------------------------------------------------------------------------------
+// Detail helpers shared by the recipes below
+// ---------------------------------------------------------------------------------------------
+
+/** Projecting cornice / eaves board around a body. */
+function cornice(
+  l: Lot,
+  x: number,
+  z: number,
+  w: number,
+  d: number,
+  y: number,
+  color: string,
+): void {
+  wbox(l, x, z, y, w + 0.03, 0.012, d + 0.03, color);
+  wbox(l, x, z, y - 0.012, w + 0.016, 0.012, d + 0.016, tone(color, 0.06));
+}
+
+/** Clumps of ivy climbing a wall face ('+z' or '-z'/'+x'/'-x'). */
+function ivy(
+  l: Lot,
+  x: number,
+  z: number,
+  w: number,
+  d: number,
+  face: '+z' | '-z' | '+x' | '-x',
+  t: number,
+  h: number,
+): void {
+  const axisX = face === '+z' || face === '-z';
+  const s = face[0] === '+' ? 1 : -1;
+  for (let i = 0; i < 9; i++) {
+    const along = t + (rand() - 0.5) * 0.09;
+    const [px, pz] = axisX
+      ? off(l, x, z, along, s * (d / 2 + 0.006))
+      : off(l, x, z, s * (w / 2 + 0.006), along);
+    l.shape(
+      new THREE.IcosahedronGeometry(0.012 + rand() * 0.008, 0),
+      tone('#3f7a3a', 0.2),
+      px,
+      pz,
+      0.05 + rand() * h,
+    );
+  }
+}
+
+/** Downpipe running down a wall corner. */
+function downpipe(l: Lot, x: number, z: number, y: number, h: number): void {
+  wround(l, x, z, 0.004, 0.004, y, h, '#4a4f54', 6);
+  wbox(l, x, z, y + h - 0.004, 0.02, 0.008, 0.012, '#4a4f54');
+}
+
+/** Stone steps up to a door facing +z. */
+function steps(l: Lot, x: number, z: number, w: number, n: number, y = 0.036): void {
+  for (let i = 0; i < n; i++)
+    wbox(
+      l,
+      ...off(l, x, z, 0, i * 0.016),
+      y + (n - 1 - i) * 0.008,
+      w + i * 0.01,
+      0.008,
+      0.016,
+      tone('#bdb6a6', 0.1),
+    );
+}
+
+/** Small porch hood over a door facing +z. */
+function hood(l: Lot, x: number, z: number, y: number, w: number, color: string): void {
+  for (const s of [-1, 1])
+    l.beam(
+      p3(off(l, x, z, s * (w / 2 - 0.004), 0.07), 0.036),
+      p3(off(l, x, z, s * (w / 2 - 0.004), 0.07), y - 0.004),
+      0.006,
+      timber,
+    );
+  wbox(l, ...off(l, x, z, 0, 0.04), y, w + 0.03, 0.01, 0.09, color, 0, 0.18);
+}
+
+/** School vegetable plot with rows of seedlings. */
+function vegPlot(l: Lot, x: number, z: number, w: number, d: number, rows: number): void {
+  wbox(l, x, z, 0.036, w, 0.012, d, '#5a3e2a');
+  for (let r = 0; r < rows; r++) {
+    const rz = -d / 2 + ((r + 0.5) * d) / rows;
+    for (let i = 0; i < Math.round(w / 0.03); i++) {
+      const [px, pz] = off(l, x, z, -w / 2 + 0.015 + i * 0.03, rz);
+      l.shape(
+        new THREE.ConeGeometry(0.01, 0.025, 5),
+        tone(r % 2 ? '#4f9a3a' : '#7ab04a', 0.15),
+        px,
+        pz,
+        0.062,
+      );
+    }
+  }
+}
+
+/** Water pump with a trough. */
+function pump(l: Lot, x: number, z: number): void {
+  wround(l, x, z, 0.008, 0.01, 0.036, 0.06, '#3a4a5a', 8);
+  wbox(l, x, z, 0.09, 0.03, 0.01, 0.01, '#3a4a5a');
+  l.beam([x, 0.1, z], [x + 0.03 / l.spanX, 0.14, z], 0.005, '#2c3236');
+  wbox(l, ...off(l, x, z, 0, 0.03), 0.036, 0.07, 0.02, 0.03, '#6b4a2a');
+  wbox(l, ...off(l, x, z, 0, 0.03), 0.052, 0.05, 0.004, 0.022, '#6fb3c8');
+}
+
+/** Sandbox with a bucket and spade. */
+function sandbox(l: Lot, x: number, z: number): void {
+  wbox(l, x, z, 0.036, 0.12, 0.016, 0.12, '#8a6a48');
+  wbox(l, x, z, 0.042, 0.108, 0.012, 0.108, '#e3d2a2');
+  wround(l, ...off(l, x, z, 0.02, 0.01), 0.011, 0.008, 0.054, 0.018, '#c9402c', 8);
+}
+
+/** Playground slide. */
+function slide(l: Lot, x: number, z: number, ry = 0): void {
+  const c = Math.cos(ry);
+  const s = Math.sin(ry);
+  const at = (a: number, b = 0): [number, number] => off(l, x, z, c * a + s * b, -s * a + c * b);
+  for (const k of [-1, 1])
+    l.beam(p3(at(-0.04, k * 0.02), 0.036), p3(at(-0.04, k * 0.02), 0.12), 0.006, '#b0463a');
+  wbox(l, ...at(-0.04), 0.12, 0.05, 0.006, 0.05, '#b0463a', ry);
+  l.beam(p3(at(-0.02), 0.12), p3(at(0.1), 0.04), 0.03, '#c9a83a');
+}
+
+/** Bicycle leaning on a fence. */
+function bicycle(l: Lot, x: number, z: number, ry: number): void {
+  for (const t of [-0.03, 0.03]) {
+    const wheel = new THREE.TorusGeometry(0.017, 0.0025, 4, 12);
+    wheel.rotateY(ry);
+    l.shape(wheel, '#2c2a28', ...off(l, x, z, Math.cos(ry) * t, -Math.sin(ry) * t), 0.036 + 0.017);
+  }
+  l.beam(
+    p3(off(l, x, z, -Math.cos(ry) * 0.03, Math.sin(ry) * 0.03), 0.05),
+    p3(off(l, x, z, Math.cos(ry) * 0.01, -Math.sin(ry) * 0.01), 0.085),
+    0.004,
+    '#b0463a',
+  );
+  l.beam(
+    p3(off(l, x, z, Math.cos(ry) * 0.01, -Math.sin(ry) * 0.01), 0.085),
+    p3(off(l, x, z, Math.cos(ry) * 0.03, -Math.sin(ry) * 0.03), 0.05),
+    0.004,
+    '#b0463a',
+  );
+}
+
+/** Cat sitting on a step. */
+function cat(l: Lot, x: number, z: number, y: number, coat = '#c27a3a'): void {
+  wbox(l, x, z, y, 0.014, 0.012, 0.02, coat);
+  l.shape(new THREE.SphereGeometry(0.0065, 6, 5), coat, ...off(l, x, z, 0, 0.012), y + 0.014);
+  wbox(l, ...off(l, x, z, 0.004, -0.012), y, 0.003, 0.016, 0.003, coat);
+}
+
+/** Songbirds on the ground or a rail. */
+function birds(
+  l: Lot,
+  list: readonly (readonly [number, number, number])[],
+  coat = '#6a5a4a',
+): void {
+  for (const [x, z, y] of list) {
+    wbox(l, x, z, y, 0.012, 0.008, 0.008, coat);
+    l.shape(new THREE.SphereGeometry(0.004, 5, 4), coat, ...off(l, x, z, 0.007, 0), y + 0.01);
+  }
+}
+
+/** Butterflies hovering above flowers. */
+function butterflies(l: Lot, list: readonly (readonly [number, number, number])[]): void {
+  for (const [x, z, y] of list) {
+    const c = flowers[Math.floor(rand() * flowers.length)]!;
+    wbox(l, ...off(l, x, z, -0.005, 0), y, 0.008, 0.002, 0.012, c, 0.4, 0.5);
+    wbox(l, ...off(l, x, z, 0.005, 0), y, 0.008, 0.002, 0.012, c, -0.4, -0.5);
+  }
+}
+
+/** Stone urn with flowers. */
+function urn(l: Lot, x: number, z: number, bloom = '#d6455a'): void {
+  wround(l, x, z, 0.014, 0.01, 0.036, 0.026, '#cfc8b6', 10);
+  wround(l, x, z, 0.018, 0.014, 0.062, 0.01, '#d9d2bf', 10);
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    wbox(
+      l,
+      ...off(l, x, z, Math.cos(a) * 0.01, Math.sin(a) * 0.01),
+      0.076 + (i % 2) * 0.01,
+      0.008,
+      0.008,
+      0.008,
+      i % 2 ? bloom : '#e8e4d8',
+    );
+  }
+  l.shape(new THREE.IcosahedronGeometry(0.014, 0), '#3f7a3a', x, z, 0.074);
+}
+
+/** Cobbled paving: many small stones of varied tone. */
+function cobbles(
+  l: Lot,
+  x0: number,
+  z0: number,
+  x1: number,
+  z1: number,
+  n: number,
+  color = '#b9b4a6',
+): void {
+  for (let i = 0; i < n; i++)
+    wbox(
+      l,
+      x0 + rand() * (x1 - x0),
+      z0 + rand() * (z1 - z0),
+      0.038,
+      0.02 + rand() * 0.02,
+      0.004,
+      0.016 + rand() * 0.016,
+      tone(color, 0.18),
+      rand() * 3,
+    );
+}
+
+/** Row of tulips or lavender planted in a strip. */
+function flowerRow(
+  l: Lot,
+  x: number,
+  z: number,
+  len: number,
+  ry: number,
+  bloom: string,
+  n = 10,
+): void {
+  for (let i = 0; i < n; i++) {
+    const t = -len / 2 + ((i + 0.5) * len) / n;
+    const [px, pz] = off(l, x, z, Math.cos(ry) * t, -Math.sin(ry) * t);
+    wbox(l, px, pz, 0.038, 0.003, 0.03, 0.003, '#3f7a3a');
+    l.shape(new THREE.SphereGeometry(0.008, 6, 5), tone(bloom, 0.12), px, pz, 0.072);
+  }
+}
+
+/** Wooden barrel on its side as a rain butt with a tap. */
+function rainButt(l: Lot, x: number, z: number): void {
+  wround(l, x, z, 0.018, 0.02, 0.036, 0.05, '#7a5232', 10);
+  wround(l, x, z, 0.019, 0.019, 0.05, 0.004, '#3a3530', 10);
+  wround(l, x, z, 0.019, 0.019, 0.07, 0.004, '#3a3530', 10);
+  wbox(l, ...off(l, x, z, 0.02, 0), 0.044, 0.01, 0.004, 0.004, '#c9a83a');
+}
+
+// ---------------------------------------------------------------------------------------------
 
 export const civicNatureDiorama: Recipes = {
   // -------------------------------------------------------------------------------------------
@@ -236,6 +477,36 @@ export const civicNatureDiorama: Recipes = {
     lanternPost(l, 0.6, 0.55, 0.14);
     shrub(l, 0.2, 0.52, 0.04, '#3f7a3a');
     shrub(l, 0.66, 0.52, 0.04, '#3f7a3a');
+    // Porch hood and steps, cornice, flower borders, downpipe and rain butt.
+    hood(l, ...off(l, bx, bz, 0, 0.17), 0.136, 0.1, slate);
+    steps(l, ...off(l, bx, bz, 0, 0.19), 0.08, 3);
+    cornice(l, bx, bz, 0.5, 0.34, 0.2, '#e3dccb');
+    for (const s of [-1, 1])
+      flowerRow(l, ...off(l, bx, bz, s * 0.17, 0.19), 0.14, 0, flowers[s > 0 ? 0 : 1]!, 7);
+    downpipe(l, ...off(l, bx, bz, 0.255, 0.165), 0.036, 0.16);
+    rainButt(l, ...off(l, bx, bz, 0.275, 0.14));
+    // Vegetable plot, sandbox, slide, pump, bicycles, cat, birds and more children.
+    vegPlot(l, 0.13, 0.76, 0.16, 0.1, 3);
+    sandbox(l, 0.58, 0.86);
+    slide(l, 0.9, 0.84, Math.PI);
+    pump(l, 0.26, 0.5);
+    bicycle(l, 0.1, 0.92, 0.2);
+    bicycle(l, 0.2, 0.92, -0.2);
+    cat(l, ...off(l, bx, bz, 0.07, 0.2), 0.052);
+    birds(l, [
+      [0.5, 0.5, 0.036],
+      [0.55, 0.52, 0.036],
+      [0.3, 0.95, 0.06],
+      [0.72, 0.95, 0.06],
+    ]);
+    butterflies(l, [
+      [0.14, 0.7, 0.1],
+      [0.2, 0.76, 0.12],
+    ]);
+    person(l, 0.64, 0.72, 0.036, '#8a5a8a', '#3a3a3c');
+    person(l, 0.12, 0.7, 0.036, '#c9a83a', '#8a5a3a');
+    person(l, 0.34, 0.5, 0.036, '#6a2f3a', '#d9c38a');
+    person(l, 0.82, 0.8, 0.036, '#2f5f86', '#3a3a3c');
   },
 
   grammar_school(l) {
@@ -284,6 +555,39 @@ export const civicNatureDiorama: Recipes = {
     for (const x of [0.28, 0.72]) lanternPost(l, x, 0.54, 0.16);
     shrub(l, 0.34, 0.5, 0.04);
     shrub(l, 0.66, 0.5, 0.04);
+    // Ivy on the brick, cornice, downpipes, steps, flower borders.
+    cornice(l, bx, bz, 0.9, 0.3, 0.326, '#e3dccb');
+    for (const t of [-0.3, 0.3]) ivy(l, bx, bz, 0.9, 0.3, '+z', t, 0.22);
+    for (const s of [-1, 1]) {
+      downpipe(l, ...off(l, bx, bz, s * 0.44, 0.155), 0.036, 0.29);
+      steps(l, ...off(l, bx, bz, s * 0.1, 0.17), 0.09, 3);
+      flowerRow(l, ...off(l, bx, bz, s * 0.3, 0.19), 0.2, 0, flowers[s > 0 ? 3 : 0]!, 9);
+    }
+    // Vegetable plot, slide, bicycles, cat, birds, more pupils and a teacher.
+    vegPlot(l, 0.12, 0.84, 0.14, 0.1, 3);
+    slide(l, 0.88, 0.8, Math.PI);
+    bicycle(l, 0.12, 0.55, 0.1);
+    bicycle(l, 0.2, 0.55, -0.1);
+    bicycle(l, 0.28, 0.55, 0.1);
+    cat(l, ...off(l, bx, bz, -0.1, 0.2), 0.052, '#3a3a3c');
+    birds(l, [
+      [0.36, 0.52, 0.036],
+      [0.4, 0.55, 0.036],
+      [0.5, 0.97, 0.062],
+      [0.6, 0.97, 0.062],
+    ]);
+    butterflies(l, [
+      [0.14, 0.8, 0.11],
+      [0.2, 0.86, 0.13],
+    ]);
+    for (const [x, z, c] of [
+      [0.44, 0.84, '#c9a83a'],
+      [0.62, 0.86, '#8a5a8a'],
+      [0.76, 0.66, '#5a7a9a'],
+      [0.36, 0.76, '#b0463a'],
+      [0.56, 0.6, '#2f5f86'],
+    ] as const)
+      person(l, x, z, 0.04, c, '#3a3a3c');
   },
 
   academy(l) {
@@ -346,6 +650,41 @@ export const civicNatureDiorama: Recipes = {
     for (const x of [0.08, 0.28, 0.72, 0.94]) cypress(l, x, 0.92, 0.2);
     for (const x of [0.34, 0.66]) lanternPost(l, x, 0.58, 0.17);
     bench(l, 0.5, 0.88);
+    // Urns on the portico plinths, cobbled forecourt, statues, ivy, downpipes.
+    for (const s of [-1, 1]) {
+      urn(l, ...off(l, bx, bz, s * 0.34, 0.3), s > 0 ? '#d6455a' : '#f0c24a');
+      downpipe(l, ...off(l, bx, bz, s * 0.455, 0.17), 0.036, 0.3);
+      statue(l, ...off(l, bx, bz, s * 0.42, 0.42));
+    }
+    cobbles(l, 0.36, 0.5, 0.64, 0.8, 46);
+    ivy(l, 0.18, 0.68, 0.26, 0.2, '+z', 0, 0.1);
+    ivy(l, bx, bz, 0.92, 0.34, '-x', 0, 0.2);
+    for (const t of [-0.34, 0.34])
+      flowerRow(l, ...off(l, bx, bz, t, 0.4), 0.16, 0, flowers[t > 0 ? 0 : 3]!, 8);
+    // Reading students, a professor, bicycles, cat and birds.
+    bench(l, 0.2, 0.88, Math.PI);
+    bench(l, 0.8, 0.88, Math.PI);
+    bicycle(l, 0.1, 0.78, 0.1);
+    bicycle(l, 0.18, 0.78, -0.1);
+    cat(l, ...off(l, bx, bz, 0.2, 0.3), 0.056, '#3a3a3c');
+    birds(l, [
+      [0.46, 0.55, 0.04],
+      [0.54, 0.58, 0.04],
+      [0.42, 0.88, 0.06],
+    ]);
+    butterflies(l, [
+      [0.7, 0.8, 0.1],
+      [0.28, 0.8, 0.12],
+    ]);
+    for (const [x, z, c] of [
+      [0.3, 0.7, '#2f3f5a'],
+      [0.7, 0.72, '#6a2f3a'],
+      [0.58, 0.54, '#2f3f5a'],
+      [0.38, 0.86, '#6a2f3a'],
+      [0.62, 0.86, '#2f3f5a'],
+    ] as const)
+      person(l, x, z, 0.036, c, '#3a3a3c');
+    person(l, 0.5, 0.52, 0.036, '#1f1f24', '#d8d8d8');
   },
 
   // -------------------------------------------------------------------------------------------
@@ -428,6 +767,31 @@ export const civicNatureDiorama: Recipes = {
     hedge(l, 0.97, 0.5, 1.4, Math.PI / 2, 0.06);
     person(l, 0.64, 0.54, 0.04, '#b0463a', '#d9c38a');
     person(l, 0.34, 0.46, 0.04, '#5a7a9a', '#3a3a3c');
+    // Urns, a gardener with a wheelbarrow, birds, butterflies and strolling visitors.
+    for (const [x, z] of [
+      [0.43, 0.2],
+      [0.57, 0.2],
+      [0.43, 0.8],
+      [0.57, 0.8],
+    ] as const)
+      urn(l, x, z, flowers[Math.floor(rand() * 5)]);
+    wheelbarrow(l, 0.62, 0.88, 0.5, '#d6455a');
+    person(l, 0.58, 0.9, 0.04, '#6a8a5a', '#d9c38a');
+    birds(l, [
+      [0.5, 0.2, 0.074],
+      [0.2, 0.5, 0.07],
+      [0.45, 0.62, 0.04],
+      [0.52, 0.64, 0.04],
+    ]);
+    butterflies(l, [
+      [0.24, 0.24, 0.12],
+      [0.76, 0.28, 0.14],
+      [0.3, 0.76, 0.13],
+      [0.7, 0.7, 0.11],
+      [0.52, 0.4, 0.15],
+    ]);
+    person(l, 0.7, 0.4, 0.04, '#8a5a8a', '#3a3a3c');
+    person(l, 0.28, 0.58, 0.04, '#c9a83a', '#d9c38a');
   },
 
   botanical_garden(l) {
@@ -524,6 +888,26 @@ export const civicNatureDiorama: Recipes = {
     person(l, 0.82, 0.78, 0.04, '#5a7a9a', '#3a3a3c');
     lanternPost(l, 0.14, 0.5, 0.15);
     lanternPost(l, 0.86, 0.5, 0.15);
+    // Gate urns, flower borders, a wheelbarrow, benches, birds and butterflies.
+    for (const x of [0.42, 0.58]) urn(l, x, 0.9, x > 0.5 ? '#d6455a' : '#f0c24a');
+    flowerRow(l, 0.3, 0.9, 0.2, 0, '#8a6ac8', 8);
+    flowerRow(l, 0.7, 0.9, 0.2, 0, '#f0c24a', 8);
+    bench(l, 0.1, 0.3, Math.PI / 2);
+    bench(l, 0.9, 0.7, -Math.PI / 2);
+    wheelbarrow(l, 0.12, 0.88, 0.6, '#6b4a30');
+    person(l, 0.16, 0.9, 0.04, '#6a8a5a', '#d9c38a');
+    person(l, 0.5, 0.94, 0.04, '#8a5a8a', '#3a3a3c');
+    birds(l, [
+      [0.3, 0.3, 0.114],
+      [0.68, 0.56, 0.114],
+      [0.5, 0.88, 0.04],
+    ]);
+    butterflies(l, [
+      [0.22, 0.4, 0.14],
+      [0.8, 0.3, 0.15],
+      [0.4, 0.94, 0.12],
+      [0.62, 0.92, 0.13],
+    ]);
   },
 
   victorian_conservatory(l) {
@@ -579,6 +963,38 @@ export const civicNatureDiorama: Recipes = {
     }
     cypress(l, 0.06, 0.08, 0.26);
     cypress(l, 0.94, 0.08, 0.26);
+    // Parterre of flower rows, gate urns, pond fountain, ducks, gardener and visitors.
+    for (const [x, c] of [
+      [0.3, '#d6455a'],
+      [0.7, '#f0c24a'],
+    ] as const)
+      for (let k = 0; k < 3; k++)
+        flowerRow(l, x, 0.5 + k * 0.025, 0.4, 0, k % 2 ? '#e8e4d8' : c, 12);
+    cobbles(l, 0.44, 0.46, 0.56, 0.6, 22);
+    for (const x of [0.42, 0.58]) urn(l, x, 0.5, x > 0.5 ? '#d6455a' : '#f0c24a');
+    wround(l, 0.5, 0.76, 0.012, 0.018, 0.05, 0.05, '#cfc8b6', 8);
+    wround(l, 0.5, 0.76, 0.03, 0.02, 0.098, 0.008, '#bfb8a8', 10);
+    birds(
+      l,
+      [
+        [0.36, 0.78, 0.054],
+        [0.4, 0.8, 0.054],
+        [0.64, 0.7, 0.054],
+        [0.2, 0.9, 0.07],
+      ],
+      '#f1ece2',
+    );
+    butterflies(l, [
+      [0.3, 0.52, 0.12],
+      [0.7, 0.52, 0.12],
+      [0.5, 0.64, 0.14],
+    ]);
+    wheelbarrow(l, 0.9, 0.92, 0.4, '#d6455a');
+    person(l, 0.84, 0.88, 0.04, '#6a8a5a', '#d9c38a');
+    person(l, 0.28, 0.66, 0.04, '#8a5a8a', '#3a3a3c');
+    person(l, 0.72, 0.66, 0.04, '#c9a83a', '#d9c38a');
+    palm(l, 0.3, 0.5, 0.2);
+    palm(l, 0.7, 0.5, 0.2);
   },
 
   // -------------------------------------------------------------------------------------------
@@ -625,6 +1041,26 @@ export const civicNatureDiorama: Recipes = {
     cypress(l, 0.93, 0.1, 0.28);
     cypress(l, 0.92, 0.55, 0.22);
     lanternPost(l, 0.3, 0.62, 0.13);
+    // Rain butt, pump, vegetable plot, drying rack, cat, birds and a fisher.
+    rainButt(l, ...off(l, hx, hz, 0.2, 0.08));
+    pump(l, 0.22, 0.62);
+    vegPlot(l, 0.84, 0.62, 0.14, 0.1, 3);
+    flowerRow(l, ...off(l, hx, hz, 0.1, 0.17), 0.12, 0, '#f0c24a', 6);
+    for (const x of [0.16, 0.34]) wround(l, x, 0.5, 0.004, 0.005, 0.036, 0.1, '#6b4a2a', 6);
+    l.beam([0.16, 0.134, 0.5], [0.34, 0.134, 0.5], 0.004, '#6b4a2a');
+    for (let i = 0; i < 4; i++)
+      wbox(l, 0.19 + i * 0.045, 0.5, 0.09, 0.012, 0.044, 0.004, i % 2 ? '#c9a58a' : '#8a8a8a');
+    cat(l, ...off(l, hx, hz, -0.02, 0.17), 0.048);
+    birds(l, [
+      [0.3, 0.96, 0.138],
+      [0.62, 0.96, 0.138],
+      [0.14, 0.8, 0.036],
+    ]);
+    butterflies(l, [
+      [0.84, 0.7, 0.1],
+      [0.78, 0.55, 0.12],
+    ]);
+    person(l, 0.82, 0.44, 0.036, '#2f5f86', '#3a3a3c');
   },
 
   yurt(l) {
@@ -677,6 +1113,41 @@ export const civicNatureDiorama: Recipes = {
     person(l, 0.34, 0.62, 0.036, '#b0463a', '#3a3a3c');
     cypress(l, 0.08, 0.12, 0.2);
     cypress(l, 0.94, 0.1, 0.22);
+    // More herd animals, hay, dung-fuel stack, saddle rack, wild flowers, birds.
+    horse(l, 0.88, 0.86, 0.2, '#6a4a3a');
+    sheep(l, 0.7, 0.9, 0.9);
+    sheep(l, 0.42, 0.88, 0.1);
+    sheep(l, 0.28, 0.9, -0.2);
+    dog(l, 0.56, 0.7, 0.4);
+    l.shape(new THREE.ConeGeometry(0.07, 0.09, 7), '#d9b84a', 0.9, 0.5, 0.082);
+    l.shape(new THREE.ConeGeometry(0.05, 0.07, 7), '#c9a83a', 0.84, 0.56, 0.072);
+    for (let i = 0; i < 6; i++)
+      wbox(
+        l,
+        0.1 + (i % 3) * 0.03,
+        0.46 + Math.floor(i / 3) * 0.025,
+        0.04,
+        0.028,
+        0.016,
+        0.02,
+        '#7a5a3a',
+      );
+    for (const x of [0.62, 0.68]) wround(l, x, 0.52, 0.004, 0.005, 0.036, 0.08, '#6b4a2a', 6);
+    wbox(l, 0.65, 0.52, 0.1, 0.1, 0.008, 0.008, '#6b4a2a');
+    wbox(l, 0.65, 0.52, 0.108, 0.05, 0.016, 0.03, '#b0463a');
+    flowerRow(l, 0.2, 0.9, 0.2, 0, '#f0c24a', 8);
+    flowerRow(l, 0.86, 0.46, 0.14, 1.57, '#c25aa8', 6);
+    birds(l, [
+      [0.34, 0.5, 0.036],
+      [0.38, 0.52, 0.036],
+      [0.22, 0.74, 0.19],
+    ]);
+    butterflies(l, [
+      [0.2, 0.86, 0.1],
+      [0.84, 0.5, 0.1],
+    ]);
+    person(l, 0.7, 0.64, 0.036, '#2f5f86', '#3a3a3c');
+    person(l, 0.2, 0.52, 0.036, '#c9a83a', '#3a3a3c');
   },
 
   trading_post(l) {
@@ -736,6 +1207,36 @@ export const civicNatureDiorama: Recipes = {
     lanternPost(l, 0.12, 0.7, 0.14);
     lanternPost(l, 0.92, 0.62, 0.14);
     cypress(l, 0.07, 0.1, 0.24);
+    // Veranda steps, hanging pelts, cobbled yard, more animals, merchants, pump and birds.
+    steps(l, ...off(l, hx, hz, 0, 0.255), 0.14, 2);
+    for (let i = 0; i < 4; i++)
+      wbox(
+        l,
+        ...off(l, hx, hz, -0.2 + i * 0.13, 0.215),
+        0.11,
+        0.05,
+        0.07,
+        0.004,
+        tone('#8a6a4a', 0.2),
+      );
+    flowerRow(l, ...off(l, hx, hz, 0.32, 0.26), 0.14, 0, '#d6455a', 6);
+    cobbles(l, 0.3, 0.52, 0.7, 0.7, 28);
+    pump(l, 0.1, 0.5);
+    horse(l, 0.14, 0.88, 0.1, '#8a5a3a');
+    cat(l, ...off(l, hx, hz, 0.12, 0.21), 0.048);
+    birds(l, [
+      [0.44, 0.86, 0.092],
+      [0.56, 0.86, 0.092],
+      [0.5, 0.66, 0.036],
+    ]);
+    butterflies(l, [[0.86, 0.5, 0.1]]);
+    for (const [x, z] of [
+      [0.9, 0.86],
+      [0.9, 0.78],
+    ] as const)
+      crate(l, x, z, 0.036, '#7a5a3a');
+    person(l, 0.84, 0.52, 0.036, '#c9a83a', '#d9c38a');
+    person(l, 0.24, 0.62, 0.036, '#6a8a5a', '#3a3a3c');
   },
 
   salt_pan(l) {
@@ -776,5 +1277,39 @@ export const civicNatureDiorama: Recipes = {
     person(l, 0.86, 0.6, 0.04, '#c9a83a', '#d9c38a');
     lanternPost(l, 0.08, 0.5, 0.14);
     lanternPost(l, 0.94, 0.48, 0.14);
+    // Wind pump, salt sacks, more workers, gulls on the sills.
+    const [mx, mz] = [0.95, 0.2];
+    wround(l, mx, mz, 0.03, 0.05, 0.036, 0.2, '#8a6a48', 8);
+    l.shape(new THREE.ConeGeometry(0.06, 0.06, 8), '#6b4a2a', mx, mz, 0.266);
+    const hub: [number, number, number] = [mx, 0.2, mz + 0.06 / l.spanZ];
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + 0.4;
+      l.beam(
+        hub,
+        [hub[0] + (Math.cos(a) * 0.14) / l.spanX, hub[1] + Math.sin(a) * 0.14, hub[2]],
+        0.01,
+        '#e8e4d8',
+      );
+    }
+    for (let i = 0; i < 4; i++)
+      l.shape(
+        new THREE.SphereGeometry(0.026, 8, 6),
+        '#e8e4d8',
+        ...off(l, sx, sz, 0.16 + (i % 2) * 0.05, 0.08 + Math.floor(i / 2) * 0.04),
+        0.05 + Math.floor(i / 2) * 0.02,
+      );
+    birds(
+      l,
+      [
+        [0.5, 0.41, 0.058],
+        [0.3, 0.41, 0.058],
+        [0.7, 0.85, 0.058],
+        [0.5, 0.63, 0.058],
+      ],
+      '#f1ece2',
+    );
+    wheelbarrow(l, 0.76, 0.62, 0.8, '#ffffff');
+    person(l, 0.42, 0.72, 0.04, '#6a8a5a', '#d9c38a');
+    person(l, 0.7, 0.78, 0.04, '#2f5f86', '#d9c38a');
   },
 };
