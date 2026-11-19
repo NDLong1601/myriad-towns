@@ -6,7 +6,10 @@ import {
   crate,
   cypress,
   door,
+  hayBale,
+  horse,
   lanternPost,
+  milkCan,
   off,
   person,
   rand,
@@ -22,13 +25,17 @@ import {
 } from './diorama';
 import {
   boat,
+  campfire,
   coneRoof,
   crane,
+  deer,
   dog,
+  dryingRack,
   glassHouse,
   logBody,
   pier,
   smoke,
+  tractor,
   truck,
   waterSheet,
 } from './dioramaProps';
@@ -209,6 +216,195 @@ function tower(l: Lot, x: number, z: number, top: number, color = '#6b4a2a'): vo
 }
 
 // ---------------------------------------------------------------------------------------------
+// Detail helpers
+// ---------------------------------------------------------------------------------------------
+
+/** Small birds standing at (x, z, y). */
+function birds(
+  l: Lot,
+  list: readonly (readonly [number, number, number])[],
+  coat = '#6a5a4a',
+): void {
+  for (const [x, z, y] of list) {
+    wbox(l, x, z, y, 0.012, 0.008, 0.008, coat);
+    l.shape(new THREE.SphereGeometry(0.004, 5, 4), coat, ...off(l, x, z, 0.007, 0), y + 0.01);
+  }
+}
+
+/** Butterflies hovering at (x, z, y). */
+function butterflies(l: Lot, list: readonly (readonly [number, number, number])[]): void {
+  const cols = ['#d6455a', '#f0c24a', '#e8e4d8', '#c25aa8', '#f08a3a'];
+  for (const [x, z, y] of list) {
+    const c = cols[Math.floor(rand() * cols.length)]!;
+    wbox(l, ...off(l, x, z, -0.005, 0), y, 0.008, 0.002, 0.012, c, 0.4, 0.5);
+    wbox(l, ...off(l, x, z, 0.005, 0), y, 0.008, 0.002, 0.012, c, -0.4, -0.5);
+  }
+}
+
+/** Cat sitting at height y. */
+function cat(l: Lot, x: number, z: number, y: number, coat = '#c27a3a'): void {
+  wbox(l, x, z, y, 0.014, 0.012, 0.02, coat);
+  l.shape(new THREE.SphereGeometry(0.0065, 6, 5), coat, ...off(l, x, z, 0, 0.012), y + 0.014);
+  wbox(l, ...off(l, x, z, 0.004, -0.012), y, 0.003, 0.016, 0.003, coat);
+}
+
+/** Downpipe running down a wall corner. */
+function downpipe(l: Lot, x: number, z: number, y: number, h: number): void {
+  wround(l, x, z, 0.004, 0.004, y, h, '#4a4f54', 6);
+  wbox(l, x, z, y + h - 0.004, 0.02, 0.008, 0.012, '#4a4f54');
+}
+
+/** Projecting cornice board around a body. */
+function cornice(
+  l: Lot,
+  x: number,
+  z: number,
+  w: number,
+  d: number,
+  y: number,
+  color: string,
+): void {
+  wbox(l, x, z, y, w + 0.03, 0.012, d + 0.03, color);
+  wbox(l, x, z, y - 0.012, w + 0.016, 0.012, d + 0.016, tone(color, 0.06));
+}
+
+/** Stone steps up to a door facing +z. */
+function steps(l: Lot, x: number, z: number, w: number, n: number, y = 0.036): void {
+  for (let i = 0; i < n; i++)
+    wbox(
+      l,
+      ...off(l, x, z, 0, i * 0.016),
+      y + (n - 1 - i) * 0.008,
+      w + i * 0.01,
+      0.008,
+      0.016,
+      tone('#bdb6a6', 0.1),
+    );
+}
+
+/** Row of flowers planted in a strip. */
+function flowerRow(
+  l: Lot,
+  x: number,
+  z: number,
+  len: number,
+  bloom: string,
+  n = 8,
+  y = 0.038,
+): void {
+  for (let i = 0; i < n; i++) {
+    const [px, pz] = off(l, x, z, -len / 2 + ((i + 0.5) * len) / n, 0);
+    wbox(l, px, pz, y, 0.003, 0.026, 0.003, '#3f7a3a');
+    l.shape(new THREE.SphereGeometry(0.008, 6, 5), tone(bloom, 0.12), px, pz, y + 0.032);
+  }
+}
+
+/** Clumps of ivy climbing a wall face. */
+function ivy(
+  l: Lot,
+  x: number,
+  z: number,
+  w: number,
+  d: number,
+  face: '+z' | '+x',
+  t: number,
+  h: number,
+  y0 = 0.036,
+): void {
+  for (let i = 0; i < 9; i++) {
+    const along = t + (rand() - 0.5) * 0.09;
+    const [px, pz] =
+      face === '+z' ? off(l, x, z, along, d / 2 + 0.006) : off(l, x, z, w / 2 + 0.006, along);
+    l.shape(
+      new THREE.IcosahedronGeometry(0.012 + rand() * 0.008, 0),
+      tone('#3f7a3a', 0.2),
+      px,
+      pz,
+      y0 + 0.015 + rand() * h,
+    );
+  }
+}
+
+/** Cobbled paving. */
+function cobbles(
+  l: Lot,
+  x0: number,
+  z0: number,
+  x1: number,
+  z1: number,
+  n: number,
+  y = 0.038,
+  color = '#b9b4a6',
+): void {
+  for (let i = 0; i < n; i++)
+    wbox(
+      l,
+      x0 + rand() * (x1 - x0),
+      z0 + rand() * (z1 - z0),
+      y,
+      0.02 + rand() * 0.02,
+      0.004,
+      0.016 + rand() * 0.016,
+      tone(color, 0.18),
+      rand() * 3,
+    );
+}
+
+/** Wooden rain barrel with a tap. */
+function rainButt(l: Lot, x: number, z: number, y = 0.036): void {
+  wround(l, x, z, 0.018, 0.02, y, 0.05, '#7a5232', 10);
+  wround(l, x, z, 0.019, 0.019, y + 0.014, 0.004, '#3a3530', 10);
+  wround(l, x, z, 0.019, 0.019, y + 0.034, 0.004, '#3a3530', 10);
+}
+
+/** Wooden bench facing +z. */
+function bench(l: Lot, x: number, z: number, y = 0.036, ry = 0): void {
+  wbox(l, x, z, y + 0.016, 0.1, 0.008, 0.034, '#6b4a2a', ry);
+  wbox(l, ...off(l, x, z, 0, -0.016), y + 0.026, 0.1, 0.03, 0.006, '#6b4a2a', ry);
+  for (const t of [-0.04, 0.04]) wbox(l, ...off(l, x, z, t, 0), y, 0.008, 0.016, 0.026, '#4a3a2a');
+}
+
+/** Beehive boxes on a stand. */
+function hives(l: Lot, x: number, z: number): void {
+  for (let i = 0; i < 3; i++) {
+    const hx = x + (i * 0.05) / l.spanX;
+    wbox(l, hx, z, 0.036, 0.034, 0.02, 0.034, '#6b4a2a');
+    wbox(l, hx, z, 0.056, 0.032, 0.02, 0.032, i % 2 ? '#e8e4d8' : '#d9c38a');
+    wbox(l, hx, z, 0.076, 0.038, 0.006, 0.038, '#8a6142');
+  }
+}
+
+/** Passenger coach on a track along x. */
+function coach(l: Lot, x: number, z: number, y: number, len: number, color: string): void {
+  wbox(l, x, z, y, len, 0.012, 0.08, '#2a2a2c');
+  wbox(l, x, z, y + 0.012, len, 0.08, 0.09, color);
+  wbox(l, x, z, y + 0.092, len + 0.01, 0.01, 0.1, shade(color, 0.7));
+  for (let i = 0; i < 6; i++)
+    for (const sd of [-1, 1])
+      wbox(
+        l,
+        ...off(l, x, z, -len / 2 + (len * (i + 0.5)) / 6, sd * 0.046),
+        y + 0.05,
+        0.026,
+        0.03,
+        0.004,
+        '#ffd27a',
+        0,
+        0,
+        1,
+      );
+  for (const t of [-0.34, -0.26, 0.26, 0.34])
+    for (const sd of [-1, 1])
+      disc(l, ...off(l, x, z, t * len, sd * 0.044), y - 0.004, 0.016, 0.006, '#2c2a28');
+}
+
+/** Lifebuoy hung on a post. */
+function lifebuoy(l: Lot, x: number, z: number, y: number): void {
+  const g = new THREE.TorusGeometry(0.014, 0.005, 5, 12);
+  l.shape(g, '#e8742a', x, z, y);
+}
+
+// ---------------------------------------------------------------------------------------------
 
 export const forestryTransitDiorama: Recipes = {
   // -------------------------------------------------------------------------------------------
@@ -284,6 +480,26 @@ export const forestryTransitDiorama: Recipes = {
         '#c9a56c',
         rand() * 3,
       );
+    // Door steps, flower box, rain butt, cat, birds, a hauling horse and more loggers.
+    steps(l, ...off(l, hx, hz, -0.07, 0.115), 0.06, 2);
+    flowerRow(l, ...off(l, hx, hz, 0.07, 0.125), 0.08, '#f0c24a', 5, 0.05);
+    rainButt(l, ...off(l, hx, hz, 0.165, 0.09));
+    cat(l, 0.2, 0.62, 0.078);
+    birds(l, [
+      [0.7, 0.7, 0.036],
+      [0.64, 0.72, 0.036],
+      [0.4, 0.34, 0.152],
+    ]);
+    butterflies(l, [
+      [0.1, 0.4, 0.1],
+      [0.9, 0.6, 0.12],
+    ]);
+    horse(l, 0.14, 0.84, 0.3, '#7a4a2a');
+    hayBale(l, 0.1, 0.74);
+    wheelbarrow(l, 0.88, 0.72, 0.6, '#a8794a');
+    campfire(l, 0.86, 0.88);
+    person(l, 0.34, 0.9, 0.036, '#5a7a4a', '#3a3a3c');
+    person(l, 0.84, 0.82, 0.036, '#c9a83a', '#d9c38a');
   },
 
   mechanized_lumber_camp(l) {
@@ -362,6 +578,28 @@ export const forestryTransitDiorama: Recipes = {
     cypress(l, 0.94, 0.08, 0.24);
     lanternPost(l, 0.5, 0.74, 0.14);
     barrel(l, 0.7, 0.34);
+    // Lodge steps and flower boxes, a hauling horse, campfire, birds and more crew.
+    steps(l, ...off(l, hx, hz, 0, 0.095), 0.06, 2);
+    for (const s of [-1, 1])
+      flowerRow(l, ...off(l, hx, hz, s * 0.07, 0.1), 0.06, '#d6455a', 4, 0.036);
+    downpipe(l, ...off(l, hx, hz, 0.1, 0.08), 0.036, 0.1);
+    rainButt(l, ...off(l, hx, hz, -0.12, 0.05));
+    horse(l, 0.22, 0.66, 0.3, '#7a4a2a');
+    hayBale(l, 0.12, 0.64);
+    dog(l, 0.56, 0.8, 0.2);
+    campfire(l, 0.92, 0.6);
+    cat(l, ...off(l, hx, hz, 0.06, 0.1), 0.054);
+    birds(l, [
+      [0.3, 0.94, 0.04],
+      [0.8, 0.94, 0.04],
+      [0.42, 0.18, 0.186],
+    ]);
+    butterflies(l, [[0.9, 0.5, 0.1]]);
+    workers(l, [
+      [0.4, 0.5, '#e8742a', '#f2cf4a'],
+      [0.62, 0.78, '#5a7a4a'],
+      [0.26, 0.74, '#4a6a8a', '#3a3a3c'],
+    ]);
   },
 
   forester_estate(l) {
@@ -403,6 +641,34 @@ export const forestryTransitDiorama: Recipes = {
     dog(l, 0.5, 0.64, 0.4);
     barrel(l, 0.6, 0.5);
     logPile(l, 0.86, 0.46, Math.PI / 2, 3, 0.1);
+    // Cornice, steps, ivy, downpipes, flower borders, rain butt and bench on the manor.
+    cornice(l, hx, hz, 0.38, 0.24, 0.152, '#d9d2bf');
+    steps(l, ...off(l, hx, hz, -0.08, 0.125), 0.07, 3);
+    ivy(l, hx, hz, 0.38, 0.24, '+x', 0, 0.2);
+    ivy(l, hx, hz, 0.38, 0.24, '+z', 0.1, 0.18);
+    for (const sg of [-1, 1]) downpipe(l, ...off(l, hx, hz, sg * 0.195, 0.125), 0.036, 0.2);
+    flowerRow(l, ...off(l, hx, hz, 0.1, 0.14), 0.14, '#d6455a', 8);
+    flowerRow(l, ...off(l, hx, hz, -0.1, 0.17), 0.12, '#f0c24a', 7);
+    rainButt(l, ...off(l, hx, hz, -0.22, 0.0));
+    bench(l, 0.2, 0.54);
+    // Deer, beehives, birds, butterflies and the family out for a walk.
+    deer(l, 0.16, 0.78, 0.5);
+    deer(l, 0.24, 0.84, 0.2);
+    hives(l, 0.88, 0.62);
+    birds(l, [
+      [0.5, 0.95, 0.06],
+      [0.6, 0.95, 0.06],
+      [0.36, 0.16, 0.262],
+    ]);
+    butterflies(l, [
+      [0.28, 0.66, 0.1],
+      [0.5, 0.78, 0.12],
+      [0.82, 0.78, 0.1],
+    ]);
+    cat(l, ...off(l, hx, hz, -0.02, 0.135), 0.054, '#3a3a3c');
+    person(l, 0.52, 0.7, 0.036, '#6a8a5a', '#d9c38a');
+    person(l, 0.82, 0.54, 0.036, '#b0463a', '#3a3a3c');
+    cobbles(l, 0.26, 0.5, 0.4, 0.62, 14);
   },
 
   // -------------------------------------------------------------------------------------------
@@ -441,6 +707,31 @@ export const forestryTransitDiorama: Recipes = {
     person(l, 0.74, 0.52, 0.036, '#5a7a9a', '#3a3a3c');
     plankStack(l, 0.88, 0.84, 3, 0.4);
     lanternPost(l, 0.1, 0.62, 0.13);
+    // Foreman's hut, rope fence, shovels in the piles, birds, a donkey cart and more diggers.
+    const gx = 0.22;
+    const gz = 0.84;
+    boardBody(l, gx, gz, 0.2, 0.14, 0.036, 0.08, '#8a6a48');
+    door(l, gx, gz, 0.2, 0.14, '+z', 0, 0.036, 0.036, 0.06, timber);
+    tinGable(l, gx, gz, 'x', 0.2, 0.14, 0.116, 0.045, '#6e5444', '#8a6a48');
+    steps(l, ...off(l, gx, gz, 0, 0.075), 0.05, 2);
+    for (let i = 0; i < 8; i++)
+      wround(l, 0.1 + i * 0.07, 0.42, 0.004, 0.005, 0.036, 0.06, timber, 5);
+    l.beam([0.1, 0.09, 0.42], [0.59, 0.09, 0.42], 0.002, '#c9b48a');
+    for (const [x, z] of [
+      [0.78, 0.26],
+      [0.88, 0.4],
+    ] as const)
+      l.beam([x, 0.07, z], [x + 0.02, 0.15, z], 0.005, '#6b4a2a');
+    birds(l, [
+      [0.74, 0.22, 0.1],
+      [0.82, 0.3, 0.086],
+      [0.5, 0.97, 0.04],
+    ]);
+    horse(l, 0.86, 0.9, 0.3, '#8a6a48');
+    dog(l, 0.2, 0.62, 0.5);
+    person(l, 0.2, 0.74, 0.036, '#c9a83a', '#d9c38a');
+    person(l, 0.66, 0.62, 0.036, '#e8742a', '#f2cf4a');
+    flowerRow(l, ...off(l, gx, gz, 0.0, 0.09), 0.1, '#f0c24a', 5);
   },
 
   stonemason_yard(l) {
@@ -501,6 +792,25 @@ export const forestryTransitDiorama: Recipes = {
     lanternPost(l, 0.58, 0.58, 0.14);
     rubble(l, 0.1, 0.2, 0.036, 8, 0.1, '#bfb8a8');
     shrub(l, 0.94, 0.9, 0.04);
+    // Carved statue on a plinth, handcart, hanging tools, birds, a cat and more masons.
+    wbox(l, 0.66, 0.9, 0.036, 0.07, 0.04, 0.07, '#cfc9b9');
+    wround(l, 0.66, 0.9, 0.012, 0.016, 0.076, 0.07, '#ece7da', 8);
+    l.shape(new THREE.SphereGeometry(0.012, 7, 6), '#ece7da', 0.66, 0.9, 0.16);
+    wheelbarrow(l, 0.3, 0.62, 0.4, '#d4cdbd');
+    for (const t of [0, 1, 2])
+      wbox(l, ...off(l, sx, sz, 0.1 + t * 0.03, -0.14), 0.15, 0.005, 0.03, 0.003, '#9aa3a8');
+    cat(l, 0.5, 0.78, 0.098, '#9a9a9a');
+    birds(l, [
+      [0.18, 0.74, 0.104],
+      [0.84, 0.78, 0.104],
+      [0.38, 0.34, 0.192],
+    ]);
+    for (let i = 0; i < 12; i++)
+      wbox(l, 0.06 + i * 0.08, 0.97, 0.036, 0.008, 0.04, 0.008, '#e3dccb');
+    wbox(l, 0.5, 0.97, 0.056, 0.9, 0.006, 0.006, '#e3dccb');
+    person(l, 0.6, 0.7, 0.036, '#2f5f86', '#d9c38a');
+    person(l, 0.26, 0.86, 0.036, '#6a8a5a', '#3a3a3c');
+    cobbles(l, 0.4, 0.5, 0.6, 0.6, 14, 0.036, '#d4cdbd');
   },
 
   mechanical_stoneworks(l) {
@@ -554,6 +864,23 @@ export const forestryTransitDiorama: Recipes = {
       [0.22, 0.52, '#e8742a', '#f2cf4a'],
     ]);
     rubble(l, 0.9, 0.9, 0.036, 8, 0.1, '#a39c8c');
+    // Cornice, steps, downpipes, flower borders, benches, birds and more staff.
+    cornice(l, hx, hz, 0.4, 0.26, 0.192, '#8a8680');
+    steps(l, ...off(l, hx, hz, 0.09, 0.14), 0.07, 3);
+    for (const sg of [-1, 1]) downpipe(l, ...off(l, hx, hz, sg * 0.2, 0.135), 0.036, 0.16);
+    flowerRow(l, ...off(l, hx, hz, -0.1, 0.16), 0.14, '#d6455a', 7);
+    bench(l, 0.5, 0.5);
+    cat(l, ...off(l, hx, hz, 0.0, 0.15), 0.052, '#3a3a3c');
+    birds(l, [
+      [0.74, 0.3, 0.18],
+      [0.84, 0.74, 0.086],
+      [0.6, 0.94, 0.04],
+    ]);
+    rainButt(l, ...off(l, hx, hz, 0.22, 0.1));
+    person(l, 0.46, 0.46, 0.036, '#2f5f86', '#d9c38a');
+    person(l, 0.72, 0.6, 0.036, '#6a8a5a', '#3a3a3c');
+    person(l, 0.1, 0.8, 0.036, '#c9a83a', '#d9c38a');
+    cobbles(l, 0.2, 0.46, 0.45, 0.52, 14, 0.036, '#a8a396');
   },
 
   // -------------------------------------------------------------------------------------------
@@ -594,6 +921,31 @@ export const forestryTransitDiorama: Recipes = {
     person(l, 0.82, 0.52, 0.094, '#6a8a5a', '#d9c38a');
     crate(l, 0.64, 0.5, 0.094, '#8a6a48');
     shrub(l, 0.06, 0.22, 0.04);
+    // Station sign, water tank, milk churns, benches, flower tubs, cat and birds.
+    for (const x of [0.16, 0.26]) wround(l, x, 0.56, 0.003, 0.004, 0.094, 0.07, '#4a4f54', 5);
+    wbox(l, 0.21, 0.56, 0.158, 0.14, 0.028, 0.006, '#1f4a6a');
+    wbox(l, 0.21, 0.56, 0.166, 0.1, 0.008, 0.008, '#f1ece2');
+    for (const t of [-1, 1])
+      l.beam([0.08 + t * 0.012, 0.03, 0.62], [0.08, 0.2, 0.62], 0.007, timber);
+    cyl(l, 0.08, 0.62, 0.2, 0.034, 0.08, 0, '#6a4a2a', 10);
+    l.beam([0.08, 0.2, 0.62], [0.08, 0.13, 0.7], 0.005, '#2c2a28');
+    for (const x of [0.42, 0.46]) milkCan(l, x, 0.54, 0.094);
+    bench(l, 0.76, 0.52, 0.094);
+    bench(l, 0.2, 0.4, 0.094);
+    for (const x of [0.1, 0.9]) {
+      wround(l, x, 0.54, 0.014, 0.012, 0.094, 0.02, '#8a5a3a', 8);
+      flowerRow(l, x, 0.54, 0.03, '#d6455a', 2, 0.112);
+    }
+    cat(l, 0.36, 0.52, 0.094, '#9a9a9a');
+    birds(l, [
+      [0.5, 0.74, 0.04],
+      [0.56, 0.74, 0.04],
+      [0.3, 0.36, 0.216],
+    ]);
+    downpipe(l, ...off(l, hx, hz, 0.18, 0.08), 0.094, 0.11);
+    flowerRow(l, ...off(l, hx, hz, -0.1, 0.1), 0.1, '#f0c24a', 5, 0.094);
+    person(l, 0.34, 0.5, 0.094, '#8a5a8a', '#3a3a3c');
+    dog(l, 0.6, 0.54, 0.3);
   },
 
   glass_vault_station(l) {
@@ -657,6 +1009,38 @@ export const forestryTransitDiorama: Recipes = {
     shrub(l, 0.95, 0.93, 0.04);
     cypress(l, 0.06, 0.12, 0.3);
     cypress(l, 0.95, 0.12, 0.3);
+    // Passenger coaches on both tracks, kiosk, benches, porters and pigeons.
+    coach(l, 0.15, 0.34, 0.042, 0.3, '#7a2c22');
+    coach(l, 0.64, 0.46, 0.042, 0.5, '#2f5a3a');
+    wbox(l, 0.9, 0.34, 0.06, 0.06, 0.07, 0.09, '#2a2a2c');
+    const kx = 0.46;
+    const kz = 0.64;
+    boardBody(l, kx, kz, 0.14, 0.08, 0.105, 0.07, '#7a2c22');
+    wbox(l, kx, kz, 0.178, 0.17, 0.012, 0.11, '#e8e4d8');
+    wbox(l, ...off(l, kx, kz, 0, 0.042), 0.14, 0.08, 0.012, 0.004, '#ffd27a', 0, 0, 1);
+    for (const x of [0.1, 0.54, 0.8]) bench(l, x, 0.66, 0.105);
+    for (const x of [0.36, 0.72]) milkCan(l, x, 0.66, 0.105);
+    for (const x of [0.2, 0.34, 0.5, 0.66, 0.8])
+      flowerRow(l, x, 0.96, 0.14, x > 0.5 ? '#d6455a' : '#f0c24a', 6);
+    birds(
+      l,
+      [
+        [0.28, 0.58, 0.108],
+        [0.5, 0.6, 0.108],
+        [0.78, 0.58, 0.108],
+        [0.3, 0.9, 0.236],
+      ],
+      '#9a9a9a',
+    );
+    cat(l, 0.12, 0.66, 0.105, '#3a3a3c');
+    for (const [x, c] of [
+      [0.12, '#2f5f86'],
+      [0.44, '#b0463a'],
+      [0.56, '#5a7a9a'],
+      [0.9, '#6a8a5a'],
+    ] as const)
+      person(l, x, 0.6, 0.105, c, '#3a3a3c');
+    cobbles(l, 0.1, 0.92, 0.9, 0.98, 30, 0.036, '#b9b4a6');
   },
 
   // -------------------------------------------------------------------------------------------
@@ -727,6 +1111,34 @@ export const forestryTransitDiorama: Recipes = {
     lanternPost(l, 0.92, 0.68, 0.13);
     cypress(l, 0.94, 0.12, 0.28);
     cypress(l, 0.05, 0.9, 0.26);
+    // Runway edge lights, a second plane, fuel truck, tractor, ground crew and windsock details.
+    for (let i = 0; i < 10; i++)
+      for (const z of [0.4, 0.66])
+        wbox(l, 0.1 + i * 0.088, z, 0.04, 0.008, 0.01, 0.008, '#ffd27a', 0, 0, 1);
+    const qx = 0.3;
+    const qz = 0.82;
+    const fuse2 = new THREE.CapsuleGeometry(0.018, 0.1, 4, 10);
+    fuse2.rotateZ(Math.PI / 2);
+    l.shape(fuse2, '#b0463a', qx, qz, 0.076);
+    wbox(l, qx, qz, 0.1, 0.06, 0.004, 0.22, '#e8e4d8');
+    wbox(l, ...off(l, qx, qz, -0.07, 0), 0.08, 0.04, 0.004, 0.034, '#b0463a');
+    for (const s of [-1, 1])
+      disc(l, ...off(l, qx, qz, 0.025, s * 0.025), 0.036, 0.012, 0.004, '#2c2a28');
+    truck(l, 0.86, 0.9, Math.PI, '#b0463a');
+    tractor(l, 0.12, 0.8, 0.6, '#3f6b3a');
+    hayBale(l, 0.08, 0.7);
+    hayBale(l, 0.12, 0.7);
+    for (const x of [0.4, 0.64]) wbox(l, x, 0.3, 0.036, 0.04, 0.05, 0.04, '#8a6a48');
+    birds(l, [
+      [0.5, 0.33, 0.04],
+      [0.54, 0.34, 0.04],
+      [0.3, 0.96, 0.06],
+    ]);
+    dog(l, 0.58, 0.8, 0.3);
+    person(l, 0.34, 0.74, 0.036, '#e8742a', '#f2cf4a');
+    person(l, 0.76, 0.78, 0.036, '#5a7a9a', '#3a3a3c');
+    person(l, 0.14, 0.4, 0.036, '#6a8a5a', '#d9c38a');
+    flowerRow(l, 0.84, 0.3, 0.18, '#f0c24a', 8);
   },
 
   // -------------------------------------------------------------------------------------------
@@ -773,6 +1185,33 @@ export const forestryTransitDiorama: Recipes = {
     cypress(l, 0.92, 0.12, 0.3);
     cypress(l, 0.06, 0.1, 0.26);
     shrub(l, 0.1, 0.44, 0.04);
+    // Lifebuoys, gulls, luggage, fishermen, benches, steps, a dinghy and a cat.
+    for (const x of [0.3, 0.84]) lifebuoy(l, x, 0.7, 0.14);
+    birds(
+      l,
+      [
+        [0.14, 0.64, 0.092],
+        [0.4, 0.64, 0.092],
+        [0.66, 0.64, 0.092],
+        [0.9, 0.64, 0.092],
+      ],
+      '#f1ece2',
+    );
+    for (const [x, y] of [
+      [0.76, 0.066],
+      [0.76, 0.088],
+    ] as const)
+      crate(l, x, 0.74, y, '#6b4a2a');
+    bench(l, 0.3, 0.74, 0.066);
+    bench(l, 0.5, 0.74, 0.066);
+    steps(l, ...off(l, 0.1, 0.5, 0, 0), 0.1, 3);
+    cat(l, ...off(l, hx, hz, 0.08, 0.14), 0.05, '#3a3a3c');
+    boat(l, 0.9, 0.9, 0.2, 0.14, '#3f6b3a', { y: 0.026 });
+    person(l, 0.34, 0.7, 0.066, '#c9a83a', '#3a3a3c');
+    person(l, 0.9, 0.68, 0.066, '#2f5f86', '#d9c38a');
+    person(l, 0.52, 0.88, 0.06, '#e8e4d8', '#3a3a3c');
+    flowerRow(l, ...off(l, hx, hz, 0, 0.13), 0.2, '#f0c24a', 6);
+    rainButt(l, ...off(l, hx, hz, 0.17, 0.06));
   },
 
   fishing_harbor(l) {
@@ -835,6 +1274,39 @@ export const forestryTransitDiorama: Recipes = {
     person(l, 0.84, 0.62, 0.066, '#6a8a5a', '#3a3a3c');
     shrub(l, 0.06, 0.1, 0.04);
     cypress(l, 0.94, 0.08, 0.26);
+    // Beacon, buoys, lobster-pot stacks, fish rack, gulls, cats, steps and more fishermen.
+    wround(l, 0.76, 0.9, 0.012, 0.016, 0.068, 0.17, '#e8e4d8', 8);
+    wround(l, 0.76, 0.9, 0.0125, 0.0125, 0.11, 0.03, '#b0463a', 8);
+    wbox(l, 0.76, 0.9, 0.24, 0.02, 0.016, 0.02, '#ffd27a', 0, 0, 1);
+    for (let i = 0; i < 7; i++)
+      l.shape(
+        new THREE.SphereGeometry(0.012, 6, 5),
+        i % 2 ? '#d6455a' : '#e8742a',
+        0.08 + i * 0.12,
+        0.5,
+        0.04,
+      );
+    dryingRack(l, 0.1, 0.34, 0);
+    birds(
+      l,
+      [
+        [0.3, 0.94, 0.09],
+        [0.76, 0.94, 0.09],
+        [0.4, 0.4, 0.07],
+        [0.5, 0.2, 0.17],
+      ],
+      '#f1ece2',
+    );
+    cat(l, 0.62, 0.38, 0.07, '#c27a3a');
+    cat(l, ...off(l, hx, hz, 0.1, 0.12), 0.05, '#3a3a3c');
+    steps(l, ...off(l, hx, hz, -0.07, 0.115), 0.07, 2, 0.034);
+    cornice(l, sx, sz, 0.26, 0.2, 0.172, '#cfc9b9');
+    downpipe(l, ...off(l, sx, sz, -0.13, 0.1), 0.034, 0.14);
+    flowerRow(l, ...off(l, sx, sz, 0.0, 0.12), 0.16, '#d6455a', 7, 0.034);
+    person(l, 0.2, 0.46, 0.034, '#2f5f86', '#d9c38a');
+    person(l, 0.3, 0.78, 0.066, '#b0463a', '#3a3a3c');
+    person(l, 0.76, 0.76, 0.066, '#c9a83a', '#d9c38a');
+    dog(l, 0.54, 0.52, 0.3);
   },
 
   ice_fishery(l) {
@@ -913,5 +1385,44 @@ export const forestryTransitDiorama: Recipes = {
     lanternPost(l, 0.14, 0.5, 0.16);
     cypress(l, 0.08, 0.12, 0.24);
     cypress(l, 0.92, 0.9, 0.22);
+    // A second hole with a fisherman, a husky team and sled, snow caps, footprints and a reindeer.
+    wround(l, 0.34, 0.66, 0.036, 0.036, 0.068, 0.005, '#1f4a5e', 14);
+    wbox(l, 0.4, 0.66, 0.07, 0.05, 0.02, 0.05, '#c9a83a');
+    person(l, 0.42, 0.7, 0.07, '#2f5f86', '#d9c38a');
+    l.beam([0.4, 0.08, 0.66], [0.35, 0.15, 0.64], 0.003, '#6b4a2a');
+    wbox(l, 0.74, 0.62, 0.07, 0.12, 0.012, 0.06, '#8a6a48');
+    for (const t of [-0.025, 0.025])
+      wbox(l, ...off(l, 0.74, 0.62, 0, t), 0.066, 0.14, 0.006, 0.008, '#4a3a2a');
+    for (let i = 0; i < 3; i++)
+      dog(
+        l,
+        0.74 + (0.12 + i * 0.05) / l.spanX,
+        0.62 + (i % 2 ? 0.02 : -0.02),
+        0.0,
+        i % 2 ? '#e8e4d8' : '#6a6a6a',
+      );
+    deer(l, 0.9, 0.72, 2.4);
+    for (let i = 0; i < 8; i++)
+      wbox(l, 0.5 + i * 0.03, 0.52 + (i % 2) * 0.012, 0.07, 0.01, 0.004, 0.016, '#a9bfc8', 0.3);
+    for (let i = 0; i < 3; i++)
+      wbox(l, 0.1 + i * 0.05, 0.8, 0.07, 0.036, 0.036, 0.036, '#cfe3ea', i);
+    wbox(l, 0.15, 0.76, 0.106, 0.036, 0.036, 0.036, '#cfe3ea', 0.5);
+    wround(l, 0.88, 0.88, 0.02, 0.03, 0.07, 0.04, '#ffffff', 8);
+    l.shape(new THREE.SphereGeometry(0.022, 8, 6), '#ffffff', 0.88, 0.88, 0.116);
+    l.shape(
+      new THREE.ConeGeometry(0.004, 0.02, 5),
+      '#e8742a',
+      ...off(l, 0.88, 0.88, 0, 0.022),
+      0.118,
+    );
+    dryingRack(l, 0.16, 0.64, 0);
+    birds(
+      l,
+      [
+        [0.7, 0.4, 0.074],
+        [0.74, 0.44, 0.074],
+      ],
+      '#2c2a28',
+    );
   },
 };
