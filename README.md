@@ -241,6 +241,26 @@ Trại đốn gỗ, hố sỏi, ga đường sắt, sân bay, bến phà, cảng
 
 ![Nhóm 2B về đêm](docs/images/group2b-night.jpg)
 
+### Nhóm 2C: Trường học, Vườn, Nhà gỗ và Giao thương
+
+Trường học, vườn hoa, nhà gỗ, lều yurt, trạm giao thương và ruộng muối được dựng lại thành sa bàn chi tiết trên lô lớn hơn (trường và vườn 3×3; nhà gỗ, yurt, trạm giao thương, ruộng muối 2×2). Thêm 2 công trình cấp cao: vườn bách thảo (mê cung cây xén, chòi sắt rèn) và cung điện kính Victoria (mái vòm kính có gân, cọ nhiệt đới, hồ sen, tượng).
+
+| Chuỗi                   | Cấp                                                                               |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| Trường học (3×3, 3 cấp) | Lớp học làng gỗ → Trường tiểu học gạch đỏ → Học viện đá vôi (đã có sẵn, dựng lại) |
+| Vườn hoa (3×3, 3 cấp)   | Vườn hoa → Vườn bách thảo (đô thị ≥ 2) → Cung điện kính Victoria (≥ 4)            |
+| Đứng riêng              | Nhà gỗ sưởi, Lều yurt, Trạm giao thương, Ruộng muối (2×2)                         |
+
+![Nhóm 2C trong thị trấn](docs/images/group2c-town.jpg)
+
+![Chuỗi Trường học](docs/images/group2c-school.jpg)
+
+![Chuỗi Vườn](docs/images/group2c-garden.jpg)
+
+![Nhà gỗ, yurt, trạm giao thương và ruộng muối](docs/images/group2c-rustic.jpg)
+
+![Nhóm 2C về đêm](docs/images/group2c-night.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

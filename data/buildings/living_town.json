@@ -1168,7 +1168,7 @@
   {
     "id": "grammar_school",
     "category": "service",
-    "footprint": { "w": 2, "d": 1 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {},
     "visual": {
       "shape": "hall",
@@ -1209,7 +1209,7 @@
   {
     "id": "academy",
     "category": "service",
-    "footprint": { "w": 2, "d": 1 },
+    "footprint": { "w": 3, "d": 3 },
     "cost": {},
     "visual": {
       "shape": "hall",
@@ -3131,6 +3131,39 @@
     "emits": [{ "field": "connectivity", "amount": 3, "radius": 6 }],
     "placeOn": ["land"],
     "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "rail_station" },
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "botanical_garden",
+    "category": "nature",
+    "footprint": { "w": 3, "d": 3 },
+    "cost": { "wood": 16, "stone": 14 },
+    "visual": { "shape": "park", "color": "#3f7a3a", "height": 0.4 },
+    "upkeep": { "labor": 1 },
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "leisure", "amount": 3, "radius": 5 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "flower_garden" },
+    "upgrades": [
+      { "to": "victorian_conservatory", "when": [{ "type": "field", "field": "urban", "min": 4 }] }
+    ],
+    "tags": ["upgrade_only"]
+  },
+  {
+    "id": "victorian_conservatory",
+    "category": "nature",
+    "footprint": { "w": 3, "d": 3 },
+    "cost": { "stone": 30, "metal": 10, "goods": 10 },
+    "visual": { "shape": "park", "color": "#bfe0e6", "height": 0.7 },
+    "upkeep": { "labor": 1, "skilled": 1 },
+    "emits": [
+      { "field": "greenery", "amount": 5, "radius": 7, "falloff": "linear" },
+      { "field": "leisure", "amount": 5, "radius": 7 }
+    ],
+    "placeOn": ["land"],
+    "decline": { "warnAtTicks": 20, "graceTicks": 60, "to": "botanical_garden" },
     "tags": ["upgrade_only"]
   }
 ]

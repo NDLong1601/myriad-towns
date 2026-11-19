@@ -206,10 +206,7 @@
   {
     "id": "flower_garden",
     "category": "nature",
-    "footprint": {
-      "w": 2,
-      "d": 3
-    },
+    "footprint": { "w": 3, "d": 3 },
     "visual": {
       "shape": "park",
       "color": "#76a456",
@@ -220,6 +217,12 @@
       "wood": 8,
       "stone": 3
     },
+    "upgrades": [
+      {
+        "to": "botanical_garden",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",

@@ -203,6 +203,7 @@ describe('building architecture', () => {
       ['woodcutter', 'mechanized_lumber_camp', 'forester_estate'],
       ['gravel_pit', 'stonemason_yard', 'mechanical_stoneworks'],
       ['rail_station', 'glass_vault_station'],
+      ['flower_garden', 'botanical_garden', 'victorian_conservatory'],
     ];
 
     for (const chain of chains) {
@@ -391,6 +392,17 @@ describe('building architecture', () => {
       'ferry_pier',
       'fishing_harbor',
       'ice_fishery',
+      // Schools, gardens, cabins and trade
+      'school',
+      'grammar_school',
+      'academy',
+      'flower_garden',
+      'botanical_garden',
+      'victorian_conservatory',
+      'log_cabin',
+      'yurt',
+      'trading_post',
+      'salt_pan',
     ];
     for (const id of fourSidedIds) {
       const def = catalog.get(id);
@@ -421,18 +433,18 @@ describe('building architecture', () => {
   it('supports 4-way building rotation (rot 0..3), swaps rectangular footprints, and preserves rotation across upgrades and saves', () => {
     const { city } = makeCity({ sandbox: true });
     city._add(city.catalog.get('road'), 2, 2);
-    // School is 2x1 at rot 0/2, and 1x2 at rot 1/3
-    const cmd = new PlaceCommand('school', 2, 3, 1);
+    // Steelworks are 3x2 at rot 0/2, and 2x3 at rot 1/3
+    const cmd = new PlaceCommand('steelworks', 2, 3, 1);
     expect(cmd.do(city)).toBe(true);
     const placed = city.at(2, 3);
     expect(placed).toBeDefined();
     expect(placed?.rot).toBe(1);
-    expect(footprintOf(placed!.def, placed!.rot)).toEqual({ w: 1, d: 2 });
-    expect(city.at(2, 4)?.uid).toBe(placed?.uid);
-    expect(city.at(3, 3)).toBeUndefined();
+    expect(footprintOf(placed!.def, placed!.rot)).toEqual({ w: 2, d: 3 });
+    expect(city.at(2, 5)?.uid).toBe(placed?.uid);
+    expect(city.at(4, 3)).toBeUndefined();
 
     // Preserves rot across in-place upgrade
-    city._replace(placed!.uid, city.catalog.get('grammar_school'));
+    city._replace(placed!.uid, city.catalog.get('bessemer_steelworks'));
     expect(city.get(placed!.uid)?.rot).toBe(1);
 
     // Preserves rot across save/load round-trip
@@ -454,9 +466,9 @@ describe('building architecture', () => {
     const loadedPois = new PoiStore(loadedCity, 42);
     applySave({ city: loadedCity, sim: loadedSim, towns: loadedTowns, pois: loadedPois }, save);
     const restored = loadedCity.at(2, 3);
-    expect(restored?.def.id).toBe('grammar_school');
+    expect(restored?.def.id).toBe('bessemer_steelworks');
     expect(restored?.rot).toBe(1);
-    expect(loadedCity.at(2, 4)?.uid).toBe(restored?.uid);
+    expect(loadedCity.at(2, 5)?.uid).toBe(restored?.uid);
   });
 });
 

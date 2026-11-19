@@ -55,15 +55,15 @@ describe('neighbourhood blueprints', () => {
     const plans = new PlanStore(city);
     const pieces = [
       { defId: 'road', x: 0, z: 0 },
-      { defId: 'flower_garden', x: 1, z: 0 },
+      { defId: 'ferry_pier', x: 1, z: 0 },
     ];
 
     expect(plans.stampBlueprint(pieces, 10, 10, 90)).toBe(0);
     expect(plans.count).toBe(0);
     expect(plans.stampBlueprint(pieces, 10, 10, 180)).toBe(2);
-    expect(plans.at(12, 12)?.defId).toBe('road');
-    expect(plans.at(10, 10)?.defId).toBe('flower_garden');
-    expect(plans.at(11, 12)).toBe(plans.at(10, 10));
+    expect(plans.at(13, 11)?.defId).toBe('road');
+    expect(plans.at(10, 10)?.defId).toBe('ferry_pier');
+    expect(plans.at(11, 11)).toBe(plans.at(10, 10));
   });
 
   it('rejects overlaps and removed catalog ids in stored data', () => {

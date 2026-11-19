@@ -646,5 +646,7 @@
   "building.forester_estate.name": "Dinh trưởng rừng",
   "building.stonemason_yard.name": "Xưởng thợ đẽo đá",
   "building.mechanical_stoneworks.name": "Xưởng chế tác đá cơ khí",
-  "building.glass_vault_station.name": "Ga đường sắt mái vòm kính"
+  "building.glass_vault_station.name": "Ga đường sắt mái vòm kính",
+  "building.botanical_garden.name": "Vườn bách thảo",
+  "building.victorian_conservatory.name": "Cung điện kính Victoria"
 }

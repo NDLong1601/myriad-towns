@@ -60,7 +60,7 @@ const plank = '#8a6142';
 const slate = '#4d5a66';
 
 /** Horizontal cylinder (axis along x, then turned by ry) with its bottom-centre at height y. */
-function cyl(
+export function cyl(
   l: Lot,
   x: number,
   z: number,
@@ -79,10 +79,10 @@ function cyl(
 
 type P3 = [number, number, number];
 /** Beam point from a lot-fraction pair and a height. */
-const p3 = (a: readonly [number, number], y: number): P3 => [a[0], y, a[1]];
+export const p3 = (a: readonly [number, number], y: number): P3 => [a[0], y, a[1]];
 
 /** Upright disc (wheel) in the x-y plane, turned by ry, bottom at y. */
-function disc(
+export function disc(
   l: Lot,
   x: number,
   z: number,
@@ -99,7 +99,7 @@ function disc(
 }
 
 /** Triangular stack of round logs lying along `ry`. */
-function logPile(l: Lot, x: number, z: number, ry: number, rows: number, len = 0.14): void {
+export function logPile(l: Lot, x: number, z: number, ry: number, rows: number, len = 0.14): void {
   const s = Math.sin(ry);
   const c = Math.cos(ry);
   for (let r = 0; r < rows; r++) {
@@ -132,7 +132,7 @@ function plankStack(l: Lot, x: number, z: number, layers: number, ry = 0): void 
 }
 
 /** Chopping stump with an axe stuck in it. */
-function stump(l: Lot, x: number, z: number): void {
+export function stump(l: Lot, x: number, z: number): void {
   wround(l, x, z, 0.03, 0.036, 0.03, 0.045, '#8a6142', 10);
   wround(l, x, z, 0.026, 0.026, 0.075, 0.003, '#d9b982', 10);
   l.beam([x, 0.1, z], [x + 0.03 / l.spanX, 0.16, z], 0.005, '#6b4a2a');
@@ -143,7 +143,7 @@ function sawdust(l: Lot, x: number, z: number, r: number): void {
   l.shape(new THREE.ConeGeometry(r, r * 0.7, 9), '#d9bf8a', x, z, 0.03 + r * 0.35);
 }
 
-function wheelbarrow(l: Lot, x: number, z: number, ry: number, load: string): void {
+export function wheelbarrow(l: Lot, x: number, z: number, ry: number, load: string): void {
   const c = Math.cos(ry);
   const s = Math.sin(ry);
   const at = (a: number, b = 0): [number, number] => off(l, x, z, c * a + s * b, -s * a + c * b);
