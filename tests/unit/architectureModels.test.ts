@@ -200,6 +200,9 @@ describe('building architecture', () => {
       ['foundry', 'heavy_foundry'],
       ['steelworks', 'bessemer_steelworks', 'integrated_steel_mill'],
       ['coal_mine', 'colliery_headframe', 'deep_shaft_colliery'],
+      ['woodcutter', 'mechanized_lumber_camp', 'forester_estate'],
+      ['gravel_pit', 'stonemason_yard', 'mechanical_stoneworks'],
+      ['rail_station', 'glass_vault_station'],
     ];
 
     for (const chain of chains) {
@@ -375,6 +378,19 @@ describe('building architecture', () => {
       'coal_mine',
       'colliery_headframe',
       'deep_shaft_colliery',
+      // Forestry, masonry, transit and harbours
+      'woodcutter',
+      'mechanized_lumber_camp',
+      'forester_estate',
+      'gravel_pit',
+      'stonemason_yard',
+      'mechanical_stoneworks',
+      'rail_station',
+      'glass_vault_station',
+      'airfield',
+      'ferry_pier',
+      'fishing_harbor',
+      'ice_fishery',
     ];
     for (const id of fourSidedIds) {
       const def = catalog.get(id);

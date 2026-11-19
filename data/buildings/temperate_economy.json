@@ -202,10 +202,7 @@
   {
     "id": "gravel_pit",
     "category": "production",
-    "footprint": {
-      "w": 1,
-      "d": 1
-    },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {
       "wood": 4
     },
@@ -228,6 +225,12 @@
       }
     ],
     "placeOn": ["land"],
+    "upgrades": [
+      {
+        "to": "stonemason_yard",
+        "when": [{ "type": "field", "field": "urban", "min": 2 }]
+      }
+    ],
     "requires": [
       {
         "type": "road",
@@ -340,7 +343,10 @@
   {
     "id": "power_plant",
     "category": "production",
-    "footprint": { "w": 3, "d": 3 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": {
       "stone": 30,
       "wood": 20,
@@ -392,7 +398,10 @@
   {
     "id": "foundry",
     "category": "production",
-    "footprint": { "w": 3, "d": 3 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": {
       "stone": 25,
       "wood": 10
@@ -451,7 +460,10 @@
   {
     "id": "factory",
     "category": "production",
-    "footprint": { "w": 3, "d": 3 },
+    "footprint": {
+      "w": 2,
+      "d": 2
+    },
     "cost": {
       "stone": 30,
       "wood": 20,

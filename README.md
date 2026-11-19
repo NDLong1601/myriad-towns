@@ -194,15 +194,15 @@ Mỏ đá, hố đất sét, mỏ sắt và đường ray được dựng lại 
 
 ### Nhóm 2A: Công nghiệp nặng và Năng lượng
 
-Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 3×3 (lò luyện thép 4×3): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
+Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than được dựng lại thành sa bàn chi tiết trên ô 2×2 (lò luyện thép 3×2): nhà máy điện với tuabin, tháp giải nhiệt và trụ điện; xưởng đúc với nồi rót kim loại nóng chảy; mái răng cưa; lò cao với bốn lò gió nóng; tháp tời, băng tải than, xe goòng, công nhân và đèn pha. Thêm 7 công trình cấp cao, mở theo mức đô thị.
 
 | Chuỗi               | Cấp                                                                       |
 | ------------------- | ------------------------------------------------------------------------- |
-| Nhà máy điện (3×3)  | Nhà máy điện → Nhà máy hơi nước (đô thị ≥ 2) → Nhà máy điện tuabin (≥ 4)  |
-| Xưởng đúc (3×3)     | Xưởng đúc → Xưởng đúc nặng (≥ 2)                                          |
-| Lò luyện thép (4×3) | Lò luyện thép → Lò luyện thép Bessemer (≥ 2) → Tổ hợp thép liên hợp (≥ 5) |
-| Mỏ than (3×3)       | Mỏ than đá → Mỏ than tháp tời (≥ 2) → Mỏ than hầm sâu (≥ 4)               |
-| Nhà máy (3×3)       | Nhà máy mái răng cưa                                                      |
+| Nhà máy điện (2×2)  | Nhà máy điện → Nhà máy hơi nước (đô thị ≥ 2) → Nhà máy điện tuabin (≥ 4)  |
+| Xưởng đúc (2×2)     | Xưởng đúc → Xưởng đúc nặng (≥ 2)                                          |
+| Lò luyện thép (3×2) | Lò luyện thép → Lò luyện thép Bessemer (≥ 2) → Tổ hợp thép liên hợp (≥ 5) |
+| Mỏ than (2×2)       | Mỏ than đá → Mỏ than tháp tời (≥ 2) → Mỏ than hầm sâu (≥ 4)               |
+| Nhà máy (2×2)       | Nhà máy mái răng cưa                                                      |
 
 ![Nhóm 2A trong thị trấn](docs/images/group2a-town.jpg)
 
@@ -215,6 +215,31 @@ Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than đ
 ![Chuỗi Mỏ than](docs/images/group2a-coal.jpg)
 
 ![Nhóm 2A về đêm](docs/images/group2a-night.jpg)
+
+### Nhóm 2B: Lâm nghiệp, Đẽo đá, Đường sắt, Sân bay và Bến cảng
+
+Trại đốn gỗ, hố sỏi, ga đường sắt, sân bay, bến phà, cảng cá và lều câu băng được dựng lại thành sa bàn chi tiết trên lô lớn hơn (2×2; ga 4×3; sân bay 4×4; bến phà 3×2; cảng cá 3×3). Thêm 5 công trình cấp cao mở theo mức đô thị: trại tiều phu cơ giới, dinh trưởng rừng (tháp canh lửa, vườn ươm kính), xưởng thợ đẽo đá, xưởng chế tác đá cơ khí (máy nghiền, cẩu giàn) và ga mái vòm kính kiểu Victoria.
+
+| Chuỗi                   | Cấp                                                                       |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Lâm nghiệp (2×2, 3 cấp) | Trại đốn gỗ → Trại tiều phu cơ giới (đô thị ≥ 2) → Dinh trưởng rừng (≥ 4) |
+| Đẽo đá (2×2, 3 cấp)     | Hố sỏi → Xưởng thợ đẽo đá (≥ 2) → Xưởng chế tác đá cơ khí (≥ 4)           |
+| Đường sắt (4×3, 2 cấp)  | Ga gỗ thôn dã → Ga đường sắt mái vòm kính (≥ 3)                           |
+| Đứng riêng              | Sân bay nhỏ (4×4), Bến phà (3×2), Cảng đánh bắt (3×3), Lều câu băng (2×2) |
+
+![Nhóm 2B trong thị trấn](docs/images/group2b-town.jpg)
+
+![Chuỗi Lâm nghiệp](docs/images/group2b-forestry.jpg)
+
+![Chuỗi Đẽo đá](docs/images/group2b-masonry.jpg)
+
+![Ga đường sắt](docs/images/group2b-rail.jpg)
+
+![Sân bay nhỏ](docs/images/group2b-airfield.jpg)
+
+![Bến phà, cảng cá và lều câu băng](docs/images/group2b-maritime.jpg)
+
+![Nhóm 2B về đêm](docs/images/group2b-night.jpg)
 
 ### Bảng màu cho người mù màu
 

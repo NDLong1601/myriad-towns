@@ -116,7 +116,7 @@ describe('placement rules', () => {
 
   it('terrain requirements count tagged tiles', () => {
     const { city, terrain, history } = setup();
-    history.run(new PlaceCommand('road', 0, 1));
+    history.run(new PlaceCommand('road', 0, 2));
     const woodcutter = city.catalog.get('woodcutter');
     for (let i = 1; i <= 3; i++) terrain.special.set(tileKey(i, 0), { flags: TileFlag.Tree });
     terrain.special.set(tileKey(-1, 0), { flags: TileFlag.Tree });

@@ -641,5 +641,10 @@
   "building.bessemer_steelworks.name": "Bessemer steelworks",
   "building.integrated_steel_mill.name": "Integrated steel mill",
   "building.colliery_headframe.name": "Colliery headframe",
-  "building.deep_shaft_colliery.name": "Deep shaft colliery"
+  "building.deep_shaft_colliery.name": "Deep shaft colliery",
+  "building.mechanized_lumber_camp.name": "Mechanized lumber camp",
+  "building.forester_estate.name": "Forester estate",
+  "building.stonemason_yard.name": "Stonemason yard",
+  "building.mechanical_stoneworks.name": "Mechanical stoneworks",
+  "building.glass_vault_station.name": "Glass-vault railway terminal"
 }
