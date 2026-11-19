@@ -51,11 +51,11 @@ describe('Advanced Urbek-inspired Features', () => {
       city.stock.food = 500;
 
       for (let x = 0; x < 5; x++) history.run(new PlaceCommand('road', x, 0));
-      city._add(city.catalog.get('well'), 3, 1);
+      city._add(city.catalog.get('well'), 2, 1);
       city._add(city.catalog.get('coal_mine'), 0, 1);
-      city._add(city.catalog.get('cottage'), 4, 1);
+      city._add(city.catalog.get('cottage'), 3, 1);
 
-      const cottageUid = city.at(4, 1)?.uid as number;
+      const cottageUid = city.at(3, 1)?.uid as number;
       expect(cottageUid).toBeDefined();
 
       sim.run(24);
