@@ -93,7 +93,15 @@ export function mouth(l: Lot, x: number, z: number, y: number, w: number, h: num
 }
 
 /** Iron bands round a round tower. */
-export function bands(l: Lot, x: number, z: number, y: number, h: number, r: number, n: number): void {
+export function bands(
+  l: Lot,
+  x: number,
+  z: number,
+  y: number,
+  h: number,
+  r: number,
+  n: number,
+): void {
   for (let i = 0; i < n; i++)
     wround(l, x, z, r * 1.03, r * 1.03, y + (i + 0.5) * (h / n), 0.007, iron, 16);
 }
@@ -186,7 +194,14 @@ export function pylon(l: Lot, x: number, z: number, h: number): void {
 }
 
 /** Wooden picket / post-and-rail fence along x. */
-export function railing(l: Lot, x0: number, x1: number, z: number, y = 0.034, color = '#6b4a2a'): void {
+export function railing(
+  l: Lot,
+  x0: number,
+  x1: number,
+  z: number,
+  y = 0.034,
+  color = '#6b4a2a',
+): void {
   const n = Math.max(2, Math.round(((x1 - x0) * l.spanX) / 0.06));
   for (let i = 0; i <= n; i++) wbox(l, x0 + ((x1 - x0) * i) / n, z, y, 0.006, 0.04, 0.006, color);
   wbox(l, (x0 + x1) / 2, z, y + 0.03, (x1 - x0) * l.spanX, 0.005, 0.006, color);
