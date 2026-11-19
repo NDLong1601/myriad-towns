@@ -957,8 +957,8 @@
     "id": "bakery",
     "category": "food",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 4,
@@ -1225,8 +1225,8 @@
     "id": "sawmill",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 8,
@@ -1289,8 +1289,8 @@
     "id": "smelter",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "stone": 12
@@ -1360,8 +1360,8 @@
     "id": "workshop",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 8,
@@ -1437,8 +1437,8 @@
     "id": "brickworks",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 6,

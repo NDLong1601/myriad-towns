@@ -283,8 +283,8 @@
     "id": "windmill",
     "category": "production",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 20,
