@@ -8,6 +8,8 @@ import { Lot, type Recipe } from './architecture/lot';
 import { farmDiorama } from './architecture/farmDiorama';
 import { livestockDiorama } from './architecture/livestockDiorama';
 import { industryDiorama } from './architecture/industryDiorama';
+import { craftDiorama } from './architecture/craftDiorama';
+import { millDiorama } from './architecture/millDiorama';
 import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
 import { siteDetails } from './architecture/siteDetails';
@@ -15,6 +17,11 @@ import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
 import { weather } from './architecture/weathering';
 import { workplaces } from './architecture/workplaces';
+
+/** Groups 2A/2B: every recipe is drawn in a FRAME-unit lot and scaled up to its footprint. */
+const framedGroups = [industryDiorama, millDiorama, craftDiorama];
+const FRAME = 0.77;
+const framed = new Set(framedGroups.flatMap((group) => Object.keys(group)));
 
 const models = new Map<string, Recipe>(
   [
@@ -28,7 +35,7 @@ const models = new Map<string, Recipe>(
     livestockDiorama,
     coastDiorama,
     miningDiorama,
-    industryDiorama,
+    ...framedGroups,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -39,7 +46,7 @@ const weathered = new Set([
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
   ...Object.keys(miningDiorama),
-  ...Object.keys(industryDiorama),
+  ...framed,
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -48,7 +55,7 @@ const dioramas = new Set([
   ...Object.keys(livestockDiorama),
   ...Object.keys(coastDiorama),
   ...Object.keys(miningDiorama),
-  ...Object.keys(industryDiorama),
+  ...framed,
 ]);
 /**
  * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
@@ -57,8 +64,6 @@ const dioramas = new Set([
  */
 const zoomed = new Map<string, number>([
   ...Object.keys(miningDiorama).map((id): [string, number] => [id, 1.5]),
-  // Heavy industry should stand taller and bulkier than the houses around it.
-  ...Object.keys(industryDiorama).map((id): [string, number] => [id, 2.6]),
 ]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();
@@ -104,7 +109,11 @@ function fitToLot(parts: BufferGeometry[], from: number, w: number, d: number): 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {
   const recipe = models.get(def.id);
   if (!recipe) return false;
-  const zoom = def.footprint.w >= 2 ? (zoomed.get(def.id) ?? 1) : 1;
+  const zoom = framed.has(def.id)
+    ? Math.min(def.footprint.w, def.footprint.d) / FRAME
+    : def.footprint.w >= 2
+      ? (zoomed.get(def.id) ?? 1)
+      : 1;
   const frame =
     zoom === 1
       ? def

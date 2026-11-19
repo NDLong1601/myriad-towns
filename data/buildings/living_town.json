@@ -1332,7 +1332,7 @@
   {
     "id": "bellows_smelter",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#736b63", "roof": "#473f39", "height": 1.75 },
     "upkeep": { "labor": 3, "ore": 1.2, "wood": 0.9 },
@@ -1361,7 +1361,7 @@
   {
     "id": "reverberatory_furnace",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#8f5140", "roof": "#3a3532", "height": 1.9 },
     "upkeep": { "labor": 2, "skilled": 1, "ore": 1.4, "wood": 0.8 },
@@ -1392,7 +1392,7 @@
   {
     "id": "blast_furnace",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#7d493a", "roof": "#303538", "height": 2.05 },
     "upkeep": { "labor": 2, "skilled": 1, "ore": 1.7, "wood": 0.8 },
@@ -1424,7 +1424,7 @@
   {
     "id": "bessemer_converter",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#8c4b3b", "roof": "#424a4f", "height": 2.2 },
     "upkeep": { "skilled": 2, "ore": 2.0, "energy": 0.3 },
@@ -1457,7 +1457,7 @@
   {
     "id": "electric_arc_smelter",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#7b8a91", "roof": "#485963", "height": 2.35 },
     "upkeep": { "skilled": 2, "expert": 1, "ore": 2.2, "energy": 0.7 },
@@ -1490,7 +1490,7 @@
   {
     "id": "metallurgical_spire",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#c9a66b", "roof": "#497d73", "height": 2.55 },
     "upkeep": { "skilled": 2, "expert": 2, "ore": 2.4, "energy": 1.0 },
@@ -1512,7 +1512,7 @@
   {
     "id": "guild_workshop",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#e2d4bd", "roof": "#8f4936", "height": 1.05 },
     "upkeep": { "skilled": 2, "metal": 0.25, "wood": 0.55 },
@@ -1543,7 +1543,7 @@
   {
     "id": "waterwheel_workshop",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#d6c8b0", "roof": "#5c4d3e", "height": 1.2 },
     "upkeep": { "skilled": 2, "metal": 0.3, "wood": 0.6 },
@@ -1575,7 +1575,7 @@
   {
     "id": "steam_manufactory",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#b85d43", "roof": "#495863", "height": 1.35 },
     "upkeep": { "skilled": 2, "metal": 0.35, "wood": 0.65 },
@@ -1609,7 +1609,7 @@
   {
     "id": "precision_manufactory",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tall", "color": "#c96c53", "roof": "#5c8084", "height": 1.5 },
     "upkeep": { "skilled": 2, "expert": 1, "metal": 0.4, "wood": 0.6, "energy": 0.3 },
@@ -1644,7 +1644,7 @@
   {
     "id": "grand_artificery",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tall", "color": "#dfd4c0", "roof": "#498574", "height": 1.75 },
     "upkeep": { "skilled": 2, "expert": 2, "metal": 0.45, "wood": 0.6, "energy": 0.6 },
@@ -1780,7 +1780,7 @@
   {
     "id": "flume_sawmill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#a8825a", "roof": "#5e4938", "height": 0.9 },
     "upkeep": { "labor": 2, "wood": 1.1 },
@@ -1806,7 +1806,7 @@
   {
     "id": "timber_mill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#dfd4be", "roof": "#465866", "height": 1.05 },
     "upkeep": { "labor": 1, "skilled": 1, "wood": 1.3 },
@@ -1834,7 +1834,7 @@
   {
     "id": "steam_sawmill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#b85d43", "roof": "#465866", "height": 1.2 },
     "upkeep": { "skilled": 2, "wood": 1.5 },
@@ -1863,7 +1863,7 @@
   {
     "id": "lumber_works",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "block", "color": "#b85d43", "roof": "#5c707a", "height": 1.4 },
     "upkeep": { "skilled": 2, "wood": 1.6, "energy": 0.3 },
@@ -1881,7 +1881,7 @@
   {
     "id": "smock_windmill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#ebe4d4", "roof": "#6e553e", "height": 1.45 },
     "upkeep": { "labor": 1 },
@@ -1908,7 +1908,7 @@
   {
     "id": "stone_windmill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#d6c8b0", "roof": "#544333", "height": 1.65 },
     "upkeep": { "labor": 1, "skilled": 1 },
@@ -1936,7 +1936,7 @@
   {
     "id": "multi_vane_mill",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#dfd4be", "roof": "#8f5140", "height": 1.85 },
     "upkeep": { "skilled": 2 },
@@ -1965,7 +1965,7 @@
   {
     "id": "wind_turbine_spire",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#ece4d2", "roof": "#558c7c", "height": 2.1 },
     "upkeep": { "skilled": 1, "expert": 1 },
@@ -1984,7 +1984,7 @@
   {
     "id": "downdraft_kiln",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#b55d42", "roof": "#4f362b", "height": 1.25 },
     "upkeep": { "labor": 2, "wood": 0.6 },
@@ -2010,7 +2010,7 @@
   {
     "id": "kiln_works",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#b8553b", "roof": "#38302c", "height": 1.45 },
     "upkeep": { "labor": 2, "skilled": 1, "wood": 0.7 },
@@ -2038,7 +2038,7 @@
   {
     "id": "tunnel_kiln_works",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#b85d43", "roof": "#465866", "height": 1.65 },
     "upkeep": { "skilled": 2, "wood": 0.6 },
@@ -2067,7 +2067,7 @@
   {
     "id": "ceramics_manufactory",
     "category": "production",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#c96c53", "roof": "#3f5361", "height": 1.85 },
     "upkeep": { "skilled": 2, "wood": 0.5, "energy": 0.3 },
