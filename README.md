@@ -218,15 +218,15 @@ Nhà máy điện, xưởng đúc, nhà máy, lò luyện thép và mỏ than đ
 
 ### Nhóm 2B: Công nghiệp nhẹ, Chế biến và nghề nông thôn
 
-Xưởng cưa, cối xay gió, xưởng thủ công, lò luyện và lò gạch được dựng lại thành sa bàn chi tiết trên ô 2×2, mỗi cấp cao hơn cấp trước. Tám nghề lẻ (trại đốn gỗ, trạm kiểm lâm, trại thợ săn lông thú, xưởng đẽo đá, hố sỏi, trạm giao thương, xưởng thủ công 2×2, ruộng muối) giữ nguyên kích thước ô nhưng cũng thành sa bàn: cabin gỗ, tháp canh lửa, xe trượt chó kéo, giá cẩu đá, sàng sỏi, ô phơi muối.
+Xưởng cưa, xưởng thủ công, lò luyện và lò gạch được dựng lại thành sa bàn chi tiết trên ô 2×2; cối xay gió là tháp đơn nên giữ ô 1×1. Mỗi cấp cao hơn cấp trước. Tám nghề lẻ (trại đốn gỗ, trạm kiểm lâm, trại thợ săn lông thú, xưởng đẽo đá, hố sỏi, trạm giao thương, xưởng thủ công 2×2, ruộng muối) giữ nguyên kích thước ô nhưng cũng thành sa bàn: cabin gỗ, tháp canh lửa, xe trượt chó kéo, giá cẩu đá, sàng sỏi, ô phơi muối.
 
-| Chuỗi (2×2)    | Cấp                                                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Xưởng cưa      | Xưởng cưa bánh xe nước → Xưởng cưa máng nước → Xưởng cưa thuỷ lực → Xưởng cưa hơi nước → Tổ hợp chế biến gỗ cơ khí                                           |
-| Cối xay gió    | Cối xay trụ gỗ → Cối xay thân bát giác → Tháp đá Hà Lan có ban công → Tháp gió đa cánh → Tháp phong điện đỉnh đồng                                           |
-| Xưởng thủ công | Lán thợ → Xưởng phường hội nhà khung gỗ có lò rèn → Xưởng bánh xe nước → Công xưởng hơi nước mái răng cưa → Viện chế tác chuẩn xác → Đại Viện Cơ khí Đồng hồ |
-| Lò luyện       | Lò luyện đất sét → Lò bễ sức nước → Lò phản xạ gạch → Lò cao công nghiệp → Lò luyện thép Bessemer → Lò hồ quang điện → Tháp Luyện kim Tinh khiết             |
-| Lò gạch        | Lò nung đống và giàn phơi gạch → Lò gạch vòm đôi → Lò vòng Hoffmann → Lò đường hầm → Nhà máy gốm sứ có lò chai                                               |
+| Chuỗi             | Cấp                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Xưởng cưa         | Xưởng cưa bánh xe nước → Xưởng cưa máng nước → Xưởng cưa thuỷ lực → Xưởng cưa hơi nước → Tổ hợp chế biến gỗ cơ khí                                           |
+| Cối xay gió (1×1) | Cối xay trụ gỗ → Cối xay thân bát giác → Tháp đá Hà Lan có ban công → Tháp gió đa cánh → Tháp phong điện đỉnh đồng                                           |
+| Xưởng thủ công    | Lán thợ → Xưởng phường hội nhà khung gỗ có lò rèn → Xưởng bánh xe nước → Công xưởng hơi nước mái răng cưa → Viện chế tác chuẩn xác → Đại Viện Cơ khí Đồng hồ |
+| Lò luyện          | Lò luyện đất sét → Lò bễ sức nước → Lò phản xạ gạch → Lò cao công nghiệp → Lò luyện thép Bessemer → Lò hồ quang điện → Tháp Luyện kim Tinh khiết             |
+| Lò gạch           | Lò nung đống và giàn phơi gạch → Lò gạch vòm đôi → Lò vòng Hoffmann → Lò đường hầm → Nhà máy gốm sứ có lò chai                                               |
 
 ![Chuỗi Xưởng cưa](docs/images/group2b-sawmill.jpg)
 

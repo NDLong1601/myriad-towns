@@ -1881,7 +1881,7 @@
   {
     "id": "smock_windmill",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 1, "d": 1 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#ebe4d4", "roof": "#6e553e", "height": 1.45 },
     "upkeep": { "labor": 1 },
@@ -1908,7 +1908,7 @@
   {
     "id": "stone_windmill",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 1, "d": 1 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#d6c8b0", "roof": "#544333", "height": 1.65 },
     "upkeep": { "labor": 1, "skilled": 1 },
@@ -1936,7 +1936,7 @@
   {
     "id": "multi_vane_mill",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 1, "d": 1 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#dfd4be", "roof": "#8f5140", "height": 1.85 },
     "upkeep": { "skilled": 2 },
@@ -1965,7 +1965,7 @@
   {
     "id": "wind_turbine_spire",
     "category": "production",
-    "footprint": { "w": 2, "d": 2 },
+    "footprint": { "w": 1, "d": 1 },
     "cost": {},
     "visual": { "shape": "tower", "color": "#ece4d2", "roof": "#558c7c", "height": 2.1 },
     "upkeep": { "skilled": 1, "expert": 1 },
