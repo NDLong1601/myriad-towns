@@ -13,6 +13,7 @@ import { craftDiorama } from './architecture/craftDiorama';
 import { millDiorama } from './architecture/millDiorama';
 import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
+import { ruralDiorama } from './architecture/ruralDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { smelterDiorama } from './architecture/smelterDiorama';
 import { theatreTiers } from './architecture/theatreTiers';
@@ -21,7 +22,14 @@ import { weather } from './architecture/weathering';
 import { workplaces } from './architecture/workplaces';
 
 /** Groups 2A/2B: every recipe is drawn in a FRAME-unit lot and scaled up to its footprint. */
-const framedGroups = [industryDiorama, millDiorama, craftDiorama, smelterDiorama, kilnDiorama];
+const framedGroups = [
+  industryDiorama,
+  millDiorama,
+  craftDiorama,
+  smelterDiorama,
+  kilnDiorama,
+  ruralDiorama,
+];
 const FRAME = 0.77;
 const framed = new Set(framedGroups.flatMap((group) => Object.keys(group)));
 
