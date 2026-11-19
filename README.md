@@ -261,6 +261,45 @@ Trường học, vườn hoa, nhà gỗ, lều yurt, trạm giao thương và ru
 
 ![Nhóm 2C về đêm](docs/images/group2c-night.jpg)
 
+### Nhóm 3A: Công nghiệp nhẹ (luyện kim, xưởng, cưa, lò gạch, xay bột, bánh)
+
+Sáu chuỗi công nghiệp nhẹ được dựng lại thành sa bàn chi tiết trên lô 2×2, mỗi cấp cao hơn và phức tạp hơn cấp trước.
+
+| Chuỗi             | Các cấp                                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
+| Luyện kim (7 cấp) | Lò nấu → Lò thổi ống bễ → Lò phản xạ → Lò cao → Lò thổi Bessemer → Lò hồ quang → Tháp luyện kim |
+| Xưởng thợ (6 cấp) | Xưởng → Xưởng phường hội → Xưởng guồng nước → Xưởng hơi nước → Xưởng chính xác → Đại công xưởng |
+| Xưởng cưa (5 cấp) | Xưởng cưa → Cưa máng nước → Xưởng gỗ → Cưa hơi nước → Xưởng gỗ lớn                              |
+| Lò gạch (5 cấp)   | Lò gạch → Lò hướng xuống → Xưởng lò → Lò hầm → Xưởng gốm                                        |
+| Cối xay (5 cấp)   | Cối xay trụ → Cối xay áo choàng → Cối xay đá → Cối nhiều cánh → Tháp điện gió                   |
+| Tiệm bánh (5 cấp) | Tiệm bánh → Bánh chợ → Bánh phường hội → Tiệm patisserie → Xưởng bánh hoàng gia                 |
+
+![Chuỗi Luyện kim 1](docs/images/group3a-smelting-a.jpg)
+
+![Chuỗi Luyện kim 2](docs/images/group3a-smelting-b.jpg)
+
+![Chuỗi Luyện kim 3](docs/images/group3a-smelting-c.jpg)
+
+![Chuỗi Xưởng thợ 1](docs/images/group3a-workshop-a.jpg)
+
+![Chuỗi Xưởng thợ 2](docs/images/group3a-workshop-b.jpg)
+
+![Chuỗi Xưởng cưa 1](docs/images/group3a-sawmill-a.jpg)
+
+![Chuỗi Xưởng cưa 2](docs/images/group3a-sawmill-b.jpg)
+
+![Chuỗi Lò gạch 1](docs/images/group3a-kiln-a.jpg)
+
+![Chuỗi Lò gạch 2](docs/images/group3a-kiln-b.jpg)
+
+![Chuỗi Cối xay 1](docs/images/group3a-windmill-a.jpg)
+
+![Chuỗi Cối xay 2](docs/images/group3a-windmill-b.jpg)
+
+![Chuỗi Tiệm bánh 1](docs/images/group3a-bakery-a.jpg)
+
+![Chuỗi Tiệm bánh 2](docs/images/group3a-bakery-b.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.
