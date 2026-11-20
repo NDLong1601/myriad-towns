@@ -338,6 +338,31 @@ Giếng nước, hải đăng, thư viện và ba công trình lẻ được d�
 
 ![Lớp học cộng đồng, Vườn thuốc, Khu nghiên cứu](docs/images/civic-sites.jpg)
 
+### Nhóm 4: Hạ tầng (toà thị chính, kho, cảng, giao thông công cộng, bãi vật liệu, kho nông sản)
+
+Toà thị chính, nhà kho, cảng hàng hóa, trạm xe buýt, ga tàu điện ngầm, bãi vật liệu và kho nông sản được dựng lại thành sa bàn chi tiết, kích thước ô giữ nguyên và vẽ theo tỉ lệ ô cố định như nhóm công trình công cộng. Toà thị chính Tân cổ điển làm lại theo đúng concept art đã duyệt. Mỗi lô có người qua lại, xe cộ, cây xanh và đèn đường.
+
+| Chuỗi                  | Cấp                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| Toà thị chính (2×2)    | Toà gạch có tháp đồng hồ và quảng trường → Toà Tân cổ điển (concept đã duyệt) → Dinh Đô đốc  |
+| Nhà kho (2×2)          | Kho gạch và khung gỗ có ròng rọc → Kho trung chuyển có tháp điều phối → Trung tâm tiếp vận   |
+| Cảng hàng hóa (3×2)    | Kè đá, cần cẩu gỗ, kho hàng → Hai cần cẩu và nhà hải quan → Dinh hải quan cẩm thạch          |
+| Trạm xe buýt (1×1)     | Nhà chờ kính thép và xe buýt → Nhà chờ xe điện gang có đồng hồ → Kiosk bát giác đồng và kính |
+| Ga tàu điện ngầm (2×2) | Lối xuống ga và phòng vé kính → Mái vòm sắt kính → Đại ga Beaux-Arts có tháp đồng hồ         |
+| Lẻ (2×2)               | Bãi vật liệu (gỗ, đá, gạch, cần trục), Kho nông sản trên cột đá                              |
+
+![Chuỗi Toà thị chính](docs/images/infra-townhall.jpg)
+
+![Chuỗi Nhà kho](docs/images/infra-warehouse.jpg)
+
+![Chuỗi Cảng hàng hóa](docs/images/infra-port.jpg)
+
+![Chuỗi Trạm xe buýt](docs/images/infra-transit.jpg)
+
+![Chuỗi Ga tàu điện ngầm](docs/images/infra-metro.jpg)
+
+![Bãi vật liệu và Kho nông sản](docs/images/infra-yards.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

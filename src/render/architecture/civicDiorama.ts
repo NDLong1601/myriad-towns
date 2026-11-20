@@ -47,7 +47,7 @@ const terracotta = '#b4613f';
 // ---------------------------------------------------------------------------------------------
 
 /** Lawn with a flagstone square; returns nothing, just lays the ground. */
-function square(
+export function square(
   l: Lot,
   seed: string,
   x0: number,
@@ -79,7 +79,7 @@ function square(
 }
 
 /** Corner quoins: alternating long and short stones up each corner. */
-function quoins(
+export function quoins(
   l: Lot,
   x: number,
   z: number,
@@ -113,7 +113,7 @@ function quoins(
 }
 
 /** Arched (or lancet) window: frame, lit glass, mullion and a round head. */
-function archWindow(
+export function archWindow(
   l: Lot,
   x: number,
   z: number,
@@ -159,7 +159,7 @@ function archWindow(
 }
 
 /** Flower bed in a low stone kerb. */
-function flowerBed(l: Lot, x: number, z: number, w: number, d: number, ry = 0): void {
+export function flowerBed(l: Lot, x: number, z: number, w: number, d: number, ry = 0): void {
   wbox(l, x, z, 0.03, w, 0.016, d, '#a49c8c', ry);
   wbox(l, x, z, 0.032, w - 0.01, 0.016, d - 0.01, '#5a4a3a', ry);
   const n = Math.max(2, Math.round((w * d) / 0.0012));
@@ -173,7 +173,7 @@ function flowerBed(l: Lot, x: number, z: number, w: number, d: number, ry = 0): 
 }
 
 /** Bench. */
-function bench(l: Lot, x: number, z: number, ry = 0): void {
+export function bench(l: Lot, x: number, z: number, ry = 0): void {
   wbox(l, x, z, 0.046, 0.06, 0.005, 0.018, '#7a5634', ry);
   wbox(
     l,
