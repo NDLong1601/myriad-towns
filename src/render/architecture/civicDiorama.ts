@@ -5,6 +5,7 @@ import {
   chimney,
   crate,
   door,
+  halfTimber,
   horse,
   lanternPost,
   meadow,
@@ -611,6 +612,338 @@ export const civicDiorama: Recipes = {
       [0.06, 0.96],
     ] as const)
       lanternPost(l, x, z, 0.17);
+  },
+
+  // -----------------------------------------------------------------------------------------
+  // Tavern (1x1); the guild tavern follows its approved concept art
+  // -----------------------------------------------------------------------------------------
+  tavern(l) {
+    square(l, 'tavern', 0.2, 0.62, 0.8, 0.96, '#b9ad94', 18);
+    // One-storey timber-and-plaster alehouse with a cross gable, barrels and a hitching rail.
+    const hx = 0.46;
+    const hz = 0.4;
+    stoneBody(l, hx, hz, 0.36, 0.26, 0.03, 0.03, '#a49c8c');
+    halfTimber(l, hx, hz, 0.35, 0.25, 0.06, 0.11, plaster);
+    windows4(l, hx, hz, 0.35, 0.25, 0.08, 0.032, { frame: timberDark });
+    door(l, hx, hz, 0.35, 0.25, '+z', -0.06, 0.06, 0.05, 0.08, timberDark);
+    shingleGable(l, hx, hz, 'x', 0.35, 0.25, 0.17, 0.1, '#6e5a46', plaster);
+    const [gx, gz] = off(l, hx, hz, 0.08, 0.06);
+    halfTimber(l, gx, gz, 0.12, 0.16, 0.06, 0.11, plaster);
+    shingleGable(l, gx, gz, 'z', 0.16, 0.12, 0.17, 0.08, '#6e5a46', plaster);
+    chimney(l, ...off(l, hx, hz, -0.14, -0.04), 0.17, 0.12);
+    hangingSign(l, ...faceAt(l, hx, hz, 0.35, 0.25, '+z', -0.13, 0.004), 0.15, '#7a2a2a');
+    for (let i = 0; i < 4; i++) barrel(l, 0.74 + (i % 2) * 0.035, 0.72 + Math.floor(i / 2) * 0.04);
+    for (const x of [0.3, 0.48]) {
+      wbox(l, x, 0.78, 0.05, 0.08, 0.008, 0.05, '#7a5634');
+      for (const s of [-1, 1])
+        wbox(l, ...off(l, x, 0.78, 0, s * 0.04), 0.04, 0.07, 0.006, 0.014, '#7a5634');
+    }
+    stoneWall(l, 0.1, 0.92, 0.32, 0.92, 0.03);
+    horse(l, 0.2, 0.84, 0);
+    workers(l, [
+      [0.34, 0.7, '#7a3a2a', '#3a3a3c'],
+      [0.52, 0.86, '#3a5a7a', '#8a6a3a'],
+      [0.62, 0.72, '#5a6a4a', '#3a3a3c'],
+    ]);
+    lanternPost(l, 0.64, 0.62, 0.14);
+    for (const [x, z] of [
+      [0.08, 0.1],
+      [0.9, 0.1],
+      [0.92, 0.92],
+    ] as const)
+      shrub(l, x, z, 0.04);
+  },
+
+  guild_tavern(l) {
+    square(l, 'guild_tavern', 0.06, 0.66, 0.94, 0.96, '#a59d8c', 14);
+    // Approved concept: raised stone plinth, cream plaster with rich dark-oak Tudor framing,
+    // steep gabled roof, and a beer garden of tables under strung lamps.
+    const hx = 0.42;
+    const hz = 0.36;
+    stoneBody(l, hx, hz, 0.36, 0.42, 0.03, 0.07, '#a49c8c');
+    halfTimber(l, hx, hz, 0.34, 0.4, 0.1, 0.24, plaster);
+    for (const s of [-1, 1])
+      for (let i = 0; i < 4; i++)
+        l.beam(
+          [hx + (s * 0.171) / l.spanX, 0.12, hz + (-0.15 + i * 0.1) / l.spanZ],
+          [hx + (s * 0.171) / l.spanX, 0.21, hz + (-0.1 + i * 0.1) / l.spanZ],
+          0.008,
+          timberDark,
+        );
+    wbox(l, hx, hz, 0.215, 0.36, 0.012, 0.42, timberDark);
+    windows4(l, hx, hz, 0.34, 0.4, 0.13, 0.036, { frame: timberDark });
+    windows4(l, hx, hz, 0.34, 0.4, 0.25, 0.034, { frame: timberDark });
+    door(l, hx, hz, 0.34, 0.4, '+z', 0, 0.1, 0.06, 0.1, timberDark);
+    for (let i = 0; i < 3; i++)
+      wbox(
+        l,
+        ...faceAt(l, hx, hz, 0.34, 0.4, '+z', 0, 0.015 + i * 0.012),
+        0.03,
+        0.1,
+        0.07 - i * 0.022,
+        0.014,
+        '#bdb6a6',
+      );
+    shingleGable(l, hx, hz, 'z', 0.4, 0.34, 0.34, 0.2, '#5e4a38', plaster);
+    chimney(l, ...off(l, hx, hz, -0.1, -0.1), 0.34, 0.2);
+    hangingSign(l, ...faceAt(l, hx, hz, 0.34, 0.4, '+z', -0.12, 0.004), 0.22, '#2a4a7a');
+    // Beer garden: trestle tables and benches, barrels, a lamp string between posts.
+    for (const [x, z] of [
+      [0.76, 0.24],
+      [0.76, 0.44],
+      [0.76, 0.64],
+    ] as const) {
+      wbox(l, x, z, 0.05, 0.1, 0.008, 0.05, '#7a5634');
+      for (const s of [-1, 1])
+        wbox(l, ...off(l, x, z, 0, s * 0.04), 0.04, 0.1, 0.006, 0.014, '#7a5634');
+      for (let i = 0; i < 3; i++)
+        wround(l, ...off(l, x, z, -0.03 + i * 0.03, 0), 0.005, 0.005, 0.058, 0.014, '#e8c84a', 6);
+    }
+    for (const z of [0.14, 0.74]) wround(l, 0.92, z, 0.004, 0.005, 0.03, 0.18, '#5c4630', 6);
+    l.beam([0.92, 0.2, 0.14], [0.92, 0.2, 0.74], 0.002, '#2c2a28');
+    for (let i = 0; i < 7; i++)
+      wbox(l, 0.92, 0.18 + i * 0.09, 0.19, 0.008, 0.008, 0.008, '#ffd27a', 0, 0, 1);
+    for (let i = 0; i < 6; i++) barrel(l, 0.12 + (i % 3) * 0.03, 0.82 + Math.floor(i / 3) * 0.035);
+    horse(l, 0.5, 0.86, 0);
+    cart(l, 0.64, 0.86, 0, 'barrels');
+    workers(l, [
+      [0.7, 0.34, '#7a3a2a', '#3a3a3c'],
+      [0.82, 0.54, '#3a5a7a', '#8a6a3a'],
+      [0.36, 0.74, '#5a6a4a', '#3a3a3c'],
+      [0.72, 0.74, '#6a3a5a', '#e9e0c8'],
+    ]);
+    lanternPost(l, 0.3, 0.72, 0.15);
+    shrub(l, 0.08, 0.1, 0.04);
+  },
+
+  grand_inn(l) {
+    square(l, 'grand_inn', 0.04, 0.62, 0.96, 0.96, '#bdb6a6', 10);
+    // Three-storey coaching inn: dressed stone ground floor, carved half-timbered upper
+    // storeys jettied out, slate-and-terracotta roof with twin dormers, a coach arch.
+    const hx = 0.46;
+    const hz = 0.34;
+    stoneBody(l, hx, hz, 0.5, 0.36, 0.03, 0.12, '#b0a894');
+    windows4(l, hx, hz, 0.5, 0.36, 0.06, 0.04, { frame: '#5a4a3a' });
+    halfTimber(l, hx, hz, 0.53, 0.39, 0.15, 0.11, plaster);
+    halfTimber(l, hx, hz, 0.56, 0.42, 0.26, 0.1, plaster);
+    windows4(l, hx, hz, 0.53, 0.39, 0.18, 0.036, { frame: timberDark });
+    windows4(l, hx, hz, 0.56, 0.42, 0.29, 0.034, { frame: timberDark });
+    for (const y of [0.15, 0.26]) wbox(l, hx, hz, y - 0.01, 0.58, 0.012, 0.44, timberDark);
+    shingleGable(l, hx, hz, 'x', 0.56, 0.42, 0.36, 0.2, slate, plaster);
+    for (let i = 0; i < 7; i++)
+      wbox(l, ...off(l, hx, hz, -0.24 + i * 0.08, 0.22), 0.36, 0.07, 0.006, 0.01, terracotta);
+    for (const s of [-1, 1]) {
+      const [dx, dz] = off(l, hx, hz, s * 0.14, 0.14);
+      wbox(l, dx, dz, 0.38, 0.07, 0.06, 0.06, plaster);
+      window4(l, dx, dz, 0.07, 0.06, '+z', 0, 0.39, 0.026, { frame: timberDark });
+      shingleGable(l, dx, dz, 'z', 0.07, 0.08, 0.44, 0.05, terracotta, plaster);
+    }
+    for (const s of [-1, 1]) chimney(l, ...off(l, hx, hz, s * 0.24, -0.08), 0.36, 0.22);
+    faceBox(l, hx, hz, 0.5, 0.36, '+z', 0.12, 0.002, 0.03, 0.1, 0.11, 0.006, '#2a2420');
+    door(l, hx, hz, 0.5, 0.36, '+z', -0.08, 0.03, 0.06, 0.1, timberDark);
+    hangingSign(l, ...faceAt(l, hx, hz, 0.5, 0.36, '+z', -0.2, 0.004), 0.14, '#7a2a2a');
+    clockFace(l, hx, hz, 0.56, 0.42, '+z', 0.33, 0.025);
+    // Coach and horses at the arch, stables, a terrace with tables, lamps.
+    horse(l, 0.62, 0.74, 0);
+    horse(l, 0.62, 0.8, 0, '#3a2a20');
+    wbox(l, 0.76, 0.77, 0.05, 0.1, 0.06, 0.06, '#2a3a5a');
+    wbox(l, 0.76, 0.77, 0.11, 0.11, 0.008, 0.07, '#1a2a4a');
+    for (const s of [-1, 1])
+      wround(l, ...off(l, 0.76, 0.77, s * 0.04, 0.034), 0.02, 0.02, 0.03, 0.004, '#3a3530', 10);
+    for (const x of [0.16, 0.32]) {
+      wbox(l, x, 0.8, 0.05, 0.08, 0.008, 0.05, '#7a5634');
+      for (const s of [-1, 1])
+        wbox(l, ...off(l, x, 0.8, 0, s * 0.04), 0.04, 0.07, 0.006, 0.014, '#7a5634');
+    }
+    for (let i = 0; i < 4; i++) barrel(l, 0.9 + (i % 2) * 0.03, 0.66 + Math.floor(i / 2) * 0.035);
+    workers(l, [
+      [0.24, 0.7, '#7a3a2a', '#3a3a3c'],
+      [0.46, 0.76, '#3a5a7a', '#8a6a3a'],
+      [0.5, 0.9, '#5a6a4a', '#2c2c2e'],
+      [0.88, 0.86, '#6a3a5a', '#e9e0c8'],
+    ]);
+    for (const [x, z] of [
+      [0.06, 0.66],
+      [0.94, 0.94],
+    ] as const)
+      lanternPost(l, x, z, 0.16);
+  },
+
+  // -----------------------------------------------------------------------------------------
+  // Chapel (1x1); the parish church follows its approved concept art
+  // -----------------------------------------------------------------------------------------
+  chapel(l) {
+    square(l, 'chapel', 0.42, 0.66, 0.58, 0.96, '#b9b2a2', 20);
+    // Wayside stone chapel: arched oak door, small front belfry, lancets and a rose window.
+    const hx = 0.5;
+    const hz = 0.42;
+    stoneBody(l, hx, hz, 0.22, 0.34, 0.03, 0.18, '#bdb3a0');
+    for (const t of [-0.08, 0.05])
+      for (const f of ['+x', '-x'] as const)
+        archWindow(l, hx, hz, 0.22, 0.34, f, t, 0.07, 0.026, 0.07, '#8a8274');
+    roseWindow(l, hx, hz, 0.22, 0.34, '+z', 0.16, 0.026);
+    archWindow(l, hx, hz, 0.22, 0.34, '+z', 0, 0.03, 0.05, 0.07, timberDark, '#5a3a24');
+    shingleGable(l, hx, hz, 'z', 0.34, 0.22, 0.21, 0.16, slate, '#bdb3a0');
+    const [bx, bz] = off(l, hx, hz, 0, 0.17);
+    wbox(l, bx, bz, 0.37, 0.05, 0.06, 0.03, '#bdb3a0');
+    faceBox(l, bx, bz, 0.05, 0.03, '+z', 0, 0.002, 0.38, 0.026, 0.036, 0.004, '#2c2a28');
+    wround(l, bx, bz, 0.01, 0.012, 0.385, 0.02, brass, 8);
+    l.shape(new THREE.ConeGeometry(0.035, 0.07, 4).rotateY(Math.PI / 4), slate, bx, bz, 0.465);
+    wbox(l, bx, bz, 0.5, 0.004, 0.04, 0.004, brass);
+    wbox(l, bx, bz, 0.52, 0.022, 0.004, 0.004, brass);
+    // Churchyard: headstones, a yew, a lychgate on the path and flowers.
+    for (let i = 0; i < 8; i++) {
+      const x = i < 4 ? 0.14 + (i % 2) * 0.08 : 0.78 + (i % 2) * 0.08;
+      const z = 0.3 + Math.floor((i % 4) / 2) * 0.2;
+      wbox(l, x, z, 0.03, 0.03, 0.04, 0.008, tone('#a8a296', 0.08), (rand() - 0.5) * 0.3);
+    }
+    l.shape(new THREE.SphereGeometry(0.06, 10, 8).scale(1, 1.3, 1), '#3f5a3a', 0.16, 0.82, 0.1);
+    for (const s of [-1, 1])
+      wbox(l, ...off(l, 0.5, 0.9, s * 0.05, 0), 0.03, 0.01, 0.1, 0.01, '#5c4630');
+    l.shape(new THREE.BoxGeometry(0.14, 0.01, 0.06).rotateX(0.0), '#5c4630', 0.5, 0.9, 0.135);
+    shingleGable(l, 0.5, 0.9, 'x', 0.12, 0.05, 0.13, 0.04, slate);
+    flowerBed(l, 0.82, 0.86, 0.12, 0.06);
+    workers(l, [[0.4, 0.74, '#2c2c2e', '#2c2c2e']]);
+    lanternPost(l, 0.64, 0.72, 0.13);
+    stoneWall(l, 0.04, 0.96, 0.4, 0.96, 0.03);
+    stoneWall(l, 0.6, 0.96, 0.96, 0.96, 0.03);
+  },
+
+  parish_church(l) {
+    square(l, 'parish_church', 0.36, 0.72, 0.64, 0.96, '#bdb6a6', 18);
+    // Approved concept: limestone nave with stepped buttresses and lancet windows, a rose window
+    // in the front gable, a square bell tower, and a walled forecourt with flower beds.
+    const hx = 0.5;
+    const hz = 0.4;
+    stoneBody(l, hx, hz, 0.28, 0.42, 0.03, 0.04, '#9a9282');
+    stoneBody(l, hx, hz, 0.26, 0.4, 0.07, 0.2, limestone);
+    for (const t of [-0.15, -0.05, 0.05, 0.15])
+      for (const s of [-1, 1]) {
+        wbox(l, ...off(l, hx, hz, s * 0.14, t), 0.07, 0.026, 0.12, 0.024, '#bdb6a6');
+        wbox(l, ...off(l, hx, hz, s * 0.136, t), 0.19, 0.016, 0.06, 0.02, limestone);
+      }
+    for (const t of [-0.1, 0, 0.1])
+      for (const f of ['+x', '-x'] as const)
+        archWindow(l, hx, hz, 0.26, 0.4, f, t, 0.1, 0.028, 0.1, '#8a8274', '#8ab0d8');
+    roseWindow(l, hx, hz, 0.26, 0.4, '+z', 0.21, 0.036);
+    archWindow(l, hx, hz, 0.26, 0.4, '+z', 0, 0.07, 0.05, 0.08, timberDark, '#5a3a24');
+    shingleGable(l, hx, hz, 'z', 0.4, 0.26, 0.27, 0.2, slate, limestone);
+    for (const e of [-1, 1])
+      for (let k = 0; k < 4; k++)
+        for (const s of [-1, 1])
+          wbox(
+            l,
+            ...off(l, hx, hz, s * (0.11 - k * 0.028), e * 0.2),
+            0.27 + k * 0.045,
+            0.03,
+            0.045,
+            0.03,
+            limestone,
+          );
+    // Bell tower at the back with louvred openings, pinnacles and a spire.
+    const [tx, tz] = off(l, hx, hz, 0, -0.26);
+    stoneBody(l, tx, tz, 0.12, 0.12, 0.03, 0.48, limestone);
+    for (const f of ['+z', '-z', '+x', '-x'] as const) {
+      archWindow(l, tx, tz, 0.12, 0.12, f, 0, 0.38, 0.04, 0.06, '#8a8274', '#2c2a28');
+      archWindow(l, tx, tz, 0.12, 0.12, f, 0, 0.18, 0.02, 0.06, '#8a8274');
+    }
+    clockFace(l, tx, tz, 0.12, 0.12, '+z', 0.3, 0.024);
+    for (const [a, b] of [
+      [-1, -1],
+      [-1, 1],
+      [1, -1],
+      [1, 1],
+    ] as const)
+      l.shape(
+        new THREE.ConeGeometry(0.012, 0.06, 4),
+        limestone,
+        ...off(l, tx, tz, a * 0.055, b * 0.055),
+        0.54,
+      );
+    l.shape(new THREE.ConeGeometry(0.06, 0.22, 8).rotateY(Math.PI / 8), slate, tx, tz, 0.62);
+    wbox(l, tx, tz, 0.73, 0.004, 0.05, 0.004, brass);
+    wbox(l, tx, tz, 0.75, 0.026, 0.004, 0.004, brass);
+    // Forecourt: low stone garden walls, rose and lavender beds, flagstone walk, two lamps.
+    for (const s of [-1, 1]) {
+      stoneWall(l, 0.5 + s * 0.14, 0.94, 0.5 + s * 0.46, 0.94);
+      stoneWall(l, 0.5 + s * 0.46, 0.66, 0.5 + s * 0.46, 0.94);
+      flowerBed(l, 0.5 + s * 0.28, 0.84, 0.16, 0.06);
+      lanternPost(l, 0.5 + s * 0.12, 0.88, 0.14);
+    }
+    for (let i = 0; i < 6; i++)
+      wbox(
+        l,
+        0.1 + (i % 2) * 0.08,
+        0.22 + Math.floor(i / 2) * 0.12,
+        0.03,
+        0.03,
+        0.04,
+        0.008,
+        '#a8a296',
+      );
+    workers(l, [
+      [0.44, 0.8, '#2c2c2e', '#2c2c2e'],
+      [0.56, 0.84, '#6a3a5a', '#e9e0c8'],
+    ]);
+    for (const [x, z] of [
+      [0.88, 0.2],
+      [0.9, 0.42],
+    ] as const)
+      shrub(l, x, z, 0.04, '#3f5a3a');
+  },
+
+  sanctuary_chapel(l) {
+    square(l, 'sanctuary_chapel', 0.06, 0.06, 0.94, 0.94, '#d8d2c5', 6);
+    // Gothic sanctuary in white limestone: pinnacled buttresses, a verdigris roof with a gilded
+    // crest, a sculpted portal under a radiant rose window, and twin front towers with spires.
+    const hx = 0.5;
+    const hz = 0.42;
+    stoneBody(l, hx, hz, 0.3, 0.46, 0.03, 0.05, '#bdb6a6');
+    stoneBody(l, hx, hz, 0.28, 0.44, 0.08, 0.26, marble);
+    for (const t of [-0.17, -0.06, 0.05, 0.16])
+      for (const s of [-1, 1]) {
+        const [px, pz] = off(l, hx, hz, s * 0.16, t);
+        wbox(l, px, pz, 0.08, 0.03, 0.22, 0.026, '#e2dccf');
+        l.shape(new THREE.ConeGeometry(0.014, 0.08, 4), '#e2dccf', px, pz, 0.34);
+        l.beam([px, 0.3, pz], [hx + (s * 0.13) / l.spanX, 0.33, pz], 0.01, '#e2dccf');
+      }
+    for (const t of [-0.12, 0, 0.12])
+      for (const f of ['+x', '-x'] as const)
+        archWindow(l, hx, hz, 0.28, 0.44, f, t, 0.12, 0.034, 0.14, brass, '#8ab0d8');
+    shingleGable(l, hx, hz, 'z', 0.44, 0.28, 0.34, 0.24, '#5fa58e', marble);
+    wbox(l, hx, hz, 0.58, 0.014, 0.02, 0.46, brass);
+    roseWindow(l, hx, hz, 0.28, 0.44, '+z', 0.27, 0.05);
+    archWindow(l, hx, hz, 0.28, 0.44, '+z', 0, 0.08, 0.07, 0.1, brass, '#5a3a24');
+    for (const s of [-1, 1]) {
+      const [tx, tz] = off(l, hx, hz, s * 0.12, 0.2);
+      stoneBody(l, tx, tz, 0.1, 0.1, 0.03, 0.56, marble);
+      for (const f of ['+z', '+x', '-x'] as const)
+        archWindow(l, tx, tz, 0.1, 0.1, f, 0, 0.44, 0.03, 0.08, brass, '#2c2a28');
+      l.shape(new THREE.ConeGeometry(0.055, 0.3, 8).rotateY(Math.PI / 8), '#5fa58e', tx, tz, 0.74);
+      wround(l, tx, tz, 0.002, 0.006, 0.89, 0.05, brass, 6);
+    }
+    // Cloister garden, statues, fountain and pilgrims.
+    for (let i = 0; i < 4; i++) flowerBed(l, 0.16 + i * 0.22, 0.86, 0.14, 0.06);
+    wround(l, 0.5, 0.76, 0.05, 0.055, 0.034, 0.02, marble, 16);
+    wround(l, 0.5, 0.76, 0.045, 0.045, 0.054, 0.002, '#5fa2b8', 16);
+    for (const s of [-1, 1]) {
+      const [sx, sz] = off(l, 0.5, 0.74, s * 0.2, 0);
+      wbox(l, sx, sz, 0.03, 0.03, 0.04, 0.03, '#d8d2c5');
+      wround(l, sx, sz, 0.008, 0.012, 0.07, 0.05, marble, 8);
+      l.shape(new THREE.SphereGeometry(0.009, 8, 6), marble, sx, sz, 0.128);
+    }
+    for (const [x, z] of [
+      [0.1, 0.1],
+      [0.9, 0.1],
+      [0.1, 0.7],
+      [0.9, 0.7],
+    ] as const)
+      lanternPost(l, x, z, 0.17);
+    workers(l, [
+      [0.36, 0.74, '#2c2c2e', '#2c2c2e'],
+      [0.64, 0.78, '#6a3a5a', '#e9e0c8'],
+      [0.44, 0.92, '#3a5a7a', '#8a6a3a'],
+    ]);
   },
 };
 
