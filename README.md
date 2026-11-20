@@ -319,6 +319,18 @@ Bốn chuỗi dân sự giữa thị trấn được dựng lại thành sa bàn
 
 ![Chuỗi Trạm xá](docs/images/group3c-clinic.jpg)
 
+### Nhà ở có đời sống
+
+Các mô hình nhà ở (từ lều tranh đến nhà chọc trời) giữ nguyên kích thước ô nhưng giờ có cư dân, thú nuôi, chậu hoa, thùng, ghế dài, đèn đường và chim bướm quanh nhà. Game tự tìm chỗ còn trống quanh mỗi ngôi nhà rồi đặt đồ vào, nên không đè lên công trình.
+
+![Nhà ở có đời sống 1](docs/images/housing-life-a.jpg)
+
+![Nhà ở có đời sống 2](docs/images/housing-life-b.jpg)
+
+![Nhà ở có đời sống 3](docs/images/housing-life-c.jpg)
+
+![Nhà ở có đời sống 4](docs/images/housing-life-d.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

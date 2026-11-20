@@ -5,6 +5,7 @@ import { coastDiorama } from './architecture/coastDiorama';
 import { housing } from './architecture/housing';
 import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
+import { addHousingLife, hasHousingLife } from './architecture/housingLife';
 import { farmDiorama } from './architecture/farmDiorama';
 import { livestockDiorama } from './architecture/livestockDiorama';
 import { civicNatureDiorama } from './architecture/civicNatureDiorama';
@@ -146,6 +147,7 @@ export function architectureModel(def: BuildingDef, parts: BufferGeometry[], var
   if (def.crop) lot.stage = variant || 4;
   const from = parts.length;
   recipe(lot);
+  if (hasHousingLife(def.id)) addHousingLife(lot, parts, from, def);
   if (zoom !== 1) {
     for (let i = from; i < parts.length; i++) parts[i]!.scale(zoom, zoom, zoom);
     fitToLot(parts, from, def.footprint.w, def.footprint.d);
