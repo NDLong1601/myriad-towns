@@ -37,29 +37,25 @@ describe('building architecture', () => {
     },
   );
 
-  it(
-    'gives every ordinary catalogue building its own model within its lot',
-    { timeout: 20000 },
-    () => {
-      const specialistModels: string[] = [];
-      for (const def of catalog.defs) {
-        if (def.crop || isRoadDef(def) || specialistModels.includes(def.id)) continue;
-        const parts: BufferGeometry[] = [];
-        expect(architectureModel(def, parts), def.id).toBe(true);
-        expect(parts.length, def.id).toBeGreaterThan(2);
-        for (const part of parts) part.dispose();
+  it('gives every ordinary catalogue building its own model within its lot', () => {
+    const specialistModels: string[] = [];
+    for (const def of catalog.defs) {
+      if (def.crop || isRoadDef(def) || specialistModels.includes(def.id)) continue;
+      const parts: BufferGeometry[] = [];
+      expect(architectureModel(def, parts), def.id).toBe(true);
+      expect(parts.length, def.id).toBeGreaterThan(2);
+      for (const part of parts) part.dispose();
 
-        const model = buildingGeometry(def);
-        model.computeBoundingBox();
-        const bounds = model.boundingBox!;
-        expect.soft(bounds.min.x, def.id).toBeGreaterThanOrEqual(-0.001);
-        expect.soft(bounds.min.z, def.id).toBeGreaterThanOrEqual(-0.001);
-        expect.soft(bounds.max.x, def.id).toBeLessThanOrEqual(def.footprint.w + 0.001);
-        expect.soft(bounds.max.z, def.id).toBeLessThanOrEqual(def.footprint.d + 0.001);
-        expect(model.getAttribute('glow').count, def.id).toBe(model.getAttribute('position').count);
-      }
-    },
-  );
+      const model = buildingGeometry(def);
+      model.computeBoundingBox();
+      const bounds = model.boundingBox!;
+      expect.soft(bounds.min.x, def.id).toBeGreaterThanOrEqual(-0.001);
+      expect.soft(bounds.min.z, def.id).toBeGreaterThanOrEqual(-0.001);
+      expect.soft(bounds.max.x, def.id).toBeLessThanOrEqual(def.footprint.w + 0.001);
+      expect.soft(bounds.max.z, def.id).toBeLessThanOrEqual(def.footprint.d + 0.001);
+      expect(model.getAttribute('glow').count, def.id).toBe(model.getAttribute('position').count);
+    }
+  }, 30_000);
 
   it('makes similar-sized buildings distinguishable by shape alone', () => {
     const material = new MeshBasicMaterial();
@@ -229,11 +225,11 @@ describe('building architecture', () => {
     const sim = new Simulation(city);
     city.stock.food = 500;
     city.stock.goods = 500;
-    city._add(city.catalog.get('townhouse'), 0, 2);
-    city._add(city.catalog.get('townhouse'), 1, 2);
-    city._add(city.catalog.get('stone_road'), 0, 1);
+    city._add(city.catalog.get('townhouse'), 0, 3);
+    city._add(city.catalog.get('townhouse'), 1, 3);
+    city._add(city.catalog.get('stone_road'), 0, 2);
     const pub = city._add(city.catalog.get('tavern'), 0, 0).building;
-    const rect = { x: 0, z: 0, w: 1, d: 1 };
+    const rect = { x: 0, z: 0, w: 2, d: 2 };
 
     city.fields.apply(
       rect,

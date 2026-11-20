@@ -15,6 +15,7 @@ import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
 import { sawKilnDiorama } from './architecture/sawKilnDiorama';
 import { millBakeryDiorama } from './architecture/millBakeryDiorama';
+import { civicTownDiorama } from './architecture/civicTownDiorama';
 import { waterDiorama } from './architecture/waterDiorama';
 import { civicDiorama } from './architecture/civicDiorama';
 import { siteDetails } from './architecture/siteDetails';
@@ -54,6 +55,7 @@ const models = new Map<string, Recipe>(
     lightIndustryDiorama,
     sawKilnDiorama,
     millBakeryDiorama,
+    civicTownDiorama,
     ...tiledGroups,
   ].flatMap((group) => Object.entries(group)),
 );
@@ -71,6 +73,7 @@ const weathered = new Set([
   ...Object.keys(lightIndustryDiorama),
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
+  ...Object.keys(civicTownDiorama),
   ...tiled,
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
@@ -86,6 +89,7 @@ const dioramas = new Set([
   ...Object.keys(lightIndustryDiorama),
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
+  ...Object.keys(civicTownDiorama),
   ...tiled,
 ]);
 /**
@@ -105,6 +109,7 @@ const zoomed = new Map<string, number>([
   ...Object.keys(lightIndustryDiorama).map((id): [string, number] => [id, 2.6]),
   ...Object.keys(sawKilnDiorama).map((id): [string, number] => [id, 2.4]),
   ...Object.keys(millBakeryDiorama).map((id): [string, number] => [id, 2.0]),
+  ...Object.keys(civicTownDiorama).map((id): [string, number] => [id, 2.0]),
 ]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();

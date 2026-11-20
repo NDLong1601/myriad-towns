@@ -300,32 +300,39 @@ Sáu chuỗi công nghiệp nhẹ được dựng lại thành sa bàn chi tiế
 
 ![Chuỗi Tiệm bánh 2](docs/images/group3a-bakery-b.jpg)
 
-### Nhóm 3B: Dịch vụ và công trình công cộng
+### Nhóm 3C (phần 1): Chợ, Quán rượu, Nhà nguyện, Trạm xá
 
-Giếng nước, hải đăng, chợ, trạm xá, quán rượu, nhà nguyện, thư viện và ba công trình lẻ được dựng lại thành sa bàn chi tiết. Kích thước ô giữ nguyên như cũ. Công trình dịch vụ vẽ theo một tỉ lệ ô cố định, nên lô lớn chứa nhiều chi tiết hơn chứ không phóng to người và đồ vật; riêng thư viện (3×3), khu nghiên cứu (4×4) và lớp học cộng đồng (2×3) được vẽ lớn hơn một chút cho công trình lấp đầy lô. Quán trọ phường hội, nhà thờ giáo xứ, y viện và thư viện vòm đồng được làm lại theo đúng concept art đã duyệt.
+Bốn chuỗi dân sự giữa thị trấn được dựng lại thành sa bàn chi tiết trên lô 2×2 (quán rượu, nhà nguyện và trạm xá nới từ 1×1 vì chi tiết quá nhỏ; chợ vốn đã 2×2). Mỗi cấp cao hơn cấp trước.
+
+| Chuỗi      | Các cấp                                         |
+| ---------- | ----------------------------------------------- |
+| Chợ        | Chợ lộ thiên → Chợ có mái → Đại chợ vòm kính    |
+| Quán rượu  | Quán rượu → Nhà phường hội → Quán trọ lớn       |
+| Nhà nguyện | Nhà nguyện làng → Nhà thờ giáo xứ → Thánh đường |
+| Trạm xá    | Trạm xá → Y viện → Đại y viện                   |
+
+![Chuỗi Chợ](docs/images/group3c-market.jpg)
+
+![Chuỗi Quán rượu](docs/images/group3c-tavern.jpg)
+
+![Chuỗi Nhà nguyện](docs/images/group3c-chapel.jpg)
+
+![Chuỗi Trạm xá](docs/images/group3c-clinic.jpg)
+
+### Nhóm 3C (phần 2): Nước, Hải đăng, Thư viện và công trình công cộng lẻ
+
+Giếng nước, hải đăng, thư viện và ba công trình lẻ được dựng lại thành sa bàn chi tiết, kích thước ô giữ nguyên. Các công trình này vẽ theo tỉ lệ ô cố định, nên lô lớn chứa nhiều chi tiết hơn chứ không phóng to người và đồ vật; riêng thư viện (3×3), khu nghiên cứu (4×4) và lớp học cộng đồng (2×3) được vẽ lớn hơn một chút để công trình lấp đầy lô. Thư viện vòm đồng làm lại theo đúng concept art đã duyệt.
 
 | Chuỗi            | Cấp                                                                                                        |
 | ---------------- | ---------------------------------------------------------------------------------------------------------- |
 | Giếng nước (1×1) | Giếng có mái ngói → Bể nước vòm đá → Trạm bơm hơi nước → Tháp nước đinh tán → Tháp thủy áp và cầu dẫn nước |
 | Hải đăng (1×1)   | Tháp sọc đỏ trắng → Tháp đá bát giác có nhà người gác → Đại hải đăng cẩm thạch                             |
-| Chợ (2×2)        | Phiên chợ quanh cột chợ → Chợ đình mái ngói có nhà cân → Thương trường mái vòm kính                        |
-| Trạm xá (1×1)    | Trạm xá quét vôi → Y viện (concept đã duyệt) → Bệnh viện đa khoa có mái vòm kính                           |
-| Quán rượu (1×1)  | Quán gỗ và vữa → Quán trọ phường hội có vườn bia (concept đã duyệt) → Tửu lầu ba tầng có xe ngựa           |
-| Nhà nguyện (1×1) | Nhà nguyện đá có nghĩa trang → Nhà thờ giáo xứ (concept đã duyệt) → Thánh đường Gothic hai tháp            |
 | Thư viện (3×3)   | Thư viện gạch có vòm đọc sách → Thư viện vòm đồng (concept đã duyệt) → Đại Thư viện Quốc gia               |
 | Công trình lẻ    | Lớp học cộng đồng (2×3), Vườn thuốc (1×1), Khu nghiên cứu có đài thiên văn và nhà kính (4×4)               |
 
 ![Chuỗi Giếng nước](docs/images/civic-water.jpg)
 
 ![Chuỗi Hải đăng](docs/images/civic-lighthouse.jpg)
-
-![Chuỗi Chợ](docs/images/civic-market.jpg)
-
-![Chuỗi Trạm xá](docs/images/civic-clinic.jpg)
-
-![Chuỗi Quán rượu](docs/images/civic-tavern.jpg)
-
-![Chuỗi Nhà nguyện](docs/images/civic-chapel.jpg)
 
 ![Chuỗi Thư viện](docs/images/civic-library.jpg)
 
