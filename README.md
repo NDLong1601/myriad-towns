@@ -300,6 +300,37 @@ Sáu chuỗi công nghiệp nhẹ được dựng lại thành sa bàn chi tiế
 
 ![Chuỗi Tiệm bánh 2](docs/images/group3a-bakery-b.jpg)
 
+### Nhóm 3B: Dịch vụ và công trình công cộng
+
+Giếng nước, hải đăng, chợ, trạm xá, quán rượu, nhà nguyện, thư viện và ba công trình lẻ được dựng lại thành sa bàn chi tiết. Kích thước ô giữ nguyên như cũ. Công trình dịch vụ vẽ theo một tỉ lệ ô cố định, nên lô lớn chứa nhiều chi tiết hơn chứ không phóng to người và đồ vật; riêng thư viện (3×3), khu nghiên cứu (4×4) và lớp học cộng đồng (2×3) được vẽ lớn hơn một chút cho công trình lấp đầy lô. Quán trọ phường hội, nhà thờ giáo xứ, y viện và thư viện vòm đồng được làm lại theo đúng concept art đã duyệt.
+
+| Chuỗi            | Cấp                                                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| Giếng nước (1×1) | Giếng có mái ngói → Bể nước vòm đá → Trạm bơm hơi nước → Tháp nước đinh tán → Tháp thủy áp và cầu dẫn nước |
+| Hải đăng (1×1)   | Tháp sọc đỏ trắng → Tháp đá bát giác có nhà người gác → Đại hải đăng cẩm thạch                             |
+| Chợ (2×2)        | Phiên chợ quanh cột chợ → Chợ đình mái ngói có nhà cân → Thương trường mái vòm kính                        |
+| Trạm xá (1×1)    | Trạm xá quét vôi → Y viện (concept đã duyệt) → Bệnh viện đa khoa có mái vòm kính                           |
+| Quán rượu (1×1)  | Quán gỗ và vữa → Quán trọ phường hội có vườn bia (concept đã duyệt) → Tửu lầu ba tầng có xe ngựa           |
+| Nhà nguyện (1×1) | Nhà nguyện đá có nghĩa trang → Nhà thờ giáo xứ (concept đã duyệt) → Thánh đường Gothic hai tháp            |
+| Thư viện (3×3)   | Thư viện gạch có vòm đọc sách → Thư viện vòm đồng (concept đã duyệt) → Đại Thư viện Quốc gia               |
+| Công trình lẻ    | Lớp học cộng đồng (2×3), Vườn thuốc (1×1), Khu nghiên cứu có đài thiên văn và nhà kính (4×4)               |
+
+![Chuỗi Giếng nước](docs/images/civic-water.jpg)
+
+![Chuỗi Hải đăng](docs/images/civic-lighthouse.jpg)
+
+![Chuỗi Chợ](docs/images/civic-market.jpg)
+
+![Chuỗi Trạm xá](docs/images/civic-clinic.jpg)
+
+![Chuỗi Quán rượu](docs/images/civic-tavern.jpg)
+
+![Chuỗi Nhà nguyện](docs/images/civic-chapel.jpg)
+
+![Chuỗi Thư viện](docs/images/civic-library.jpg)
+
+![Lớp học cộng đồng, Vườn thuốc, Khu nghiên cứu](docs/images/civic-sites.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

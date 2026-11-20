@@ -27,6 +27,14 @@ import { workplaces } from './architecture/workplaces';
 const TILE = 0.77;
 const tiledGroups = [waterDiorama, civicDiorama];
 const tiled = new Set(tiledGroups.flatMap((group) => Object.keys(group)));
+/** Large civic lots drawn a little bigger than tile scale so their buildings fill the lot. */
+const tiledZoom = new Map<string, number>([
+  ['public_library', 2],
+  ['grand_library', 2],
+  ['royal_archive', 2],
+  ['research_campus', 2.2],
+  ['community_classroom', 1.6],
+]);
 
 const models = new Map<string, Recipe>(
   [
@@ -142,7 +150,11 @@ function fitToLot(parts: BufferGeometry[], from: number, w: number, d: number): 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {
   const recipe = models.get(def.id);
   if (!recipe) return false;
-  const zoom = tiled.has(def.id) ? 1 / TILE : def.footprint.w >= 2 ? (zoomed.get(def.id) ?? 1) : 1;
+  const zoom = tiled.has(def.id)
+    ? (tiledZoom.get(def.id) ?? 1 / TILE)
+    : def.footprint.w >= 2
+      ? (zoomed.get(def.id) ?? 1)
+      : 1;
   const frame =
     zoom === 1
       ? def
