@@ -1684,8 +1684,8 @@
     "id": "clinic",
     "category": "service",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 6,
@@ -1748,8 +1748,8 @@
     "id": "tavern",
     "category": "service",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "wood": 8,
@@ -1813,8 +1813,8 @@
     "id": "chapel",
     "category": "service",
     "footprint": {
-      "w": 1,
-      "d": 1
+      "w": 2,
+      "d": 2
     },
     "cost": {
       "stone": 14
