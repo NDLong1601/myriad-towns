@@ -392,6 +392,7 @@
   "save.loadFailed": "Save not found or unreadable; starting a new game.",
   "save.importFailed": "This file is not a valid Myriad Towns save.",
   "save.missing": "The save has buildings this version no longer has: {ids}",
+  "save.displaced": "Some buildings in the save are now larger and overlap a neighbour, so they were removed: {ids}",
   "save.genVersion": "Saved with another map generator version: terrain may differ slightly.",
   "save.continue": "Continue \"{name}\"",
   "settings.title": "Settings",

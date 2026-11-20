@@ -86,6 +86,28 @@ describe('save round trip', () => {
     expect(b.city.count).toBeLessThan(a.city.count);
   });
 
+  it('skips a building that grew since the save and now overlaps a neighbour', () => {
+    const a = newGame();
+    village(a, 0, 0);
+    const data = takeSave(a, META, null);
+    // Turn one 1x1 hut into a 2x2 building in place: it now covers its neighbours.
+    const hut = data.defs.indexOf('hut');
+    data.defs.push('market');
+    const market = data.defs.length - 1;
+    const chunk = data.chunks.find((c) => c.b.some((v, i) => i % 7 === 1 && v === hut))!;
+    for (let i = 0; i < chunk.b.length; i += 7) {
+      if (chunk.b[i + 1] === hut) {
+        chunk.b[i + 1] = market;
+        break;
+      }
+    }
+    const b = newGame();
+    const { missing, displaced } = applySave(b, data);
+    expect(missing).toEqual([]);
+    expect(displaced.length).toBeGreaterThan(0);
+    expect(b.city.count).toBeGreaterThan(0);
+  });
+
   it('50 modified chunks stay well under 1 MB', async () => {
     const a = newGame(false);
     for (let c = 0; c < 50; c++) village(a, (c % 10) * 32 + 2, Math.floor(c / 10) * 32 + 2);

@@ -361,9 +361,11 @@ city.on((e) => {
   }
 });
 // Restore a saved game now that every system and renderer is listening.
-let missingDefs: string[] = [];
-if (loaded)
-  missingDefs = applySave({ city, sim, towns, pois, goals, regionalTrade }, loaded).missing;
+const restored = loaded
+  ? applySave({ city, sim, towns, pois, goals, regionalTrade }, loaded)
+  : { missing: [], displaced: [] };
+const missingDefs: string[] = restored.missing;
+const displacedDefs: string[] = restored.displaced;
 // Warn visibly on the building itself, not only in a toast.
 sim.on((e) => {
   if (e.type === 'warn') buildings.setTint(e.uid, WARNING_TINT);
@@ -492,6 +494,7 @@ if (settings.autosave && params.get('autosave') !== '0') session.startAutosave(1
 if (loadError) say(t('save.loadFailed'), 'bad');
 if (loaded) say(t('save.loaded', { name: loaded.meta.name }));
 if (missingDefs.length) say(t('save.missing', { ids: missingDefs.join(', ') }), 'bad');
+if (displacedDefs.length) say(t('save.displaced', { ids: displacedDefs.join(', ') }), 'bad');
 if (loaded && loaded.genVersion !== GEN_VERSION) say(t('save.genVersion'), 'bad');
 
 const bar = document.createElement('div');

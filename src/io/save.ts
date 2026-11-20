@@ -7,7 +7,7 @@
  */
 import { tileToChunk } from '@/core/coords';
 import { GEN_VERSION, SAVE_SCHEMA_VERSION } from '@/core/version';
-import type { BuildingRotation, City } from '@/sim/city';
+import { type BuildingRotation, type City, footprintOf } from '@/sim/city';
 import type { Goals } from '@/sim/goals';
 import type { PoiStore } from '@/sim/poi';
 import type { ProgressSnapshot } from '@/sim/progress';
@@ -133,12 +133,14 @@ export function takeSave(game: Game, meta: SaveMeta, camera: CameraSave | null):
 
 /**
  * Loads a save into a freshly built game (same seed and mode, nothing placed yet).
- * Returns ids of buildings the save names that this version no longer has (they are skipped).
+ * Returns ids of buildings the save names that this version no longer has, and of buildings that
+ * no longer fit where they stood (both are skipped).
  */
-export function applySave(game: Game, data: SaveData): { missing: string[] } {
+export function applySave(game: Game, data: SaveData): { missing: string[]; displaced: string[] } {
   const { city, sim } = game;
   if (city.count > 0) throw new Error('applySave needs an empty city');
   const missing = new Set<string>();
+  const displaced = new Map<string, number>();
   // Order matters: explored ruins and towns first, so re-adding buildings neither pays ruin
   // rewards again nor founds new towns.
   game.pois.restoreExplored(data.pois);
@@ -169,13 +171,19 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   pending.sort((a, b) => (a[0] as number) - (b[0] as number));
   for (const [uid, x, z, flags, unmet, warned, di] of pending as number[][]) {
     const rot = (((flags as number) >> 3) & 3) as BuildingRotation;
-    city._add(
-      city.catalog.get(data.defs[di as number] as string),
-      x as number,
-      z as number,
-      uid,
-      rot,
-    );
+    const def = city.catalog.get(data.defs[di as number] as string);
+    // A building whose footprint grew since the save was made can now overlap a neighbour;
+    // skip it (the player is told) rather than abort the whole load.
+    const { w, d } = footprintOf(def, rot);
+    let free = true;
+    for (let dz = 0; dz < d && free; dz++)
+      for (let dx = 0; dx < w && free; dx++)
+        if (city.at((x as number) + dx, (z as number) + dz)) free = false;
+    if (!free) {
+      displaced.set(def.id, (displaced.get(def.id) ?? 0) + 1);
+      continue;
+    }
+    city._add(def, x as number, z as number, uid, rot);
     if ((flags as number) & 4) city._setActive(uid as number, false);
     sim.importState(uid as number, (flags as number) & 3, unmet as number, warned as number);
   }
@@ -205,5 +213,8 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   towns.done();
   if (data.regionalTrade) game.regionalTrade?.restore(data.regionalTrade);
   city._addStock({}, 1); // refresh every stock listener once
-  return { missing: [...missing] };
+  return {
+    missing: [...missing],
+    displaced: [...displaced].map(([id, n]) => (n > 1 ? ` ×` : id)),
+  };
 }

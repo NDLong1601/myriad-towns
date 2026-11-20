@@ -392,6 +392,7 @@
   "save.loadFailed": "Không tìm thấy hoặc không đọc được bản lưu, bắt đầu ván mới.",
   "save.importFailed": "File này không phải bản lưu Myriad Towns hợp lệ.",
   "save.missing": "Bản lưu có công trình không còn trong phiên bản này: {ids}",
+  "save.displaced": "Bản lưu có công trình nay đã lớn hơn và chồng lên công trình bên cạnh, nên đã được gỡ bỏ: {ids}",
   "save.genVersion": "Bản lưu tạo từ phiên bản sinh bản đồ khác: địa hình có thể hơi khác.",
   "save.continue": "Tiếp tục \"{name}\"",
   "settings.title": "Cài đặt",
