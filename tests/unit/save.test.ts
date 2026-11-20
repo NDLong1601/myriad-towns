@@ -118,3 +118,19 @@ describe('migrations', () => {
     expect(() => migrate({})).toThrow(SaveError);
   });
 });
+
+describe('loading a save after a footprint grew', () => {
+  it('nudges the overlapping building instead of aborting the load', async () => {
+    const a = newGame(false);
+    a.history.run(new PlaceCommand('road', 0, 1));
+    a.history.run(new PlaceCommand('well', 1, 1));
+    expect([...a.city.all()].map((x) => x.def.id)).toEqual(['road', 'well']);
+    const data = takeSave(a, META, null);
+    // Pretend the road tile is now a 2x2 building that no longer fits beside the well.
+    data.defs = data.defs.map((id) => (id === 'road' ? 'villa' : id));
+    const b = newGame(false);
+    const { missing } = applySave(b, data);
+    expect(missing).toEqual([]);
+    expect([...b.city.all()].map((x) => x.def.id).sort()).toEqual(['villa', 'well']);
+  });
+});

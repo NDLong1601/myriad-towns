@@ -7,7 +7,8 @@
  */
 import { tileToChunk } from '@/core/coords';
 import { GEN_VERSION, SAVE_SCHEMA_VERSION } from '@/core/version';
-import type { BuildingRotation, City } from '@/sim/city';
+import { rectOf, type BuildingRotation, type City } from '@/sim/city';
+import type { BuildingDef } from '@/sim/catalog';
 import type { Goals } from '@/sim/goals';
 import type { PoiStore } from '@/sim/poi';
 import type { ProgressSnapshot } from '@/sim/progress';
@@ -169,13 +170,15 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   pending.sort((a, b) => (a[0] as number) - (b[0] as number));
   for (const [uid, x, z, flags, unmet, warned, di] of pending as number[][]) {
     const rot = (((flags as number) >> 3) & 3) as BuildingRotation;
-    city._add(
-      city.catalog.get(data.defs[di as number] as string),
-      x as number,
-      z as number,
-      uid,
-      rot,
-    );
+    const def = city.catalog.get(data.defs[di as number] as string);
+    // A building's footprint can grow between versions, so an old save may now overlap its
+    // neighbours. Nudge it to the nearest free spot, or drop it rather than abort the load.
+    const spot = freeSpot(city, def, x as number, z as number, rot);
+    if (!spot) {
+      missing.add(def.id);
+      continue;
+    }
+    city._add(def, spot[0], spot[1], uid, rot);
     if ((flags as number) & 4) city._setActive(uid as number, false);
     sim.importState(uid as number, (flags as number) & 3, unmet as number, warned as number);
   }
@@ -206,4 +209,27 @@ export function applySave(game: Game, data: SaveData): { missing: string[] } {
   if (data.regionalTrade) game.regionalTrade?.restore(data.regionalTrade);
   city._addStock({}, 1); // refresh every stock listener once
   return { missing: [...missing] };
+}
+
+/** The saved spot if the footprint is clear, else the nearest clear spot within 4 tiles. */
+function freeSpot(
+  city: City,
+  def: BuildingDef,
+  x: number,
+  z: number,
+  rot: BuildingRotation,
+): [number, number] | undefined {
+  const { w, d } = rectOf(def, x, z, rot);
+  const clear = (px: number, pz: number): boolean => {
+    for (let tz = pz; tz < pz + d; tz++)
+      for (let tx = px; tx < px + w; tx++) if (city.at(tx, tz)) return false;
+    return true;
+  };
+  if (clear(x, z)) return [x, z];
+  for (let r = 1; r <= 4; r++)
+    for (let dz = -r; dz <= r; dz++)
+      for (let dx = -r; dx <= r; dx++)
+        if (Math.max(Math.abs(dx), Math.abs(dz)) === r && clear(x + dx, z + dz))
+          return [x + dx, z + dz];
+  return undefined;
 }
