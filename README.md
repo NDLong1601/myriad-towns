@@ -300,6 +300,25 @@ Sáu chuỗi công nghiệp nhẹ được dựng lại thành sa bàn chi tiế
 
 ![Chuỗi Tiệm bánh 2](docs/images/group3a-bakery-b.jpg)
 
+### Nhóm 3C (phần 1): Chợ, Quán rượu, Nhà nguyện, Trạm xá
+
+Bốn chuỗi dân sự giữa thị trấn được dựng lại thành sa bàn chi tiết trên lô 2×2 (quán rượu, nhà nguyện và trạm xá nới từ 1×1 vì chi tiết quá nhỏ; chợ vốn đã 2×2). Mỗi cấp cao hơn cấp trước.
+
+| Chuỗi      | Các cấp                                         |
+| ---------- | ----------------------------------------------- |
+| Chợ        | Chợ lộ thiên → Chợ có mái → Đại chợ vòm kính    |
+| Quán rượu  | Quán rượu → Nhà phường hội → Quán trọ lớn       |
+| Nhà nguyện | Nhà nguyện làng → Nhà thờ giáo xứ → Thánh đường |
+| Trạm xá    | Trạm xá → Y viện → Đại y viện                   |
+
+![Chuỗi Chợ](docs/images/group3c-market.jpg)
+
+![Chuỗi Quán rượu](docs/images/group3c-tavern.jpg)
+
+![Chuỗi Nhà nguyện](docs/images/group3c-chapel.jpg)
+
+![Chuỗi Trạm xá](docs/images/group3c-clinic.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

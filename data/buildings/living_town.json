@@ -849,7 +849,7 @@
   {
     "id": "guild_tavern",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "house",
@@ -894,7 +894,7 @@
   {
     "id": "grand_inn",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "tall",
@@ -1014,7 +1014,7 @@
   {
     "id": "parish_church",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "tower",
@@ -1060,7 +1060,7 @@
   {
     "id": "sanctuary_chapel",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "tower",
@@ -1095,7 +1095,7 @@
   {
     "id": "infirmary",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "block",
@@ -1136,7 +1136,7 @@
   {
     "id": "medical_hall",
     "category": "service",
-    "footprint": { "w": 1, "d": 1 },
+    "footprint": { "w": 2, "d": 2 },
     "cost": {},
     "visual": {
       "shape": "tall",

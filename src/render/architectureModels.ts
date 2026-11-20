@@ -15,6 +15,7 @@ import { miningDiorama } from './architecture/miningDiorama';
 import { orchardDiorama } from './architecture/orchardDiorama';
 import { sawKilnDiorama } from './architecture/sawKilnDiorama';
 import { millBakeryDiorama } from './architecture/millBakeryDiorama';
+import { civicTownDiorama } from './architecture/civicTownDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
@@ -39,6 +40,7 @@ const models = new Map<string, Recipe>(
     lightIndustryDiorama,
     sawKilnDiorama,
     millBakeryDiorama,
+    civicTownDiorama,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -55,6 +57,7 @@ const weathered = new Set([
   ...Object.keys(lightIndustryDiorama),
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
+  ...Object.keys(civicTownDiorama),
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -69,6 +72,7 @@ const dioramas = new Set([
   ...Object.keys(lightIndustryDiorama),
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
+  ...Object.keys(civicTownDiorama),
 ]);
 /**
  * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
@@ -87,6 +91,7 @@ const zoomed = new Map<string, number>([
   ...Object.keys(lightIndustryDiorama).map((id): [string, number] => [id, 2.6]),
   ...Object.keys(sawKilnDiorama).map((id): [string, number] => [id, 2.4]),
   ...Object.keys(millBakeryDiorama).map((id): [string, number] => [id, 2.0]),
+  ...Object.keys(civicTownDiorama).map((id): [string, number] => [id, 2.0]),
 ]);
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();
