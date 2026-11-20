@@ -3,6 +3,7 @@ import type { BuildingDef } from '@/sim/catalog';
 import { civic } from './architecture/civic';
 import { coastDiorama } from './architecture/coastDiorama';
 import { housing } from './architecture/housing';
+import { housingLife } from './architecture/housingLife';
 import { landmarks } from './architecture/landmarks';
 import { Lot, type Recipe } from './architecture/lot';
 import { farmDiorama } from './architecture/farmDiorama';
@@ -93,6 +94,7 @@ const zoomed = new Map<string, number>([
   ...Object.keys(millBakeryDiorama).map((id): [string, number] => [id, 2.0]),
   ...Object.keys(civicTownDiorama).map((id): [string, number] => [id, 2.0]),
 ]);
+const LIFE_SCALE = 1.6;
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();
 const part = new Box3();
@@ -154,6 +156,14 @@ export function architectureModel(def: BuildingDef, parts: BufferGeometry[], var
   if (!dioramas.has(def.id)) {
     landmarks[def.id]?.(lot);
     siteDetails[def.id]?.(lot);
+    if (def.category === 'housing') {
+      // Life props are drawn a size up so residents read at the scale of the house models.
+      const s = LIFE_SCALE;
+      const lifeFrame = { ...def, footprint: { w: def.footprint.w / s, d: def.footprint.d / s } };
+      const first = parts.length;
+      housingLife(new Lot(parts, lifeFrame, southRows.has(def.id)), def);
+      for (let i = first; i < parts.length; i++) parts[i]!.scale(s, s, s);
+    }
   }
   return true;
 }
