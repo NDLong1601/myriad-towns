@@ -16,11 +16,26 @@ import { orchardDiorama } from './architecture/orchardDiorama';
 import { sawKilnDiorama } from './architecture/sawKilnDiorama';
 import { millBakeryDiorama } from './architecture/millBakeryDiorama';
 import { civicTownDiorama } from './architecture/civicTownDiorama';
+import { waterDiorama } from './architecture/waterDiorama';
+import { civicDiorama } from './architecture/civicDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
 import { weather } from './architecture/weathering';
 import { workplaces } from './architecture/workplaces';
+
+/** Civic dioramas drawn at a fixed tile scale (TILE units a tile), so bigger lots hold more. */
+const TILE = 0.77;
+const tiledGroups = [waterDiorama, civicDiorama];
+const tiled = new Set(tiledGroups.flatMap((group) => Object.keys(group)));
+/** Large civic lots drawn a little bigger than tile scale so their buildings fill the lot. */
+const tiledZoom = new Map<string, number>([
+  ['public_library', 2],
+  ['grand_library', 2],
+  ['royal_archive', 2],
+  ['research_campus', 2.2],
+  ['community_classroom', 1.6],
+]);
 
 const models = new Map<string, Recipe>(
   [
@@ -41,6 +56,7 @@ const models = new Map<string, Recipe>(
     sawKilnDiorama,
     millBakeryDiorama,
     civicTownDiorama,
+    ...tiledGroups,
   ].flatMap((group) => Object.entries(group)),
 );
 /** Buildings that get baked contact shadows and tone variation. */
@@ -58,6 +74,7 @@ const weathered = new Set([
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
   ...Object.keys(civicTownDiorama),
+  ...tiled,
 ]);
 /** Diorama-style recipes draw their own grounds, so the generic extras are skipped. */
 const dioramas = new Set([
@@ -73,6 +90,7 @@ const dioramas = new Set([
   ...Object.keys(sawKilnDiorama),
   ...Object.keys(millBakeryDiorama),
   ...Object.keys(civicTownDiorama),
+  ...tiled,
 ]);
 /**
  * Dioramas drawn in a smaller frame and scaled up to fill a larger footprint: the recipe sees a
@@ -137,7 +155,11 @@ function fitToLot(parts: BufferGeometry[], from: number, w: number, d: number): 
 export function architectureModel(def: BuildingDef, parts: BufferGeometry[], variant = 0): boolean {
   const recipe = models.get(def.id);
   if (!recipe) return false;
-  const zoom = def.footprint.w >= 2 ? (zoomed.get(def.id) ?? 1) : 1;
+  const zoom = tiled.has(def.id)
+    ? (tiledZoom.get(def.id) ?? 1 / TILE)
+    : def.footprint.w >= 2
+      ? (zoomed.get(def.id) ?? 1)
+      : 1;
   const frame =
     zoom === 1
       ? def
