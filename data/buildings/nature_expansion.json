@@ -1,0 +1,209 @@
+[
+  {
+    "id": "lotus_pond",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 6, "stone": 6 },
+    "visual": { "shape": "park", "color": "#5f9a6a", "roof": "#e98caa", "height": 0.2 },
+    "requires": [{ "type": "road", "maxDistance": 3 }],
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 4, "falloff": "linear" },
+      { "field": "leisure", "amount": 2, "radius": 4 }
+    ],
+    "unlock": { "population": 40, "revealAt": 20 }
+  },
+  {
+    "id": "zen_rock_garden",
+    "category": "nature",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 6, "wood": 2 },
+    "visual": { "shape": "park", "color": "#cfc8b4", "roof": "#6e6a62", "height": 0.12 },
+    "requires": [{ "type": "road", "maxDistance": 2 }],
+    "emits": [
+      { "field": "leisure", "amount": 2, "radius": 3 },
+      { "field": "faith", "amount": 1, "radius": 3 }
+    ],
+    "unlock": { "population": 80, "revealAt": 50 }
+  },
+  {
+    "id": "bamboo_grove",
+    "category": "nature",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 2 },
+    "visual": { "shape": "park", "color": "#6f9a4a", "roof": "#8ab04a", "height": 0.5 },
+    "requires": [],
+    "emits": [{ "field": "greenery", "amount": 2, "radius": 2 }]
+  },
+  {
+    "id": "wildflower_meadow",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 2 },
+    "visual": { "shape": "park", "color": "#7fae5a", "roof": "#e8c84a", "height": 0.08 },
+    "requires": [],
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 4, "falloff": "linear" },
+      { "field": "noise", "amount": -1, "radius": 3 }
+    ]
+  },
+  {
+    "id": "hedge_maze",
+    "category": "nature",
+    "footprint": { "w": 3, "d": 3 },
+    "cost": { "wood": 14, "stone": 6 },
+    "visual": { "shape": "park", "color": "#4f7f3a", "roof": "#3f6a3a", "height": 0.18 },
+    "requires": [{ "type": "road", "maxDistance": 2 }],
+    "upkeep": { "labor": 1 },
+    "emits": [
+      { "field": "leisure", "amount": 4, "radius": 6 },
+      { "field": "greenery", "amount": 2, "radius": 5, "falloff": "linear" }
+    ],
+    "unlock": { "population": 180, "revealAt": 120 }
+  },
+  {
+    "id": "waterfall_garden",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "stone": 18, "wood": 6 },
+    "visual": { "shape": "park", "color": "#5f9a5a", "roof": "#8ab0c8", "height": 0.5 },
+    "requires": [
+      { "type": "road", "maxDistance": 2 },
+      { "type": "field", "field": "water_access", "min": 1 }
+    ],
+    "upkeep": { "labor": 1 },
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "leisure", "amount": 3, "radius": 5 }
+    ],
+    "unlock": { "population": 140, "revealAt": 90 }
+  },
+  {
+    "id": "butterfly_garden",
+    "category": "nature",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "wood": 4 },
+    "visual": { "shape": "park", "color": "#76a456", "roof": "#d86ab8", "height": 0.14 },
+    "requires": [{ "type": "road", "maxDistance": 3 }],
+    "emits": [
+      { "field": "greenery", "amount": 2, "radius": 3, "falloff": "linear" },
+      { "field": "education", "amount": 1, "radius": 3 }
+    ],
+    "unlock": { "population": 60, "revealAt": 30 }
+  },
+  {
+    "id": "bird_sanctuary",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 10 },
+    "visual": { "shape": "park", "color": "#4f7f42", "roof": "#7a5634", "height": 0.4 },
+    "requires": [
+      { "type": "road", "maxDistance": 4 },
+      { "type": "terrain", "terrain": "forest", "radius": 3, "min": 4 }
+    ],
+    "emits": [
+      { "field": "greenery", "amount": 4, "radius": 6, "falloff": "linear" },
+      { "field": "education", "amount": 1, "radius": 4 }
+    ],
+    "unlock": { "population": 100, "revealAt": 60 }
+  },
+  {
+    "id": "picnic_meadow",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 6 },
+    "visual": { "shape": "park", "color": "#7aaa5a", "roof": "#c8392c", "height": 0.12 },
+    "requires": [{ "type": "road", "maxDistance": 3 }],
+    "emits": [
+      { "field": "leisure", "amount": 3, "radius": 5 },
+      { "field": "greenery", "amount": 1, "radius": 3 }
+    ],
+    "unlock": { "population": 30, "revealAt": 10 }
+  },
+  {
+    "id": "forest_trail",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 1 },
+    "cost": { "wood": 4 },
+    "visual": { "shape": "park", "color": "#4f7a3a", "roof": "#8a6a48", "height": 0.4 },
+    "requires": [{ "type": "terrain", "terrain": "forest", "radius": 2, "min": 3 }],
+    "emits": [
+      { "field": "leisure", "amount": 2, "radius": 4 },
+      { "field": "greenery", "amount": 2, "radius": 3 }
+    ]
+  },
+  {
+    "id": "lakeside_boardwalk",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 1 },
+    "cost": { "wood": 10 },
+    "visual": { "shape": "park", "color": "#6a9a5a", "roof": "#9a7a52", "height": 0.15 },
+    "requires": [
+      { "type": "road", "maxDistance": 3 },
+      { "type": "terrain", "terrain": "water", "radius": 2, "min": 2 }
+    ],
+    "emits": [
+      { "field": "leisure", "amount": 3, "radius": 5 },
+      { "field": "greenery", "amount": 1, "radius": 3 }
+    ],
+    "unlock": { "population": 70, "revealAt": 40 }
+  },
+  {
+    "id": "alpine_meadow",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 4, "stone": 4 },
+    "visual": { "shape": "park", "color": "#8aae6a", "roof": "#e9e4d6", "height": 0.3 },
+    "placeOn": ["land", "mountain"],
+    "requires": [{ "type": "road", "maxDistance": 4 }],
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "leisure", "amount": 2, "radius": 4 }
+    ],
+    "tags": ["mountain"],
+    "unlock": { "population": 60, "revealAt": 30 }
+  },
+  {
+    "id": "cactus_garden",
+    "category": "nature",
+    "footprint": { "w": 1, "d": 1 },
+    "cost": { "stone": 3, "wood": 1 },
+    "visual": { "shape": "park", "color": "#d8c08a", "roof": "#4f8a3a", "height": 0.2 },
+    "placeOn": ["land", "steppe"],
+    "requires": [{ "type": "road", "maxDistance": 3 }],
+    "emits": [
+      { "field": "greenery", "amount": 2, "radius": 3 },
+      { "field": "leisure", "amount": 1, "radius": 3 }
+    ],
+    "tags": ["steppe"]
+  },
+  {
+    "id": "snow_pine_park",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 8, "stone": 2 },
+    "visual": { "shape": "park", "color": "#d8dfe0", "roof": "#3f6a3a", "height": 0.4 },
+    "placeOn": ["land", "cold"],
+    "requires": [{ "type": "road", "maxDistance": 3 }],
+    "emits": [
+      { "field": "greenery", "amount": 3, "radius": 5, "falloff": "linear" },
+      { "field": "leisure", "amount": 3, "radius": 5 }
+    ],
+    "tags": ["cold"],
+    "unlock": { "population": 50, "revealAt": 25 }
+  },
+  {
+    "id": "community_allotment",
+    "category": "nature",
+    "footprint": { "w": 2, "d": 2 },
+    "cost": { "wood": 6 },
+    "visual": { "shape": "park", "color": "#6f8a4a", "roof": "#8a6a48", "height": 0.15 },
+    "requires": [{ "type": "road", "maxDistance": 2 }],
+    "upkeep": { "labor": 1 },
+    "produces": { "food": 0.6 },
+    "emits": [
+      { "field": "greenery", "amount": 2, "radius": 4, "falloff": "linear" },
+      { "field": "leisure", "amount": 1, "radius": 3 }
+    ],
+    "unlock": { "population": 90, "revealAt": 60 }
+  }
+]

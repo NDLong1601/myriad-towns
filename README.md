@@ -363,6 +363,36 @@ Toà thị chính, nhà kho, cảng hàng hóa, trạm xe buýt, ga tàu điện
 
 ![Bãi vật liệu và Kho nông sản](docs/images/infra-yards.jpg)
 
+### Nhóm 5B: Thiên nhiên mở rộng (15 công trình mới)
+
+Thêm 15 công trình thiên nhiên đủ thể loại: hồ nước, đồng cỏ, vườn chuyên đề, rừng và công trình theo địa hình (núi, thảo nguyên, xứ lạnh, ven nước), mỗi loại một kích thước và hiệu ứng riêng. Tất cả đều là sa bàn chi tiết vẽ theo tỉ lệ ô cố định.
+
+| Công trình           | Ô   | Đặc điểm                                                                |
+| -------------------- | --- | ----------------------------------------------------------------------- |
+| Ao sen               | 2×2 | Hồ sen, cầu gỗ cong, chòi nghỉ, liễu rủ; tăng cây xanh, giải trí        |
+| Vườn đá Thiền        | 1×1 | Sỏi cào vân, đá, đèn đá; tăng giải trí, tín ngưỡng                      |
+| Rừng tre             | 1×1 | Khóm tre, lối đi; không cần đường                                       |
+| Đồng hoa dại         | 2×2 | Hoa dại, bướm; tăng cây xanh, giảm tiếng ồn, không cần đường            |
+| Mê cung cây xanh     | 3×3 | Ba vòng tường cây, đài phun nước ở giữa; giải trí cao                   |
+| Vườn thác nước       | 2×2 | Vách đá, thác, hồ, suối và cầu; cần nguồn nước                          |
+| Vườn bướm            | 1×1 | Luống hoa, nhà kính nuôi bướm; tăng giáo dục                            |
+| Khu bảo tồn chim     | 2×2 | Chòi quan sát chim, hộp tổ, hồ; cần gần rừng                            |
+| Bãi dã ngoại         | 2×2 | Khăn picnic, bàn ghế, diều; giải trí                                    |
+| Đường mòn trong rừng | 2×1 | Lối mòn, khúc gỗ, biển chỉ đường; cần gần rừng, không cần đường         |
+| Cầu gỗ ven hồ        | 2×1 | Cầu gỗ dọc mặt nước, bến thuyền, lau sậy; cần gần nước                  |
+| Đồng cỏ núi cao      | 2×2 | Đá phủ tuyết, hoa núi, chòi đá, dê; đặt được trên núi                   |
+| Vườn xương rồng      | 1×1 | Xương rồng, thùa, mái che; đặt được trên thảo nguyên                    |
+| Công viên tùng tuyết | 2×2 | Tùng phủ tuyết, hồ băng có người trượt, người tuyết; đặt được ở xứ lạnh |
+| Vườn rau cộng đồng   | 2×2 | Sáu luống rau, kho dụng cụ, ủ phân; sản xuất một ít lương thực          |
+
+![Hồ, thác, cầu gỗ, khu bảo tồn chim](docs/images/nature-water.jpg)
+
+![Đồng hoa dại, bãi dã ngoại, đồng cỏ núi cao, công viên tùng tuyết](docs/images/nature-meadows.jpg)
+
+![Vườn đá, rừng tre, vườn bướm, vườn xương rồng, đường mòn, vườn rau](docs/images/nature-gardens.jpg)
+
+![Mê cung cây xanh](docs/images/nature-maze.jpg)
+
 ### Bảng màu cho người mù màu
 
 Bật trong ⚙ (hoặc `?palette=cvd`): xanh dương thay cho xanh lá, cam thay cho đỏ ở thông báo, ô đặt thử và số liệu tài nguyên. Mọi thông báo còn có ký hiệu đi kèm (✔ tốt, ▲ cảnh báo, ✖ xấu) nên không phụ thuộc vào màu.

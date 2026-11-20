@@ -19,6 +19,7 @@ import { civicTownDiorama } from './architecture/civicTownDiorama';
 import { waterDiorama } from './architecture/waterDiorama';
 import { civicDiorama } from './architecture/civicDiorama';
 import { infraDiorama } from './architecture/infraDiorama';
+import { natureDiorama } from './architecture/natureDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
@@ -27,7 +28,7 @@ import { workplaces } from './architecture/workplaces';
 
 /** Civic dioramas drawn at a fixed tile scale (TILE units a tile), so bigger lots hold more. */
 const TILE = 0.77;
-const tiledGroups = [waterDiorama, civicDiorama, infraDiorama];
+const tiledGroups = [waterDiorama, civicDiorama, infraDiorama, natureDiorama];
 const tiled = new Set(tiledGroups.flatMap((group) => Object.keys(group)));
 /** Large civic lots drawn a little bigger than tile scale so their buildings fill the lot. */
 const tiledZoom = new Map<string, number>([
