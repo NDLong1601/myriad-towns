@@ -16,6 +16,7 @@ import { orchardDiorama } from './architecture/orchardDiorama';
 import { sawKilnDiorama } from './architecture/sawKilnDiorama';
 import { millBakeryDiorama } from './architecture/millBakeryDiorama';
 import { waterDiorama } from './architecture/waterDiorama';
+import { civicDiorama } from './architecture/civicDiorama';
 import { siteDetails } from './architecture/siteDetails';
 import { theatreTiers } from './architecture/theatreTiers';
 import { transport } from './architecture/transport';
@@ -24,7 +25,7 @@ import { workplaces } from './architecture/workplaces';
 
 /** Civic dioramas drawn at a fixed tile scale (TILE units a tile), so bigger lots hold more. */
 const TILE = 0.77;
-const tiledGroups = [waterDiorama];
+const tiledGroups = [waterDiorama, civicDiorama];
 const tiled = new Set(tiledGroups.flatMap((group) => Object.keys(group)));
 
 const models = new Map<string, Recipe>(
