@@ -94,7 +94,7 @@ const zoomed = new Map<string, number>([
   ...Object.keys(millBakeryDiorama).map((id): [string, number] => [id, 2.0]),
   ...Object.keys(civicTownDiorama).map((id): [string, number] => [id, 2.0]),
 ]);
-const LIFE_SCALE = 1.6;
+const LIFE_SCALE = 1;
 const southRows = new Set(['artisan_row_south', 'terrace_residence_south']);
 const box = new Box3();
 const part = new Box3();
@@ -157,7 +157,7 @@ export function architectureModel(def: BuildingDef, parts: BufferGeometry[], var
     landmarks[def.id]?.(lot);
     siteDetails[def.id]?.(lot);
     if (def.category === 'housing') {
-      // Life props are drawn a size up so residents read at the scale of the house models.
+      // Life props at their natural size (kept as a knob in case they need to read larger).
       const s = LIFE_SCALE;
       const lifeFrame = { ...def, footprint: { w: def.footprint.w / s, d: def.footprint.d / s } };
       const first = parts.length;
